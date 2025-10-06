@@ -1,0 +1,153 @@
+/* style.css - versão corrigida
+   - garante que a radio-logo fique pequena no header
+   - header fixo com z-index alto para não ficar em cima do conteúdo
+   - background interativo tem z-index menor
+   - comentários para fácil edição
+*/
+
+:root{
+  --bg:#030313;
+  --accent1:#ffcc00;
+  --accent2:#3be8ff;
+  --glass: rgba(255,255,255,0.04);
+  --max-width:1200px;
+}
+
+/* Reset rápido */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:Inter,system-ui,Arial;background:var(--bg);color:#eef3ff}
+a{color:inherit}
+
+/* BACKGROUND: foto do estúdio (dentro da pasta images/) */
+.hero-bg{
+  position:fixed;
+  inset:0;
+  z-index:0; /* fica atrás de todo mundo */
+  background-image:url('../images/main-background.jpg');
+  background-size:cover;
+  background-position:center;
+  filter:brightness(0.32) saturate(1.05);
+  transition:transform .18s linear;
+}
+.overlay{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.7));
+}
+
+/* HEADER (fixo, sempre no topo) */
+.site-header{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:72px;
+  z-index:20; /* bem acima do fundo */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 22px;
+  background:linear-gradient(180deg, rgba(0,0,0,0.36), transparent);
+  backdrop-filter: blur(6px);
+}
+
+/* BRAND (logo + texto) */
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand-logo{
+  width:48px; height:48px; object-fit:cover;
+  border-radius:10px;
+  border:2px solid rgba(255,255,255,0.06);
+}
+.brand-title{font-family:Orbitron,system-ui;font-size:20px;color:var(--accent1)}
+
+/* HEADER RIGHT (redes + rádio) */
+.header-right{display:flex;align-items:center;gap:12px}
+.socials a{
+  display:inline-block;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.02);
+  color:rgba(255,255,255,0.9);text-decoration:none;font-size:13px;
+}
+.socials a:hover{background:rgba(255,255,255,0.04)}
+
+/* Importante: radio-mini reduzida e sem overflow */
+.radio-area{display:flex;align-items:center;gap:10px}
+.radio-mini{width:38px;height:38px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);flex:0 0 38px}
+.radio-mini img{width:100%;height:100%;object-fit:contain;display:block}
+
+/* Botão grande de rádio (visível e moderno) */
+.radio-btn{
+  padding:9px 14px;border-radius:999px;border:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  color:#041027;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(59,232,255,0.06);
+}
+.radio-btn[aria-pressed="true"]{filter:brightness(0.95)}
+
+/* MAIN content (empurra conteúdo abaixo do header) */
+main{position:relative;z-index:5;padding-top:96px;min-height:100vh;max-width:var(--max-width);margin:0 auto}
+
+/* NAV */
+.nav-bar{display:flex;justify-content:center;gap:14px;padding:18px}
+.nav-btn{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+.nav-btn:hover{background:rgba(255,255,255,0.03)}
+
+/* HERO */
+.hero{display:flex;align-items:center;gap:28px;padding:36px 18px}
+.hero-left{max-width:720px}
+.eyebrow{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent2),var(--accent1));color:#041027;font-weight:700}
+.hero-title{font-family:Orbitron;font-size:40px;margin:12px 0}
+.lead{color:rgba(238,243,255,0.9);line-height:1.5}
+
+/* BUTTONS */
+.btn{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041027;border:0;font-weight:700}
+
+/* SECTIONS */
+.section{padding:28px 18px}
+.row-cards{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;padding-left:6px}
+.card{min-width:220px;height:132px;border-radius:8px;overflow:hidden;background:#0c0c0c;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+.card img{width:100%;height:100%;object-fit:cover}
+
+/* photo grid */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+
+/* VÍDEOS - NOVO CSS */
+#videoGrid{
+  display:flex;
+  flex-wrap:wrap;          /* permite múltiplas linhas */
+  gap:20px;                 /* espaço entre vídeos */
+  justify-content:center;   /* centraliza na tela */
+  padding:10px 0;
+}
+
+.video-card{
+  flex:1 1 300px;           /* largura mínima 300px, cresce se houver espaço */
+  max-width:400px;           /* largura máxima */
+}
+
+.video-card iframe{
+  width:100%;               /* ocupa todo o card */
+  height:225px;             /* mantém proporção 16:9 */
+  border:none;              /* remove bordas */
+}
+
+/* MODAL */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:40;opacity:0;pointer-events:none;transition:opacity .18s}
+.modal.open{opacity:1;pointer-events:auto}
+.modal-box{width:92%;max-width:980px;background:#000;border-radius:10px;overflow:hidden;position:relative}
+.modal-box iframe{width:100%;height:560px;border:0;display:block}
+.modal-close{position:absolute;right:8px;top:8px;background:rgba(255,255,255,0.04);border:0;color:#fff;padding:8px;border-radius:8px;cursor:pointer}
+
+/* FOOTER */
+.site-footer{text-align:center;padding:30px;color:rgba(255,255,255,0.6)}
+
+/* RESPONSIVO */
+@media (max-width:980px){
+  .hero{flex-direction:column;text-align:center}
+  .brand-title{font-size:18px}
+  .brand-logo{width:44px;height:44px}
+  .radio-mini{width:34px;height:34px}
+  .modal-box iframe{height:360px}
+}
+@media (max-width:520px){
+  .nav-bar{flex-wrap:wrap;padding:12px}
+  .hero-title{font-size:26px}
+  .card{min-width:160px;height:100px}
+  .video-card{flex:1 1 100%;max-width:100%} /* vídeos responsivos mobile */
+  .video-card iframe{height:200px}           /* ajusta altura no mobile */
+}
+
