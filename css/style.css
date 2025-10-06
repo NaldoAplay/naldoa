@@ -6,7 +6,7 @@
 */
 
 :root{
-  --bg:#000003;
+  --bg:#250069e7;
   --accent1:#ffcc00;
   --accent2:#3be8ff;
   --glass: rgba(255,255,255,0.04);
@@ -23,7 +23,7 @@ a{color:inherit}
   position:fixed;
   inset:0;
   z-index:0; /* fica atrás de todo mundo */
-  background-image:url('../images/main-background (2).jpg');
+  background-image:url('../images/main-background.jpg');
   background-size:cover;
   background-position:center;
   filter:brightness(0.32) saturate(1.05);
