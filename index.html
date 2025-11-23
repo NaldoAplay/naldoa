@@ -1,31 +1,36 @@
 <!doctype html>
 <html lang="pt-BR">
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "NaldoA",
-  "alternateName": ["DJ NaldoA", "NaldoA Oficial", "NaldoA Play"],
-  "url": "https://naldoaplay.github.io/naldoa/",
-  "image": "https://naldoaplay.github.io/naldoa/logo-naldoa.png",
-  "description": "NaldoA é um artista de música eletrônica, DJ e Desenvolvedor Web. Criador da marca NaldoA Play e autor da música 'Minha História'. Focado em inovação visual e sonora.",
-  "jobTitle": ["DJ", "Desenvolvedor Web", "Produtor Musical"],
-  "sameAs": [
-    "https://www.youtube.com/@djnaldoaoficial"
-  ],
-  "worksFor": {
-    "@type": "Organization",
-    "name": "NaldoA Play"
-  }
-}
-</script>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>NaldoA — NaldoA Play</title>
+  <title>NaldoA — DJ, Produtor & Dev</title>
+  <meta name="description" content="Site oficial do DJ NaldoA. Músicas, vídeos, rádio NaldoA Play e portfólio de desenvolvimento web.">
   <link rel="stylesheet" href="css/style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "NaldoA",
+    "alternateName": ["DJ NaldoA", "NaldoA Oficial", "NaldoA Play"],
+    "url": "https://naldoaplay.github.io/naldoa/",
+    "image": "https://naldoaplay.github.io/naldoa/logo-naldoa.png",
+    "description": "NaldoA é um artista de música eletrônica, DJ e Desenvolvedor Web. Criador da marca NaldoA Play e autor da música 'Minha História'.",
+    "jobTitle": ["DJ", "Desenvolvedor Web", "Produtor Musical"],
+    "sameAs": [
+      "https://youtube.com/@djnaldoaoficial",
+      "https://www.instagram.com/naldoaoficial",
+      "https://www.tiktok.com/@DjNaldoAoficial",
+      "LINK_DO_SEU_SPOTIFY_AQUI"
+    ],
+    "worksFor": {
+      "@type": "Organization",
+      "name": "NaldoA Play"
+    }
+  }
+  </script>
+
   <style>
-   
     /* Remove barra de rolagem horizontal da grid de vídeos */
     #videoGrid {
       display: flex;
@@ -38,6 +43,7 @@
       width: 100%;
       max-width: 400px;
       height: 225px;
+      border-radius: 8px; /* Dica visual: bordas arredondadas ficam mais modernas */
     }
     .site-footer {
       text-align: center;
@@ -49,8 +55,11 @@
   </style>
 </head>
 <body>
+ <body>
 
-  <!-- HEADER FIXO -->
+  <div class="hero-bg"></div> 
+  <div class="overlay"></div>
+
   <header class="site-header" role="banner">
     <div class="brand">
       <img src="images/main-logo.png" alt="Logo NaldoA" class="brand-logo">
@@ -59,7 +68,7 @@
 
     <div class="header-right">
       <nav class="socials" aria-label="Redes sociais">
-        <a href="https://open.spotify.com/artist/05anJA6CE7Afkn0hYyVMRV?si=w30YFN3UTkmdGIhuxxuvtw" target="_blank" rel="noopener">Spotify</a>
+        <a href="https://open.spotify.com/artist/05anJA6CE7Afkn0hYyVMRV?si=qsPhzzocRiCOHeMyNUf60w" target="_blank" rel="noopener">Spotify</a>
         <a href="https://youtube.com/@djnaldoaoficial?si=5VQQTtmtXtWmt6PD" target="_blank" rel="noopener">YouTube</a>
         <a href="https://www.instagram.com/naldoaoficial?igsh=d3FkMDM5a2xtaWE%3D&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
         <a href="https://www.tiktok.com/@DjNaldoAoficial" target="_blank" rel="noopener">TikTok</a>
@@ -73,9 +82,7 @@
     </div>
   </header>
 
-  <!-- MAIN -->
   <main id="main">
-    <!-- Hero -->
     <section class="hero">
       <div class="hero-left">
         <div class="eyebrow">NaldoA Play • Rádio & DJ</div>
@@ -84,56 +91,47 @@
       </div>
     </section>
 
-    <!-- VÍDEOS -->
     <section id="videos" class="section">
       <h3>Meus Vídeos</h3>
       <div id="videoGrid">
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/sQeY8CwXQ9w?s" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/3RpVyPb96sU?si" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/zKaXDl5Texk?si" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/aZHefqVqXpU" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/AnYGQcgD1nY" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/cSvC3vtNCkQ" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/dGdda27vfRM" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/dwYoOnT_7Pc" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/AHsb5xThjyk" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/-wFl2OcdDnk" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/GdE1z8Mf0zA" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/s-p1w9kAkFY" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/8FylSyd2Q6o" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/lcSXpMr0OUw" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/N4KYGevK0nA" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/UZfhORsxS98" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/BM4uCU1pUAY" frameborder="0" allowfullscreen></iframe></div>
-        <div class="video-card"><iframe src="https://www.youtube.com/embed/QoFsUuUjusc" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/sQeY8CwXQ9w" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/3RpVyPb96sU" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/zKaXDl5Texk" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/aZHefqVqXpU" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/AnYGQcgD1nY" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/cSvC3vtNCkQ" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/dGdda27vfRM" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/dwYoOnT_7Pc" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/AHsb5xThjyk" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/-wFl2OcdDnk" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/GdE1z8Mf0zA" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/s-p1w9kAkFY" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/8FylSyd2Q6o" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/lcSXpMr0OUw" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/N4KYGevK0nA" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/UZfhORsxS98" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/BM4uCU1pUAY" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
+        <div class="video-card"><iframe src="https://www.youtube.com/embed/QoFsUuUjusc" loading="lazy" frameborder="0" allowfullscreen></iframe></div>
       </div>
     </section>
 
-    <!-- SOBRE -->
     <section id="sobre" class="section">
       <h3>Sobre</h3>
-      <p><strong>NaldoA</strong> 
-        — DJ & Produtor de EDM
-
-NaldoA é DJ, produtor musical e criador da rádio online NaldoA Play, especializado em EDM, House, Trance e Progressive. Com anos de experiência no cenário musical, NaldoA combina criatividade, técnica e tecnologia para entregar sets energéticos e produções originais que conquistam o público em todo o Brasil e no mundo.
-
-Além de suas mixagens ao vivo, NaldoA produz faixas exclusivas, remixes e playlists que são transmitidos diariamente em sua rádio online, proporcionando uma experiência musical completa para fãs de música eletrônica. Seus vídeos de performances, lives e bastidores estão disponíveis no site e no canal oficial do YouTube, permitindo que seguidores acompanhem cada passo de sua carreira.
-
-Siga NaldoA nas redes sociais para acessar lançamentos, notícias sobre eventos, playlists exclusivas e sets inéditos. Seja pelo Spotify, YouTube, Instagram ou TikTok, você encontra conteúdos frescos e envolventes sobre EDM e música eletrônica.
-
-Se você é fã de música eletrônica e quer se conectar com novas tendências, NaldoA é referência em mixagens dinâmicas, produção musical profissional e entretenimento digital, oferecendo uma experiência sonora única para todos os públicos.
-
-🎵 Ouça, assista e sinta a energia da música com NaldoA — DJ e Produtor de EDM.</p>
+      <div style="max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        <p><strong>NaldoA</strong> — DJ & Produtor de EDM</p>
+        <p>NaldoA é DJ, produtor musical e criador da rádio online <strong>NaldoA Play</strong>, especializado em EDM, House, Trance e Progressive. Com anos de experiência no cenário musical, NaldoA combina criatividade, técnica e tecnologia para entregar sets energéticos e produções originais que conquistam o público em todo o Brasil e no mundo.</p>
+        <p>Além de suas mixagens ao vivo, NaldoA produz faixas exclusivas, remixes e playlists que são transmitidos diariamente em sua rádio online, proporcionando uma experiência musical completa para fãs de música eletrônica. Seus vídeos de performances, lives e bastidores estão disponíveis no site e no canal oficial do YouTube.</p>
+        <p>Siga NaldoA nas redes sociais para acessar lançamentos como "Minha História", notícias sobre eventos e sets inéditos.</p>
+        <p>🎵 <em>Ouça, assista e sinta a energia da música com NaldoA.</em></p>
+      </div>
     </section>
 
-    <!-- CONTATO -->
     <section id="contato" class="section">
       <h3>Contato & Redes</h3>
-      <p>@NaldoAOficial</p>
+      <p>Siga no Instagram: <a href="https://www.instagram.com/naldoaoficial?igsh=d3FkMDM5a2xtaWE%3D&utm_source=qr" style="color: gold;">@NaldoAOficial</a></p>
     </section>
   </main>
 
-  <!-- RODAPÉ -->
   <footer class="site-footer">
     © 2025 NaldoA — Todos os direitos reservados.
   </footer>
