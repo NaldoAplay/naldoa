@@ -184,3 +184,34 @@ main{position:relative;z-index:5;padding-top:96px;min-height:100vh;max-width:var
   .video-card iframe{height:200px}           /* ajusta altura no mobile */
 }
 
+/* BARRA DE STREAMING (Separada do Hero) */
+.streaming-bar {
+  width: 100%;
+  padding: 30px 20px;
+  background: rgba(0, 0, 0, 0.4); /* Fundo um pouco mais escuro para destacar */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Linha fina sutil */
+  text-align: center; /* Centraliza tudo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttons-wrapper {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Ajuste para celular: botões um em cima do outro se a tela for pequena */
+@media (max-width: 600px) {
+  .buttons-wrapper {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-gold, .btn-spotify {
+    width: 100%; /* Botão ocupa a largura toda no celular */
+    text-align: center;
+  }
+}
