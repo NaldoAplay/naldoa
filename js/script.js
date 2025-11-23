@@ -1,57 +1,93 @@
-/* script.js - versão ajustada
+/* script.js - NaldoA Official
    - Background interativo
-   - Rádio player
-   - Modal de reprodução de vídeos
-   - Navegação interna
+   - Rádio Player com Visualizer (Espectro)
+   - Modal de Vídeos
+   - Navegação Suave
 */
 
-// ====== CONFIGURAÇÃO ======
-const RADIO_STREAM = "https://stream.zeno.fm/xx785t45mf9uv"; // seu stream
+// ====== 1. CONFIGURAÇÃO ======
+// Link da sua rádio (ZenoFM)
+const RADIO_STREAM = "https://stream.zeno.fm/xx785t45mf9uv"; 
 
-// ====== BACKGROUND INTERATIVO ======
+// ====== 2. BACKGROUND INTERATIVO (O Fundo que mexe) ======
 const heroBg = document.querySelector('.hero-bg');
+
 function onPointer(e){
+  // Detecta se é touch ou mouse
   const p = e.touches ? e.touches[0] : e;
+  
+  // Calcula a posição
   const mx = (p.clientX / window.innerWidth - 0.5) * 18;
   const my = (p.clientY / window.innerHeight - 0.5) * 12;
-  if(heroBg) heroBg.style.transform = `translate(${mx}px, ${my}px) scale(1.06)`;
+  
+  // Move o fundo levemente
+  if(heroBg) {
+    heroBg.style.transform = `translate(${mx}px, ${my}px) scale(1.06)`;
+  }
 }
+
+// Adiciona os eventos de movimento
 window.addEventListener('pointermove', onPointer, {passive:true});
 window.addEventListener('touchmove', onPointer, {passive:true});
 window.addEventListener('resize', ()=> heroBg && (heroBg.style.transform = 'scale(1.03)'));
 
-// ====== RADIO PLAYER ======
+
+// ====== 3. RADIO PLAYER & VISUALIZER (A Mágica) ======
 const radioBtn = document.getElementById('radioBtn');
 const audioEl = document.getElementById('radioAudio');
+
+// Configuração inicial do áudio
 if(audioEl){
   audioEl.src = RADIO_STREAM;
   audioEl.crossOrigin = "anonymous";
-  audioEl.load();
+  // Não damos .load() aqui para não gastar dados do usuário antes da hora
 }
-let playing = false;
-if(radioBtn){
+
+if(radioBtn && audioEl){
   radioBtn.addEventListener('click', async () => {
-    if(!audioEl) return;
     try {
       if(audioEl.paused){
+        // --- LIGAR RÁDIO ---
+        // Se a fonte estiver vazia, recarrega o stream (bom para rádio ao vivo)
+        if(!audioEl.src || audioEl.src === window.location.href) {
+            audioEl.src = RADIO_STREAM;
+        }
+        
         await audioEl.play();
-        radioBtn.textContent = '⏸ NaldoA Play';
+        
+        // Atualiza Botão
+        radioBtn.textContent = '⏸ Pausar Rádio';
+        radioBtn.classList.add('playing');
         radioBtn.setAttribute('aria-pressed','true');
-        playing = true;
+        
+        // 🔥 LIGA O ESPECTRO VISUAL (BARRINHAS) 🔥
+        document.body.classList.add('is-playing'); 
+
       } else {
+        // --- DESLIGAR RÁDIO ---
         audioEl.pause();
+        
+        // Atualiza Botão
         radioBtn.textContent = '▶ NaldoA Play';
+        radioBtn.classList.remove('playing');
         radioBtn.setAttribute('aria-pressed','false');
-        playing = false;
+        
+        // ❄️ DESLIGA O ESPECTRO VISUAL ❄️
+        document.body.classList.remove('is-playing');
+        
+        // Opcional: Limpa o buffer para parar de baixar dados
+        audioEl.src = ""; 
       }
     } catch(e){
-      console.warn('Playback blocked or error', e);
+      console.warn('Erro ao tentar tocar a rádio:', e);
+      alert("Clique novamente para iniciar a rádio.");
     }
   });
 }
 
-// ====== MODAL DE VÍDEOS ======
-const modal = document.getElementById('videoModal');
+
+// ====== 4. MODAL DE VÍDEOS (YouTube Pop-up) ======
+const modal = document.getElementById('videoModal'); // Se você criar o modal no HTML futuramente
 const playerFrame = document.getElementById('playerFrame');
 const closeBtn = document.querySelector('.modal-close');
 
@@ -60,43 +96,53 @@ function openModal(id){
   playerFrame.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
   modal.classList.add('open');
   modal.setAttribute('aria-hidden','false');
-  history.pushState({modal:id}, '', '#video-'+id);
 }
 
 function closeModal(){
   if(!modal || !playerFrame) return;
-  playerFrame.src = '';
+  playerFrame.src = ''; // Para o vídeo
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden','true');
-  history.back();
 }
 
+// Eventos do Modal
 if(closeBtn) closeBtn.addEventListener('click', closeModal);
-modal && modal.addEventListener('click', (e)=> { if(e.target === modal) closeModal(); });
-window.addEventListener('popstate', ()=> { if(modal && modal.classList.contains('open')) closeModal(); });
+if(modal) modal.addEventListener('click', (e)=> { if(e.target === modal) closeModal(); });
 
-// ====== EVENTO PARA TODOS OS VÍDEOS NO GRID ======
+// Detecta clique na grid de vídeos (Opcional, caso queira abrir em modal)
 const videoGrid = document.getElementById('videoGrid');
-if(videoGrid){
+if(videoGrid && modal){
   videoGrid.querySelectorAll('.video-card iframe').forEach((iframe)=>{
+    // Lógica para detectar cliques no iframe (requer pointer-events:none no CSS do iframe para funcionar o clique na div pai)
     const parent = iframe.parentElement;
     const idMatch = iframe.src.match(/\/embed\/([a-zA-Z0-9_-]+)/);
-    if(!idMatch) return;
-    const id = idMatch[1];
-    parent.style.cursor = 'pointer';
-    parent.addEventListener('click', ()=> openModal(id));
+    
+    if(idMatch) {
+        // Se quiser ativar o modal ao clicar, descomente abaixo:
+        // parent.addEventListener('click', () => openModal(idMatch[1]));
+    }
   });
 }
 
-// ====== NAVEGAÇÃO INTERNA ======
-document.querySelectorAll('.nav-btn, .hero-actions .btn').forEach(btn => {
+
+// ====== 5. NAVEGAÇÃO INTERNA (Scroll Suave) ======
+document.querySelectorAll('.nav-btn, .hero-actions .btn, a[href^="#"]').forEach(btn => {
   btn.addEventListener('click', (ev) => {
-    const target = btn.dataset.section || btn.getAttribute('data-scroll');
-    if(!target) return;
-    const el = document.getElementById(target);
-    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    const href = btn.getAttribute('href') || btn.dataset.section;
+    if(!href || href === '#') return;
+    
+    // Se for link interno (#id)
+    if(href.startsWith('#')) {
+        ev.preventDefault();
+        const targetId = href.substring(1);
+        const el = document.getElementById(targetId);
+        if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
   });
 });
 
-// ====== BRAND CLIQUE VOLTA AO TOPO ======
-document.getElementById('brandBtn')?.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
+// ====== 6. CLIQUE NO LOGO (Volta ao topo) ======
+const brandLogo = document.querySelector('.brand');
+if(brandLogo) {
+    brandLogo.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+}
