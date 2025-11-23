@@ -1,4 +1,4 @@
-/* style.css - NaldoA Official (Versão Final Completa) */
+/* style.css - NaldoA Official (Versão Final com Espectro Gigante) */
 
 :root {
   --bg: #030313;
@@ -13,7 +13,7 @@
 
 html {
   height: 100%;
-  overflow-y: scroll; /* Garante barra de rolagem */
+  overflow-y: scroll;
 }
 
 body {
@@ -27,41 +27,27 @@ body {
 
 a { color: inherit; text-decoration: none; transition: 0.2s; }
 
-/* === 2. FUNDO ANIMADO (TRANCE FLOW) === */
-.hero-bg {
+/* === 2. FUNDO ESPECTRO (CANVAS) === */
+/* Este é o palco onde o Javascript desenha as barras */
+#bgCanvas {
   position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  z-index: -10;
-  pointer-events: none;
-  
-  /* Animação de cores estilo DJ */
-  background: linear-gradient(-45deg, #000000, #1a1200, #0a0a0a, #001529);
-  background-size: 400% 400%;
-  animation: tranceFlow 15s ease infinite;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -10; /* Fica bem atrás */
+  background: #030313; /* Cor base se o JS demorar */
 }
 
-/* Textura de pontos (LED effect) */
-.hero-bg::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 30px 30px;
-}
-
-/* Sombra para leitura */
+/* Sombra para leitura (Overlay) */
 .overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   z-index: -5;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 0%, #000000 90%);
-}
-
-@keyframes tranceFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  /* Degradê circular para focar no centro e escurecer as bordas */
+  background: radial-gradient(circle at center, transparent 10%, #000000 90%);
+  opacity: 0.8; /* Ajuste a transparência aqui */
 }
 
 /* === 3. HEADER & NAV === */
@@ -74,8 +60,8 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
   align-items: center;
   justify-content: space-between;
   padding: 10px 22px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent);
-  backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent);
+  backdrop-filter: blur(4px);
 }
 
 .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
@@ -115,13 +101,16 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .hero { display: flex; align-items: center; gap: 28px; padding: 36px 18px; }
 .hero-left { max-width: 720px; }
 .eyebrow { display: inline-block; padding: 6px 12px; border-radius: 50px; background: linear-gradient(90deg, var(--accent2), var(--accent1)); color: #000; font-weight: 700; font-size: 12px; margin-bottom: 10px; }
-.hero-title { font-family: 'Orbitron', sans-serif; font-size: 42px; margin-bottom: 15px; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
-.lead { color: rgba(255,255,255,0.8); line-height: 1.6; font-size: 18px; }
+.hero-title { font-family: 'Orbitron', sans-serif; font-size: 42px; margin-bottom: 15px; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
+.lead { color: rgba(255,255,255,0.9); line-height: 1.6; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
 /* === 5. BARRA DE STREAMING (BOTÕES) === */
 .streaming-bar {
   width: 100%; padding: 30px 20px;
-  background: rgba(0, 0, 0, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.6); /* Mais escuro para destacar do fundo piscante */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
   text-align: center; display: flex; flex-direction: column; align-items: center; margin-bottom: 40px;
 }
 .buttons-wrapper { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 15px; }
@@ -142,7 +131,7 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 }
 .btn-spotify:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(29, 185, 84, 0.6); background: #1ed760; }
 
-/* === 6. VISUALIZER (ESPECTRO DE ÁUDIO) === */
+/* === 6. VISUALIZER (BARRINHAS PEQUENAS) === */
 .music-waves {
   display: flex; align-items: flex-end; gap: 3px; height: 20px; margin-left: 10px;
   opacity: 0.3; transition: opacity 0.3s;
@@ -152,13 +141,11 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
   border-radius: 2px; animation: none;
 }
 
-/* Só anima quando a classe is-playing está no body */
 body.is-playing .music-waves { opacity: 1; }
 body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-out; }
 
 @keyframes equalizer { 0% { height: 3px; } 50% { height: 100%; } 100% { height: 3px; } }
 
-/* Delays para parecer natural */
 .music-waves span:nth-child(1) { animation-delay: 0.0s; }
 .music-waves span:nth-child(2) { animation-delay: 0.2s; }
 .music-waves span:nth-child(3) { animation-delay: 0.4s; }
@@ -167,24 +154,21 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
 .music-waves span:nth-child(6) { animation-delay: 0.15s; }
 .music-waves span:nth-child(7) { animation-delay: 0.05s; }
 
-/* Ajuste para o visualizer do Topo */
-.top-waves { display: none; } /* Esconde no celular pra não quebrar layout */
+.top-waves { display: none; }
 @media (min-width: 768px) { .top-waves { display: flex; } }
-
-/* Ajuste para o visualizer do Rodapé */
 .bottom-waves { justify-content: center; height: 40px; margin-bottom: 15px; }
 .bottom-waves span { width: 6px; }
 
-/* === 7. GRID DE VÍDEOS & SEÇÕES === */
+/* === 7. GRID & SEÇÕES === */
 .section { padding: 20px; }
-.section h3 { font-family: 'Orbitron', sans-serif; font-size: 24px; margin-bottom: 20px; border-left: 4px solid var(--accent1); padding-left: 15px; }
+.section h3 { font-family: 'Orbitron', sans-serif; font-size: 24px; margin-bottom: 20px; border-left: 4px solid var(--accent1); padding-left: 15px; text-shadow: 0 2px 4px #000; }
 
 #videoGrid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-.video-card { flex: 1 1 300px; max-width: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.3s; }
+.video-card { flex: 1 1 300px; max-width: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.3s; background: #000; }
 .video-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
 .video-card iframe { width: 100%; height: 225px; border: none; display: block; }
 
-/* === 8. MODAL DE VÍDEO === */
+/* === 8. MODAL === */
 .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 50; opacity: 0; pointer-events: none; transition: 0.3s; }
 .modal.open { opacity: 1; pointer-events: auto; }
 .modal-box { width: 90%; max-width: 900px; background: #000; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(59, 232, 255, 0.2); }
@@ -195,7 +179,7 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
 /* === 9. FOOTER === */
 .site-footer { text-align: center; padding: 40px 20px; background: #000; color: rgba(255,255,255,0.5); font-size: 14px; position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.1); }
 
-/* === 10. RESPONSIVO (CELULAR) === */
+/* === 10. RESPONSIVO === */
 @media (max-width: 768px) {
   .hero { flex-direction: column; text-align: center; padding-top: 20px; }
   .hero-title { font-size: 32px; }
@@ -203,5 +187,5 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
   .btn-gold, .btn-spotify { width: 100%; display: block; }
   .modal-box iframe { height: 300px; }
   .site-header { padding: 10px 15px; }
-  .brand-title { display: none; } /* Esconde nome NaldoA no topo do celular pra caber os botões */
+  .brand-title { display: none; }
 }
