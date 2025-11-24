@@ -105,31 +105,75 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .lead { color: rgba(255,255,255,0.9); line-height: 1.6; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
 /* === 5. BARRA DE STREAMING (BOTÕES) === */
+/* === 5. BARRA DE STREAMING (BOTÕES - VERSÃO FINA) === */
 .streaming-bar {
-  width: 100%; padding: 30px 20px;
-  background: rgba(0, 0, 0, 0.6); /* Mais escuro para destacar do fundo piscante */
+  width: 100%;
+  padding: 15px 10px; /* Barra mais fina */
+  background: rgba(0, 0, 0, 0.6);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(5px);
-  text-align: center; display: flex; flex-direction: column; align-items: center; margin-bottom: 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
 }
-.buttons-wrapper { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 15px; }
 
-/* Botão Dourado (SoundOn) */
+.buttons-wrapper {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* Estilo Base para os dois botões (Mais delicados) */
+.btn-gold, .btn-spotify {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* TAMANHO REDUZIDO AQUI 👇 */
+  padding: 8px 24px;  /* Mais fino e elegante */
+  font-size: 13px;    /* Letra menor */
+  min-width: 180px;   /* Largura fixa pra ficarem iguais */
+  height: 36px;       /* Altura fixa fina */
+  
+  border-radius: 50px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: 0.2s;
+  text-decoration: none;
+}
+
+/* Cores Específicas */
 .btn-gold {
-  display: inline-block; background: linear-gradient(90deg, var(--accent1), #ffaa00);
-  color: #000; padding: 14px 28px; border-radius: 50px; font-weight: 800; text-transform: uppercase;
-  font-size: 14px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); border: 2px solid #fff;
+  background: linear-gradient(90deg, var(--accent1), #ffaa00);
+  color: #000;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  border: 1px solid #fff;
 }
-.btn-gold:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); background: #fff; }
 
-/* Botão Spotify (Verde) */
 .btn-spotify {
-  display: inline-block; background: var(--spotify); color: #fff;
-  padding: 14px 28px; border-radius: 50px; font-weight: 800; text-transform: uppercase;
-  font-size: 14px; box-shadow: 0 0 15px rgba(29, 185, 84, 0.3); border: 2px solid transparent;
+  background: var(--spotify);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(29, 185, 84, 0.2);
+  border: 1px solid transparent;
 }
-.btn-spotify:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(29, 185, 84, 0.6); background: #1ed760; }
+
+/* Hover (Passar o mouse) */
+.btn-gold:hover, .btn-spotify:hover {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+}
+
+@media (max-width: 500px) {
+  .btn-gold, .btn-spotify {
+    width: 100%; /* No celular fica largura total */
+  }
+}
 
 /* === 6. VISUALIZER (BARRINHAS PEQUENAS) === */
 .music-waves {
