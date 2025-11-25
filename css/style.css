@@ -223,13 +223,76 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
 /* === 9. FOOTER === */
 .site-footer { text-align: center; padding: 40px 20px; background: #000; color: rgba(255,255,255,0.5); font-size: 14px; position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.1); }
 
-/* === 10. RESPONSIVO === */
+/* === 10. RESPONSIVO MOBILE (VERSÃO ABSOLUTA / CACHE BUSTER) === */
 @media (max-width: 768px) {
-  .hero { flex-direction: column; text-align: center; padding-top: 20px; }
-  .hero-title { font-size: 32px; }
-  .buttons-wrapper { flex-direction: column; width: 100%; }
-  .btn-gold, .btn-spotify { width: 100%; display: block; }
-  .modal-box iframe { height: 300px; }
-  .site-header { padding: 10px 15px; }
-  .brand-title { display: none; }
+  
+  /* 1. Resetar o Header para Bloco simples */
+  .site-header {
+    display: block; /* Removemos o flex para ter controle total */
+    height: auto;
+    padding: 15px;
+    position: relative; /* Necessário para o botão absoluto funcionar */
+  }
+
+  /* 2. Logo fica na Esquerda (Padrão) */
+  .brand {
+    display: inline-flex;
+  }
+  .brand-title { display: none; } /* Esconde o nome, deixa só o logo */
+
+  /* 3. FORÇAR O RÁDIO NO CANTO DIREITO SUPERIOR */
+  .radio-area {
+    position: absolute; /* Sai do fluxo e vai pro canto */
+    top: 15px;
+    right: 15px;
+  }
+  .radio-btn {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+  .radio-mini, .music-waves { display: none; } /* Esconde o ícone mini e ondas no topo do celular para limpar */
+
+  /* 4. Menu de Redes Sociais (Barra de Rolagem em Baixo) */
+  .header-right {
+    display: block;
+    width: 100%;
+    margin-top: 15px; /* Empurra para baixo do logo */
+  }
+
+  .socials {
+    display: flex;
+    overflow-x: auto; /* Rolagem lateral */
+    white-space: nowrap;
+    gap: 10px;
+    padding-bottom: 5px;
+    /* Esconder barra de rolagem */
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: none; 
+  }
+  .socials::-webkit-scrollbar { display: none; }
+
+  .socials a {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+  }
+
+  /* Ajustes Gerais Mobile */
+  .hero { padding-top: 20px; }
+  .hero-title { font-size: 28px; }
+  
+  /* Botões de Streaming (Tijolinhos Transparentes) */
+  .buttons-wrapper {
+    gap: 5px;
+    flex-wrap: nowrap;
+    margin-top: 20px;
+  }
+  .btn-gold, .btn-spotify, .btn-ytmusic {
+    padding: 8px 5px;
+    font-size: 10px;
+    flex: 1;
+    justify-content: center;
+  }
 }
