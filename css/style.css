@@ -230,7 +230,7 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
   text-transform: uppercase; /* Deixa em maiúsculo bonito */
   font-weight: bold;
 }
-/* === 10. RESPONSIVO MOBILE (FINAL: BOTÕES PEQUENOS + RÁDIO VISÍVEL) === */
+/* === 10. RESPONSIVO MOBILE (FINAL: BOTÕES GORDINHOS) === */
 @media (max-width: 768px) {
   
   /* --- 1. CABEÇALHO --- */
@@ -238,37 +238,31 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     display: flex;
     flex-wrap: wrap; 
     align-items: center;
-    padding: 8px 12px; /* Menos borda */
+    padding: 8px 12px;
     height: auto;
     gap: 0; 
   }
 
   /* Logo NaldoA (Esquerda) */
-  .brand {
-    flex: 0 0 40%; 
-    order: 1; 
-  }
+  .brand { flex: 0 0 40%; order: 1; }
   .brand-title { display: none; } 
 
-  /* Agrupador da Direita */
-  .header-right { display: contents; }
-
   /* Rádio + Foto (Direita) */
+  .header-right { display: contents; }
+  
   .radio-area {
-    flex: 0 0 60%; /* Mais espaço pra rádio */
+    flex: 0 0 60%; 
     order: 2; 
     justify-content: flex-end; 
     margin: 0;
-  }
-  
-  /* AQUI ESTÁ A CORREÇÃO DA FOTO */
+  }  
   .radio-mini {
-    display: block !important; /* Força aparecer */
-    width: 28px; /* Tamanho pequeno */
+    display: block !important;
+    width: 28px;
     height: 28px;
     margin-right: 6px;
   }
-  .music-waves { display: none; } /* Ondas escondidas pra não poluir */
+  .music-waves { display: none; }
   
   .radio-btn {
     padding: 6px 12px;
@@ -285,7 +279,7 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     display: flex;
     overflow-x: auto; 
     padding-bottom: 5px;
-    gap: 6px; /* Botões mais coladinhos */
+    gap: 6px; 
     -webkit-overflow-scrolling: touch; 
     scrollbar-width: none;
   }
@@ -295,12 +289,11 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     flex-shrink: 0; 
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.1);
-    /* BOTÕES BEM MENORES AGORA: */
-    padding: 6px 10px; 
+    padding: 6px 12px; 
     border-radius: 50px; 
-    font-size: 10px; /* Letra pequena */
+    font-size: 11px; 
     white-space: nowrap;
-    height: 26px; /* Altura fixa fina */
+    height: 28px; 
     display: flex; align-items: center;
   }
 
@@ -312,21 +305,28 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
   }
   .hero-title { font-size: 26px; }
   
-  /* --- 4. BOTÕES DO MEIO (REDONDOS E PEQUENOS) --- */
+  /* --- 4. BOTÕES DO MEIO (AGORA MAIORES) --- */
   .buttons-wrapper {
-    gap: 5px;
+    gap: 6px; /* Um pouco de espaço entre eles */
     flex-wrap: nowrap; 
     margin-top: 15px;
-    padding: 0 5px;
+    padding: 0 2px;
   }
   
   .btn-gold, .btn-spotify, .btn-ytmusic {
-    padding: 8px 0; 
-    font-size: 10px;
-    flex: 1; 
+    flex: 1; /* Divide o espaço igualmente */
+    
+    /* AQUI ESTÁ A CORREÇÃO DO "CISCO": */
+    padding: 12px 0;   /* Mais altura (gordinho) */
+    font-size: 11px;   /* Letra legível */
+    height: auto;      /* Altura automática */
+    
     display: flex;
     justify-content: center;
+    align-items: center;
     border-radius: 50px; 
     white-space: nowrap;
+    overflow: hidden; /* Corta o texto se não couber */
+    text-overflow: ellipsis; 
   }
-}
+} 
