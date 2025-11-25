@@ -104,74 +104,85 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .hero-title { font-family: 'Orbitron', sans-serif; font-size: 42px; margin-bottom: 15px; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
 .lead { color: rgba(255,255,255,0.9); line-height: 1.6; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-/* === 5. BARRA DE STREAMING (BOTÕES) === */
-/* === 5. BARRA DE STREAMING (BOTÕES - VERSÃO FINA) === */
-.streaming-bar {
-  width: 100%;
-  padding: 15px 10px; /* Barra mais fina */
-  background: rgba(0, 0, 0, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(5px);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 30px;
-}
+/* --- ESTILO DOS BOTÕES DE STREAMING (EFEITO VIDRO) --- */
 
 .buttons-wrapper {
   display: flex;
   gap: 15px;
-  flex-wrap: wrap;
   justify-content: center;
-  margin-top: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  z-index: 10; /* Garante que fique acima do canvas */
+  position: relative;
 }
 
-/* Estilo Base para os dois botões (Mais delicados) */
-.btn-gold, .btn-spotify {
+/* Estilo Base dos Botões (Transparente) */
+.btn-gold, .btn-spotify, .btn-ytmusic {
+  background: rgba(0, 0, 0, 0.3); /* Fundo preto semi-transparente */
+  backdrop-filter: blur(4px); /* Desfoque leve no fundo (efeito vidro) */
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 50px; /* Bordas redondas */
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  
-  /* TAMANHO REDUZIDO AQUI 👇 */
-  padding: 8px 24px;  /* Mais fino e elegante */
-  font-size: 13px;    /* Letra menor */
-  min-width: 180px;   /* Largura fixa pra ficarem iguais */
-  height: 36px;       /* Altura fixa fina */
-  
-  border-radius: 50px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: 0.2s;
-  text-decoration: none;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Borda sutil */
 }
 
-/* Cores Específicas */
+/* --- Cores Específicas (Borda e Texto brilham) --- */
+
+/* SoundOn / Gold */
 .btn-gold {
-  background: linear-gradient(90deg, var(--accent1), #ffaa00);
+  border-color: #d4af37;
+  color: #d4af37;
+}
+.btn-gold:hover {
+  background: #d4af37;
   color: #000;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-  border: 1px solid #fff;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
 }
 
-.btn-spotify {
-  background: var(--spotify);
+/* YouTube Music / Red */
+.btn-ytmusic {
+  border-color: #ff0000;
+  color: #ff4d4d;
+}
+.btn-ytmusic:hover {
+  background: #ff0000;
   color: #fff;
-  box-shadow: 0 0 10px rgba(29, 185, 84, 0.2);
-  border: 1px solid transparent;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
 }
 
-/* Hover (Passar o mouse) */
-.btn-gold:hover, .btn-spotify:hover {
-  transform: scale(1.02);
-  filter: brightness(1.1);
+/* Spotify / Green */
+.btn-spotify {
+  border-color: #1DB954;
+  color: #1DB954;
+}
+.btn-spotify:hover {
+  background: #1DB954;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(29, 185, 84, 0.6);
 }
 
-@media (max-width: 500px) {
-  .btn-gold, .btn-spotify {
-    width: 100%; /* No celular fica largura total */
+/* --- AJUSTES PARA CELULAR (MOBILE) --- */
+@media (max-width: 600px) {
+  .buttons-wrapper {
+    gap: 8px; /* Menos espaço entre eles */
+    flex-wrap: nowrap; /* Força ficar na mesma linha */
+    justify-content: space-between; /* Espalha na largura */
+    padding: 0 10px; /* Margem de segurança nas laterais */
+  }
+
+  .btn-gold, .btn-spotify, .btn-ytmusic {
+    padding: 8px 10px; /* Botão mais fino */
+    font-size: 11px; /* Letra menor */
+    flex: 1; /* Todos com o mesmo tamanho */
+    justify-content: center; /* Centraliza texto */
+    white-space: nowrap; /* Não deixa o texto quebrar */
   }
 }
 
