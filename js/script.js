@@ -1,102 +1,171 @@
-/* script.js - versão ajustada
-   - Background interativo
-   - Rádio player
-   - Modal de reprodução de vídeos
-   - Navegação interna
-*/
+/* script.js - NaldoA Official (Versão Turbo - Sem Economia) */
 
-// ====== CONFIGURAÇÃO ======
-const RADIO_STREAM = "https://stream.zeno.fm/xx785t45mf9uv"; // seu stream
+// ====== 1. CONFIGURAÇÃO ======
+// Link da sua rádio (ZenoFM)
+const RADIO_STREAM = "https://stream.zeno.fm/xx785t45mf9uv"; 
 
-// ====== BACKGROUND INTERATIVO ======
-const heroBg = document.querySelector('.hero-bg');
-function onPointer(e){
-  const p = e.touches ? e.touches[0] : e;
-  const mx = (p.clientX / window.innerWidth - 0.5) * 18;
-  const my = (p.clientY / window.innerHeight - 0.5) * 12;
-  if(heroBg) heroBg.style.transform = `translate(${mx}px, ${my}px) scale(1.06)`;
+// ====== 2. BACKGROUND ESPECTRO (O Fundo que mexe) ======
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+let bars = [];
+const barCount = 60; 
+let canvasWidth, canvasHeight;
+
+if (canvas) {
+    function resizeCanvas() {
+        canvasWidth = window.innerWidth;
+        canvasHeight = window.innerHeight;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        initBars();
+    }
+
+    function initBars() {
+        bars = [];
+        const barWidth = canvasWidth / barCount;
+        for (let i = 0; i < barCount; i++) {
+            bars.push({
+                x: i * barWidth,
+                y: canvasHeight,
+                width: barWidth - 2,
+                height: Math.random() * (canvasHeight * 0.2), // Começa baixo
+                speed: Math.random() * 2 + 1,
+                direction: 1 
+            });
+        }
+    }
+
+    function animateSpectrum() {
+        ctx.fillStyle = '#030313'; // Limpa tela
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        // Gradiente das Barras
+        const gradient = ctx.createLinearGradient(0, canvasHeight, 0, 0);
+        gradient.addColorStop(0, '#ffcc00'); // Base Ouro
+        gradient.addColorStop(0.5, '#3be8ff'); // Meio Azul
+        gradient.addColorStop(1, '#000000'); // Topo Preto
+        ctx.fillStyle = gradient;
+
+        // Se estiver tocando, agita mais
+        const isPlaying = document.body.classList.contains('is-playing');
+        const speedMultiplier = isPlaying ? 3.5 : 0.5; // Bem rápido se tocar
+
+        bars.forEach(bar => {
+            ctx.fillRect(bar.x, canvasHeight - bar.height, bar.width, bar.height);
+            if (bar.direction === 1) {
+                bar.height += bar.speed * speedMultiplier;
+                if (bar.height > canvasHeight * (isPlaying ? 0.8 : 0.3)) bar.direction = -1;
+            } else {
+                bar.height -= bar.speed * speedMultiplier;
+                if (bar.height < canvasHeight * 0.05) bar.direction = 1;
+            }
+            // "Pulo" aleatório na batida
+            if(isPlaying && Math.random() > 0.92) bar.height += 30;
+        });
+        requestAnimationFrame(animateSpectrum);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animateSpectrum();
 }
-window.addEventListener('pointermove', onPointer, {passive:true});
-window.addEventListener('touchmove', onPointer, {passive:true});
-window.addEventListener('resize', ()=> heroBg && (heroBg.style.transform = 'scale(1.03)'));
 
-// ====== RADIO PLAYER ======
+
+// ====== 3. RADIO PLAYER (MODO TURBO) ======
 const radioBtn = document.getElementById('radioBtn');
 const audioEl = document.getElementById('radioAudio');
+
+// INICIALIZAÇÃO IMEDIATA (Sem economizar dados)
 if(audioEl){
-  audioEl.src = RADIO_STREAM;
-  audioEl.crossOrigin = "anonymous";
-  audioEl.load();
-}
-let playing = false;
-if(radioBtn){
-  radioBtn.addEventListener('click', async () => {
-    if(!audioEl) return;
-    try {
-      if(audioEl.paused){
-        await audioEl.play();
-        radioBtn.textContent = '⏸ NaldoA Play';
-        radioBtn.setAttribute('aria-pressed','true');
-        playing = true;
-      } else {
-        audioEl.pause();
-        radioBtn.textContent = '▶ NaldoA Play';
-        radioBtn.setAttribute('aria-pressed','false');
-        playing = false;
-      }
-    } catch(e){
-      console.warn('Playback blocked or error', e);
-    }
-  });
+    audioEl.src = RADIO_STREAM;
+    audioEl.crossOrigin = "anonymous";
+    audioEl.load(); // Força o navegador a preparar o áudio AGORA
 }
 
-// ====== MODAL DE VÍDEOS ======
+if(radioBtn && audioEl){
+    radioBtn.addEventListener('click', () => {
+        // Verifica se está pausado
+        if(audioEl.paused){
+            // --- DAR PLAY ---
+            const playPromise = audioEl.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Play funcionou!
+                    updateInterface(true);
+                })
+                .catch(error => {
+                    console.log("Erro no Play, tentando recarregar stream...");
+                    // Se der erro, força recarregar o link e tenta de novo
+                    audioEl.src = RADIO_STREAM;
+                    audioEl.load();
+                    audioEl.play();
+                    updateInterface(true);
+                });
+            }
+        } else {
+            // --- PAUSAR ---
+            audioEl.pause();
+            // NÃO limpamos o SRC aqui. Deixa conectado pra voltar rápido.
+            updateInterface(false);
+        }
+    });
+}
+
+function updateInterface(isPlaying) {
+    if(isPlaying) {
+        radioBtn.textContent = '⏸ Pausar Rádio';
+        radioBtn.classList.add('playing');
+        document.body.classList.add('is-playing'); // Liga o Espectro
+    } else {
+        radioBtn.textContent = '▶ NaldoA Play';
+        radioBtn.classList.remove('playing');
+        document.body.classList.remove('is-playing'); // Desliga o Espectro
+    }
+}
+
+// Se a rádio cair sozinha (internet ruim), tenta reconectar
+audioEl.addEventListener('error', (e) => {
+    console.log("Queda de conexão, reconectando...");
+    setTimeout(() => {
+        audioEl.src = RADIO_STREAM;
+        audioEl.load();
+        if(document.body.classList.contains('is-playing')) audioEl.play();
+    }, 3000);
+});
+
+
+// ====== 4. MODAL DE VÍDEOS & NAVEGAÇÃO ======
 const modal = document.getElementById('videoModal');
 const playerFrame = document.getElementById('playerFrame');
 const closeBtn = document.querySelector('.modal-close');
 
 function openModal(id){
-  if(!modal || !playerFrame) return;
-  playerFrame.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden','false');
-  history.pushState({modal:id}, '', '#video-'+id);
+    if(!modal || !playerFrame) return;
+    playerFrame.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
 }
 
 function closeModal(){
-  if(!modal || !playerFrame) return;
-  playerFrame.src = '';
-  modal.classList.remove('open');
-  modal.setAttribute('aria-hidden','true');
-  history.back();
+    if(!modal || !playerFrame) return;
+    playerFrame.src = '';
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
 }
 
 if(closeBtn) closeBtn.addEventListener('click', closeModal);
-modal && modal.addEventListener('click', (e)=> { if(e.target === modal) closeModal(); });
-window.addEventListener('popstate', ()=> { if(modal && modal.classList.contains('open')) closeModal(); });
+if(modal) modal.addEventListener('click', (e)=> { if(e.target === modal) closeModal(); });
 
-// ====== EVENTO PARA TODOS OS VÍDEOS NO GRID ======
-const videoGrid = document.getElementById('videoGrid');
-if(videoGrid){
-  videoGrid.querySelectorAll('.video-card iframe').forEach((iframe)=>{
-    const parent = iframe.parentElement;
-    const idMatch = iframe.src.match(/\/embed\/([a-zA-Z0-9_-]+)/);
-    if(!idMatch) return;
-    const id = idMatch[1];
-    parent.style.cursor = 'pointer';
-    parent.addEventListener('click', ()=> openModal(id));
-  });
-}
-
-// ====== NAVEGAÇÃO INTERNA ======
-document.querySelectorAll('.nav-btn, .hero-actions .btn').forEach(btn => {
-  btn.addEventListener('click', (ev) => {
-    const target = btn.dataset.section || btn.getAttribute('data-scroll');
-    if(!target) return;
-    const el = document.getElementById(target);
-    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-  });
+// Navegação Suave
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
 });
 
-// ====== BRAND CLIQUE VOLTA AO TOPO ======
-document.getElementById('brandBtn')?.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
+// Clique no Logo volta ao topo
+document.querySelector('.brand')?.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
