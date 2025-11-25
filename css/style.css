@@ -212,93 +212,103 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
 /* === 9. FOOTER === */
 .site-footer { text-align: center; padding: 40px 20px; background: #000; color: rgba(255,255,255,0.5); font-size: 14px; position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.1); }
 
-/* === 10. RESPONSIVO MOBILE (LAYOUT APP DEFINITIVO) === */
+/* === 10. RESPONSIVO MOBILE (FINAL: BOTÕES PEQUENOS + RÁDIO VISÍVEL) === */
 @media (max-width: 768px) {
   
-  /* --- 1. CABEÇALHO (HEADER) --- */
+  /* --- 1. CABEÇALHO --- */
   .site-header {
     display: flex;
-    flex-wrap: wrap; /* Permite quebrar em linhas */
+    flex-wrap: wrap; 
     align-items: center;
-    padding: 10px 15px;
-    height: auto; /* Altura ajustável */
-    gap: 0; /* Remove espaços extras automáticos */
+    padding: 8px 12px; /* Menos borda */
+    height: auto;
+    gap: 0; 
   }
 
-  /* Logo ocupa metade da linha de cima */
+  /* Logo NaldoA (Esquerda) */
   .brand {
-    flex: 0 0 50%; /* 50% de largura */
-    order: 1; /* Primeiro item */
+    flex: 0 0 40%; 
+    order: 1; 
   }
-  .brand-title { display: none; } /* Esconde texto NaldoA, só ícone */
+  .brand-title { display: none; } 
 
   /* Agrupador da Direita */
-  .header-right {
-    display: contents; /* Remove o conteiner para controlar os filhos direto */
-  }
+  .header-right { display: contents; }
 
-  /* Rádio ocupa a outra metade da linha de cima */
+  /* Rádio + Foto (Direita) */
   .radio-area {
-    flex: 0 0 50%; /* 50% de largura */
-    order: 2; /* Segundo item */
-    justify-content: flex-end; /* Alinha na direita */
+    flex: 0 0 60%; /* Mais espaço pra rádio */
+    order: 2; 
+    justify-content: flex-end; 
     margin: 0;
   }
-  .radio-mini, .music-waves { display: none; } /* Limpa visual: esconde ondas e mini logo */
+  
+  /* AQUI ESTÁ A CORREÇÃO DA FOTO */
+  .radio-mini {
+    display: block !important; /* Força aparecer */
+    width: 28px; /* Tamanho pequeno */
+    height: 28px;
+    margin-right: 6px;
+  }
+  .music-waves { display: none; } /* Ondas escondidas pra não poluir */
   
   .radio-btn {
-    padding: 6px 14px;
+    padding: 6px 12px;
     font-size: 11px;
-    height: 32px; /* Altura fixa para alinhar */
+    height: 30px; 
+    display: flex; align-items: center;
   }
 
-  /* MENU SOCIAL (Barra de Rolagem na Linha de Baixo) */
+  /* --- 2. MENU SOCIAL COMPACTO --- */
   .socials {
-    order: 3; /* Terceiro item (vai para baixo) */
-    width: 100%; /* Ocupa linha inteira */
-    margin-top: 10px; /* Separa do topo */
+    order: 3; 
+    width: 100%; 
+    margin-top: 8px; 
     display: flex;
-    overflow-x: auto; /* Permite arrastar para o lado */
+    overflow-x: auto; 
     padding-bottom: 5px;
-    gap: 10px;
-    -webkit-overflow-scrolling: touch; /* Rolagem suave no iPhone */
+    gap: 6px; /* Botões mais coladinhos */
+    -webkit-overflow-scrolling: touch; 
     scrollbar-width: none;
   }
-  .socials::-webkit-scrollbar { display: none; } /* Esconde barra de rolagem */
+  .socials::-webkit-scrollbar { display: none; } 
 
   .socials a {
-    flex-shrink: 0; /* Não deixa esmagar */
+    flex-shrink: 0; 
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.1);
-    padding: 8px 16px;
-    border-radius: 50px; /* Redondinho */
-    font-size: 11px;
+    /* BOTÕES BEM MENORES AGORA: */
+    padding: 6px 10px; 
+    border-radius: 50px; 
+    font-size: 10px; /* Letra pequena */
     white-space: nowrap;
+    height: 26px; /* Altura fixa fina */
+    display: flex; align-items: center;
   }
 
-  /* --- 2. CONTEÚDO --- */
+  /* --- 3. CONTEÚDO --- */
   .hero { 
-    padding-top: 20px; 
+    padding-top: 15px; 
     flex-direction: column;
     text-align: center;
   }
-  .hero-title { font-size: 28px; }
+  .hero-title { font-size: 26px; }
   
-  /* --- 3. BOTÕES DO MEIO (CORREÇÃO DO QUADRADO) --- */
+  /* --- 4. BOTÕES DO MEIO (REDONDOS E PEQUENOS) --- */
   .buttons-wrapper {
-    gap: 8px;
-    flex-wrap: nowrap; /* Lado a lado */
-    margin-top: 20px;
+    gap: 5px;
+    flex-wrap: nowrap; 
+    margin-top: 15px;
     padding: 0 5px;
   }
   
   .btn-gold, .btn-spotify, .btn-ytmusic {
-    padding: 10px 0; /* Altura boa */
+    padding: 8px 0; 
     font-size: 10px;
-    flex: 1; /* Divide espaço igual */
+    flex: 1; 
     display: flex;
     justify-content: center;
-    border-radius: 50px; /* FORÇA FICAR REDONDO (PÍLULA) */
+    border-radius: 50px; 
     white-space: nowrap;
   }
 }
