@@ -212,6 +212,24 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
 /* === 9. FOOTER === */
 .site-footer { text-align: center; padding: 40px 20px; background: #000; color: rgba(255,255,255,0.5); font-size: 14px; position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.1); }
 
+/* === BARRA DE STREAMING (NOVO) === */
+.streaming-bar {
+  display: flex;
+  flex-direction: column; /* Coloca um em cima do outro */
+  align-items: center;    /* Centraliza tudo */
+  justify-content: center;
+  margin: 20px 0;         /* Espaço em cima e embaixo */
+  text-align: center;
+}
+
+.streaming-bar p {
+  font-size: 12px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+  margin-bottom: 15px; /* Espaço entre o texto e os botões */
+  text-transform: uppercase; /* Deixa em maiúsculo bonito */
+  font-weight: bold;
+}
 /* === 10. RESPONSIVO MOBILE (FINAL: BOTÕES PEQUENOS + RÁDIO VISÍVEL) === */
 @media (max-width: 768px) {
   
