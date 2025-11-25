@@ -230,7 +230,7 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
   text-transform: uppercase; /* Deixa em maiúsculo bonito */
   font-weight: bold;
 }
-/* === 10. RESPONSIVO MOBILE (TESTE: 2 VÍDEOS POR LINHA) === */
+/* === 10. RESPONSIVO MOBILE (FINAL: BOTÕES GORDINHOS) === */
 @media (max-width: 768px) {
   
   /* --- 1. CABEÇALHO --- */
@@ -243,9 +243,11 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     gap: 0; 
   }
 
+  /* Logo NaldoA (Esquerda) */
   .brand { flex: 0 0 40%; order: 1; }
   .brand-title { display: none; } 
 
+  /* Rádio + Foto (Direita) */
   .header-right { display: contents; }
   
   .radio-area {
@@ -253,8 +255,7 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     order: 2; 
     justify-content: flex-end; 
     margin: 0;
-  }
-  
+  }  
   .radio-mini {
     display: block !important;
     width: 28px;
@@ -270,7 +271,7 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     display: flex; align-items: center;
   }
 
-  /* --- 2. MENU SOCIAL --- */
+  /* --- 2. MENU SOCIAL COMPACTO --- */
   .socials {
     order: 3; 
     width: 100%; 
@@ -291,9 +292,9 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     padding: 6px 12px; 
     border-radius: 50px; 
     font-size: 11px; 
+    white-space: nowrap;
     height: 28px; 
     display: flex; align-items: center;
-    white-space: nowrap;
   }
 
   /* --- 3. CONTEÚDO --- */
@@ -304,42 +305,28 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
   }
   .hero-title { font-size: 26px; }
   
-  /* --- 4. BOTÕES DO MEIO --- */
+  /* --- 4. BOTÕES DO MEIO (AGORA MAIORES) --- */
   .buttons-wrapper {
-    gap: 6px; 
+    gap: 6px; /* Um pouco de espaço entre eles */
     flex-wrap: nowrap; 
     margin-top: 15px;
     padding: 0 2px;
   }
   
   .btn-gold, .btn-spotify, .btn-ytmusic {
-    flex: 1; 
-    padding: 12px 0;   
-    font-size: 11px;   
-    height: auto;      
+    flex: 1; /* Divide o espaço igualmente */
+    
+    /* AQUI ESTÁ A CORREÇÃO DO "CISCO": */
+    padding: 12px 0;   /* Mais altura (gordinho) */
+    font-size: 11px;   /* Letra legível */
+    height: auto;      /* Altura automática */
+    
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50px; 
     white-space: nowrap;
-    overflow: hidden; 
+    overflow: hidden; /* Corta o texto se não couber */
     text-overflow: ellipsis; 
   }
-
-  /* --- 5. VÍDEOS EM GRADE (2 POR LINHA) --- */
-  #videoGrid {
-    gap: 10px; /* Espaço menor entre os vídeos */
-    padding: 0 5px;
-  }
-
-  .video-card {
-    /* O truque: força ocupar 48% da tela (quase metade) */
-    flex: 0 0 48%; 
-    max-width: 48%;
-  }
-
-  .video-card iframe {
-    height: 100px; /* Altura reduzida para manter a proporção */
-  }
-
-} /* <--- FIM DO CSS */
+}
