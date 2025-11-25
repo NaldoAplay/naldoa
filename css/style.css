@@ -212,12 +212,86 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
 /* === 9. FOOTER === */
 .site-footer { text-align: center; padding: 40px 20px; background: #000; color: rgba(255,255,255,0.5); font-size: 14px; position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.1); }
 
-/* === 10. RESPONSIVO GERAL === */
+/* === 10. RESPONSIVO MOBILE (FINAL E ORGANIZADO) === */
 @media (max-width: 768px) {
-  .hero { flex-direction: column; text-align: center; padding-top: 20px; }
-  .hero-title { font-size: 32px; }
-  /* Removi as regras de botões aqui para não atrapalhar o design mobile novo */
-  .modal-box iframe { height: 300px; }
-  .site-header { padding: 10px 15px; }
-  .brand-title { display: none; }
+  
+  /* 1. Header Cresce para caber duas linhas */
+  .site-header {
+    flex-wrap: wrap; /* Permite quebrar linha */
+    height: auto; /* Altura automática */
+    padding: 10px 15px;
+    gap: 10px;
+  }
+
+  /* 2. Logo na Esquerda */
+  .brand {
+    flex: 1; /* Ocupa o espaço disponível */
+    margin-right: auto;
+  }
+  .brand-title { display: none; } /* Esconde o nome "NaldoA" escrito para ganhar espaço, deixa só o logo */
+
+  /* 3. Agrupador da Direita (Redes + Rádio) */
+  .header-right {
+    flex: 1; 
+    justify-content: flex-end; /* Alinha Rádio na direita */
+    width: 100%; /* Força ocupar a largura para quebrar linha */
+    flex-wrap: wrap;
+  }
+
+  /* 4. Rádio (Fica no Topo Direito) */
+  .radio-area {
+    order: 1; /* Prioridade 1: Fica na linha de cima junto com o Logo */
+    margin-left: auto; /* Empurra para direita total */
+  }
+  
+  .radio-btn {
+    padding: 8px 14px; /* Botão um pouco menor */
+    font-size: 12px;
+    white-space: nowrap; /* Texto não quebra linha */
+  }
+
+  /* 5. Menu de Redes Sociais (A BARRA MÁGICA) */
+  .socials {
+    order: 2; /* Prioridade 2: Vai para a linha de baixo */
+    width: 100%; /* Ocupa a linha inteira */
+    display: flex;
+    overflow-x: auto; /* Permite ROLAGEM HORIZONTAL com o dedo */
+    white-space: nowrap;
+    padding: 10px 0 5px 0;
+    margin-top: 5px;
+    border-top: 1px solid rgba(255,255,255,0.1); /* Linha separadora chique */
+    gap: 10px;
+    /* Esconde a barra de rolagem feia */
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: none; 
+  }
+  .socials::-webkit-scrollbar { display: none; }
+
+  /* Estilo dos botõezinhos do menu móvel */
+  .socials a {
+    background: rgba(255,255,255,0.08);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    flex-shrink: 0; /* Impede que eles sejam esmagados */
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  /* Ajuste do Herói e Botões Principais */
+  .hero { padding-top: 20px; text-align: center; }
+  .hero-title { font-size: 28px; }
+  
+  /* Ajuste dos Botões Grandes de Streaming (Tijolinhos) */
+  .buttons-wrapper {
+    gap: 6px;
+    flex-wrap: nowrap;
+    margin-top: 15px;
+  }
+  .btn-gold, .btn-spotify, .btn-ytmusic {
+    padding: 8px 5px;
+    font-size: 10px;
+    flex: 1;
+    border-radius: 8px;
+    justify-content: center;
+  }
 }
