@@ -102,67 +102,68 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .hero-title { font-family: 'Orbitron', sans-serif; font-size: 42px; margin-bottom: 15px; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
 .lead { color: rgba(255,255,255,0.9); line-height: 1.6; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-/* === 5. BOTÕES DE STREAMING (EFEITO VIDRO / GLASSMORPHISM) === */
+/* === 5. BOTÕES DE STREAMING (VERSÃO CORRIGIDA: GRANDE NO PC / PEQUENO NO MOBILE) === */
 
 .buttons-wrapper {
   display: flex;
-  gap: 15px;
+  gap: 20px; /* Mais espaço entre eles no PC */
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 20px;
+  margin-top: 30px;
   z-index: 10;
   position: relative;
 }
 
-/* Estilo Base dos Botões (Transparente) */
+/* Estilo Base (PC - AGORA MAIORES) */
 .btn-gold, .btn-spotify, .btn-ytmusic {
-  background: rgba(0, 0, 0, 0.3); /* Fundo preto semi-transparente */
-  backdrop-filter: blur(4px); /* Desfoque leve no fundo */
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   color: #fff;
-  padding: 10px 20px;
+  /* AUMENTEI AQUI PARA FICAR GRANDE NO PC: */
+  padding: 16px 32px; 
   border-radius: 50px;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 16px; /* Letra maior no PC */
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Borda sutil */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-transform: uppercase; /* Letras maiúsculas para dar mais presença */
+  letter-spacing: 1px;
 }
 
-/* Cores Específicas (Hover Brilhante) */
-
-/* SoundOn / Gold */
+/* Cores Específicas */
 .btn-gold { border-color: #d4af37; color: #d4af37; }
-.btn-gold:hover { background: #d4af37; color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
+.btn-gold:hover { background: #d4af37; color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.8); transform: scale(1.05); }
 
-/* YouTube Music / Red */
 .btn-ytmusic { border-color: #ff0000; color: #ff4d4d; }
-.btn-ytmusic:hover { background: #ff0000; color: #fff; box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
+.btn-ytmusic:hover { background: #ff0000; color: #fff; box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); transform: scale(1.05); }
 
-/* Spotify / Green */
 .btn-spotify { border-color: #1DB954; color: #1DB954; }
-.btn-spotify:hover { background: #1DB954; color: #fff; box-shadow: 0 0 15px rgba(29, 185, 84, 0.6); }
+.btn-spotify:hover { background: #1DB954; color: #fff; box-shadow: 0 0 20px rgba(29, 185, 84, 0.8); transform: scale(1.05); }
 
-/* AJUSTES PARA CELULAR (3 na mesma linha) */
+/* --- AJUSTES PARA CELULAR (AGORA BEM PEQUENOS) --- */
 @media (max-width: 600px) {
   .buttons-wrapper {
-    gap: 8px; /* Menos espaço */
+    gap: 5px; /* Coladinhos um no outro */
     flex-wrap: nowrap; /* Força ficar na mesma linha */
-    justify-content: space-between;
-    padding: 0 10px;
+    justify-content: center;
+    padding: 0 5px;
+    margin-top: 15px; /* Menos margem do topo */
   }
 
   .btn-gold, .btn-spotify, .btn-ytmusic {
-    padding: 8px 6px; /* Botão mais fino */
-    font-size: 11px; /* Letra menor */
-    flex: 1; /* Tamanhos iguais */
+    /* DIMINUI AQUI PARA FICAR PEQUENO NO CELULAR: */
+    padding: 6px 4px; /* Quase sem borda interna */
+    font-size: 10px; /* Letra bem pequena */
+    flex: 1; /* Divide o espaço igualmente entre os 3 */
     justify-content: center;
-    white-space: nowrap;
+    border-radius: 8px; /* Borda menos redonda para economizar espaço */
+    gap: 4px; /* Ícone colado no texto */
   }
 }
-
 /* === 6. VISUALIZER (BARRINHAS PEQUENAS) === */
 .music-waves {
   display: flex; align-items: flex-end; gap: 3px; height: 20px; margin-left: 10px;
