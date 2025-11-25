@@ -233,3 +233,23 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
   .site-header { padding: 10px 15px; }
   .brand-title { display: none; }
 }
+/* --- BOTÃO YOUTUBE MUSIC --- */
+.btn-ytmusic {
+  background-color: #ff0000; /* Vermelho YouTube */
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-ytmusic:hover {
+  background-color: #cc0000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+}
