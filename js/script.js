@@ -169,3 +169,51 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // Clique no Logo volta ao topo
 document.querySelector('.brand')?.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+/* === CONFIGURAÇÃO DA TELA DE BLOQUEIO (FOTO E NOME) === */
+const player = document.getElementById('radioAudio');
+
+if (player) {
+    player.addEventListener('play', function() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: 'NaldoA Play',
+                artist: 'NaldoA',
+                album: 'Rádio Ao Vivo',
+                artwork: [
+                    { src: 'images/radio-logo.jpg', sizes: '96x96',   type: 'image/jpeg' },
+                    { src: 'images/radio-logo.jpg', sizes: '128x128', type: 'image/jpeg' },
+                    { src: 'images/radio-logo.jpg', sizes: '192x192', type: 'image/jpeg' },
+                    { src: 'images/radio-logo.jpg', sizes: '512x512', type: 'image/jpeg' }
+                ]
+            });
+
+            // Configura os botões da tela de bloqueio (Play/Pause)
+            navigator.mediaSession.setActionHandler('play', function() {
+                player.play();
+                updatePlayButtonUI(true); // Se você tiver uma função que atualiza o botão visual
+            });
+            navigator.mediaSession.setActionHandler('pause', function() {
+                player.pause();
+                updatePlayButtonUI(false);
+            });
+        }
+    });
+}
+
+// Função auxiliar para atualizar o botão visual (caso seu script original não tenha)
+function updatePlayButtonUI(isPlaying) {
+    const btn = document.getElementById('radioBtn');
+    const waves = document.querySelector('.music-waves');
+    
+    if (btn) {
+        if (isPlaying) {
+            btn.innerHTML = '⏸ Pausar Rádio';
+            btn.classList.add('playing');
+            if(waves) waves.style.opacity = '1';
+        } else {
+            btn.innerHTML = '▶ NaldoA Play';
+            btn.classList.remove('playing');
+            if(waves) waves.style.opacity = '0.3';
+        }
+    }
+}
