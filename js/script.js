@@ -180,11 +180,11 @@ if (player) {
                 artist: 'NaldoA',
                 album: 'Rádio Ao Vivo',
                 artwork: [
-                    // O ?v=99 obriga o celular a baixar a nova versão
-                    { src: 'images/logo.jpg?v=99', sizes: '96x96',   type: 'image/jpeg' },
-                    { src: 'images/logo.jpg?v=99', sizes: '128x128', type: 'image/jpeg' },
-                    { src: 'images/logo.jpg?v=99', sizes: '192x192', type: 'image/jpeg' },
-                    { src: 'images/logo.jpg?v=99', sizes: '512x512', type: 'image/jpeg' }
+                    // Usando o LINK COMPLETO (HTTPS) para não ter erro de caminho
+                    { src: 'https://naldoaplay.github.io/naldoa/images/logo.jpg', sizes: '96x96',   type: 'image/jpeg' },
+                    { src: 'https://naldoaplay.github.io/naldoa/images/logo.jpg', sizes: '128x128', type: 'image/jpeg' },
+                    { src: 'https://naldoaplay.github.io/naldoa/images/logo.jpg', sizes: '192x192', type: 'image/jpeg' },
+                    { src: 'https://naldoaplay.github.io/naldoa/images/logo.jpg', sizes: '512x512', type: 'image/jpeg' }
                 ]
             });
 
