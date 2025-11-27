@@ -180,10 +180,10 @@ if (player) {
                 artist: 'NaldoA',
                 album: 'Rádio Ao Vivo',
                 artwork: [
-                    { src: 'images/radio-logo.jpg', sizes: '96x96',   type: 'image/jpeg' },
-                    { src: 'images/radio-logo.jpg', sizes: '128x128', type: 'image/jpeg' },
-                    { src: 'images/radio-logo.jpg', sizes: '192x192', type: 'image/jpeg' },
-                    { src: 'images/radio-logo.jpg', sizes: '512x512', type: 'image/jpeg' }
+                    { src: 'images/LogoRádio4K.jpeg', sizes: '96x96',   type: 'image/jpeg' },
+                    { src: 'images/LogoRádio4K.jpeg', sizes: '128x128', type: 'image/jpeg' },
+                    { src: 'images/LogoRádio4K.jpeg', sizes: '192x192', type: 'image/jpeg' },
+                    { src: 'images/LogoRádio4K.jpeg', sizes: '512x512', type: 'image/jpeg' }
                 ]
             });
 
