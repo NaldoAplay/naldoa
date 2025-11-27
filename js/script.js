@@ -175,15 +175,16 @@ const player = document.getElementById('radioAudio');
 if (player) {
     player.addEventListener('play', function() {
         if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
+           navigator.mediaSession.metadata = new MediaMetadata({
                 title: 'NaldoA Play',
                 artist: 'NaldoA',
                 album: 'Rádio Ao Vivo',
                 artwork: [
-                    { src: 'images/logoradio.jpeg', sizes: '96x96',   type: 'image/jpeg' },
-                    { src: 'images/logoradio.jpeg', sizes: '128x128', type: 'image/jpeg' },
-                    { src: 'images/logoradio.jpeg', sizes: '192x192', type: 'image/jpeg' },
-                    { src: 'images/logoradio.jpeg', sizes: '512x512', type: 'image/jpeg' }
+                    // O ?v=99 obriga o celular a baixar a nova versão
+                    { src: 'images/logo.jpg?v=99', sizes: '96x96',   type: 'image/jpeg' },
+                    { src: 'images/logo.jpg?v=99', sizes: '128x128', type: 'image/jpeg' },
+                    { src: 'images/logo.jpg?v=99', sizes: '192x192', type: 'image/jpeg' },
+                    { src: 'images/logo.jpg?v=99', sizes: '512x512', type: 'image/jpeg' }
                 ]
             });
 
