@@ -144,8 +144,8 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .btn-spotify { border-color: #1DB954; color: #1DB954; }
 .btn-spotify:hover { background: #1DB954; color: #fff; box-shadow: 0 0 20px rgba(29, 185, 84, 0.8); transform: scale(1.05); }
 
-.btn-amazonMusic { border-color: #1b43b1; color: #1d43b1; }
-.btn-amazonMusic:hover { background: #1b43b1; color: #fff; box-shadow: 0 0 20px rgba(29, 97, 185, 0.8); transform: scale(1.05); }
+.btn-amazonMusic { border-color: #1b9fb1; color: #1b9fb1; }
+.btn-amazonMusic:hover { background: #1b9fb1; color: #fff; box-shadow: 0 0 20px rgba(29, 180, 185, 0.8); transform: scale(1.05); }
 
 /* --- AJUSTES PARA CELULAR (AGORA BEM PEQUENOS) --- */
 @media (max-width: 600px) {
