@@ -115,7 +115,7 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 }
 
 /* Estilo Base (PC - AGORA MAIORES) */
-.btn-gold, .btn-spotify, .btn-ytmusic {
+.btn-gold, .btn-spotify, .btn-ytmusic, .btn-amazonMusic {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   color: #fff;
@@ -144,6 +144,9 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .btn-spotify { border-color: #1DB954; color: #1DB954; }
 .btn-spotify:hover { background: #1DB954; color: #fff; box-shadow: 0 0 20px rgba(29, 185, 84, 0.8); transform: scale(1.05); }
 
+.btn-amazonMusic { border-color: #1b43b1; color: #1d43b1; }
+.btn-amazonMusic:hover { background: #1b43b1; color: #fff; box-shadow: 0 0 20px rgba(29, 97, 185, 0.8); transform: scale(1.05); }
+
 /* --- AJUSTES PARA CELULAR (AGORA BEM PEQUENOS) --- */
 @media (max-width: 600px) {
   .buttons-wrapper {
@@ -154,7 +157,7 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
     margin-top: 15px; /* Menos margem do topo */
   }
 
-  .btn-gold, .btn-spotify, .btn-ytmusic {
+  .btn-gold, .btn-spotify, .btn-ytmusic, .btn-amazonMusic {
     /* DIMINUI AQUI PARA FICAR PEQUENO NO CELULAR: */
     padding: 6px 4px; /* Quase sem borda interna */
     font-size: 10px; /* Letra bem pequena */
@@ -313,7 +316,7 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     padding: 0 2px;
   }
   
-  .btn-gold, .btn-spotify, .btn-ytmusic {
+  .btn-gold, .btn-spotify, .btn-ytmusic, .btn-amazonMusic {
     flex: 1; /* Divide o espaço igualmente */
     
     /* AQUI ESTÁ A CORREÇÃO DO "CISCO": */
