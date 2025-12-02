@@ -152,7 +152,7 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .btn-spotify { border-color: #1DB954; color: #1DB954; }
 .btn-spotify:hover { background: #1DB954; color: #fff; box-shadow: 0 0 20px rgba(29, 185, 84, 0.8); transform: scale(1.05); }
 
-.btn-amazonMusic { border-color: #00a8e1; color: #00a8e1; }
+.btn-amazonMusic { border-color: #00a8e1; color: #319fc4; }
 .btn-amazonMusic:hover { background: #00a8e1; color: #fff; box-shadow: 0 0 20px rgba(0, 168, 225, 0.8); transform: scale(1.05); }
 
 /* === 6. VISUALIZER (BARRINHAS NO TOPO) === */
