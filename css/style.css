@@ -225,7 +225,7 @@ body.welcome-active { overflow: hidden; }
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   /* Fundo com sua foto + película escura 70% */
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../images/logo-naldoa.png') no-repeat center center/cover;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../images/Image_67.jpeg') no-repeat center center/cover;
   background-color: #030313; /* Cor de segurança */
   z-index: 9999; /* Fica acima de TUDO */
   display: flex;
