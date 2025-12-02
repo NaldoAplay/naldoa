@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
   <meta name="google-site-verification" content="PZFFJm_Wbf1_G96H6vLLwWTxFwV8BVkNG5f26izxQ_g" />
@@ -10,7 +11,7 @@
   
   <title>NaldoA — NaldoA Play</title>
   
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=10">
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
@@ -37,16 +38,30 @@
 
 <body>
 
+  <div id="welcome-overlay">
+    <div class="welcome-content">
+      <button id="enterBtn" class="glowing-btn">
+        ✨ Bem-Vindo ao universo NaldoA!
+      </button>
+    </div>
+  </div>
+
+  <audio id="welcomeAudio" preload="auto">
+      <source src="SejaBemVindoAudio/sejabemvindo.wav" type="audio/mpeg">
+  </audio>
+
   <canvas id="bgCanvas"></canvas>
   <div class="overlay"></div>
 
   <header class="site-header" role="banner">
+    
     <div class="brand">
       <img src="images/main-logo.png" alt="Logo NaldoA" class="brand-logo">
       <h1 class="brand-title">NaldoA</h1>
     </div>
 
     <div class="header-right">
+      
       <nav class="socials" aria-label="Redes sociais">
         <a href="https://music.apple.com/br/artist/naldoa/1782398892" target="_blank" rel="noopener" style="color: #ff0055;">Apple Music</a>
         
@@ -96,7 +111,7 @@
             🎧 Spotify
           </a>
 
-          <a href="https://music.amazon.com/artists/B0DP59T244/naldoa?marketplaceId=ART4WZ8MWBX2Y&musicTerritory=BR&ref=dm_sh_RFnvZTLV5No7DdKWceJ5zvcEY" target="_blank" class="btn-amazonMusic">
+          <a href="https://music.amazon.com/artists/B0DP59T244/naldoa?marketplaceId=ART4WZ8MWBX2Y&musicTerritory=BR&ref=dm_sh_RFnvZTLV5No7DdKWceJ5zvcEY" target="_blank" class="btn-amazonMusic" style="border-color: #00a8e1; color: #00a8e1;">
             🎧 AZ Music
           </a>
         </div>
@@ -132,13 +147,13 @@
       <div style="max-width: 800px; margin: 0 auto; line-height: 1.6; color: #ccc;">
           <p><strong>NaldoA</strong> — DJ & Produtor de EDM</p>
           <br>
-          <p>NaldoA é DJ, produtor musical e criador da rádio online NaldoA Play, especializado em EDM, House, Trance e Progressive. Com anos de experiência no cenário musical, NaldoA combina criatividade, técnica e tecnologia para entregar sets energéticos e produções originais que conquistam o público em todo o Brasil e no mundo.</p>
+          <p>NaldoA é DJ, produtor musical e criador da rádio online NaldoA Play...</p>
           <br>
-          <p>Além de suas mixagens ao vivo, NaldoA produz faixas exclusivas, remixes e playlists que são transmitidos diariamente em sua rádio online, proporcionando uma experiência musical completa para fãs de música eletrônica. Seus vídeos de performances, lives e bastidores estão disponíveis no site e no canal oficial do YouTube, permitindo que seguidores acompanhem cada passo de sua carreira.</p>
+          <p>Além de suas mixagens ao vivo, NaldoA produz faixas exclusivas...</p>
           <br>
-          <p>Siga NaldoA nas redes sociais para acessar lançamentos, notícias sobre eventos, playlists exclusivas e sets inéditos. Seja pelo Spotify, YouTube Music, Instagram ou TikTok, você encontra conteúdos frescos e envolventes sobre EDM e música eletrônica.</p>
+          <p>Siga NaldoA nas redes sociais para acessar lançamentos...</p>
           <br>
-          <p>Se você é fã de música eletrônica e quer se conectar com novas tendências, NaldoA é referência em mixagens dinâmicas, produção musical profissional e entretenimento digital, oferecendo uma experiência sonora única para todos os públicos.</p>
+          <p>Se você é fã de música eletrônica e quer se conectar...</p>
           <br>
           <p>🎵 Ouça, assista e sinta a energia da música com NaldoA — DJ e Produtor de EDM.</p>
       </div>

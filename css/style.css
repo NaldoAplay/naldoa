@@ -1,67 +1,72 @@
-/* style.css - NaldoA Official (Versão Final: Glassmorphism + Mobile Otimizado) */
+/* style.css - NaldoA Official (Versão Final Completa v10) */
 
 :root {
-  --bg: #030313;
-  --accent1: #ffcc00; /* Dourado */
-  --accent2: #3be8ff; /* Azul Cyber */
-  --spotify: #1DB954; /* Verde Spotify */
-  --max-width: 1200px;
+  --bg: #030313;           /* Cor de fundo principal (quase preto) */
+  --accent1: #ffcc00;      /* Dourado (Cor da marca) */
+  --accent2: #3be8ff;      /* Azul Cyber (Cor secundária) */
+  --spotify: #1DB954;      /* Verde oficial Spotify */
+  --amazon: #00a8e1;       /* Azul oficial Amazon */
+  --max-width: 1200px;     /* Largura máxima do site no PC */
 }
 
-/* === 1. RESET & ESTRUTURA === */
+/* === 1. RESET & ESTRUTURA BÁSICA === */
+/* Remove margens padrão de todos os elementos para ter controle total */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: scroll; /* Garante rolagem suave */
 }
 
 body {
   min-height: 100vh;
-  font-family: 'Inter', system-ui, Arial, sans-serif;
-  color: #eef3ff;
+  font-family: 'Inter', system-ui, Arial, sans-serif; /* Fonte moderna */
+  color: #eef3ff; /* Texto quase branco */
   position: relative;
-  overflow-x: hidden;
+  overflow-x: hidden; /* Impede rolagem lateral indesejada */
   background-color: var(--bg);
 }
 
+/* Links padrão */
 a { color: inherit; text-decoration: none; transition: 0.2s; }
 
-/* === 2. FUNDO ESPECTRO (CANVAS) === */
+/* === 2. FUNDO ANIMADO (CANVAS) === */
 #bgCanvas {
-  position: fixed;
+  position: fixed; /* Fica preso na tela, não rola */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -10;
+  z-index: -10; /* Fica atrás de tudo */
   background: #030313;
 }
 
-/* Sombra para leitura (Overlay) */
+/* Camada escura por cima do fundo para facilitar leitura */
 .overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   z-index: -5;
-  pointer-events: none;
+  pointer-events: none; /* Deixa o clique passar através */
   background: radial-gradient(circle at center, transparent 10%, #000000 90%);
   opacity: 0.8;
 }
 
-/* === 3. HEADER & NAV === */
+/* === 3. CABEÇALHO (TOPO FIXO) === */
 .site-header {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: 72px;
-  z-index: 20;
+  z-index: 20; /* Fica acima do conteúdo */
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 22px;
+  /* Fundo vidro fosco */
   background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent);
   backdrop-filter: blur(4px);
 }
 
+/* Logo e Nome */
 .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
 .brand-logo {
   width: 48px; height: 48px; object-fit: cover;
@@ -69,7 +74,10 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 }
 .brand-title { font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--accent1); }
 
+/* Lado Direito do Menu */
 .header-right { display: flex; align-items: center; gap: 12px; }
+
+/* Links Sociais (Pequenos botões no topo) */
 .socials a {
   display: inline-block; padding: 6px 10px; border-radius: 8px;
   background: rgba(255,255,255,0.05); font-size: 13px; color: #fff;
@@ -81,6 +89,7 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 .radio-mini { width: 38px; height: 38px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
 .radio-mini img { width: 100%; height: 100%; object-fit: contain; }
 
+/* Botão Play da Rádio */
 .radio-btn {
   padding: 9px 16px; border-radius: 50px; border: 0;
   background: linear-gradient(90deg, var(--accent1), #ffaa00);
@@ -91,9 +100,10 @@ a { color: inherit; text-decoration: none; transition: 0.2s; }
 .radio-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 204, 0, 0.5); }
 .radio-btn.playing { background: #fff; color: #000; animation: pulseBtn 2s infinite; }
 
+/* Animação do botão pulsando quando toca */
 @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
 
-/* === 4. HERO SECTION === */
+/* === 4. SEÇÃO HERO (PRINCIPAL) === */
 main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max-width: var(--max-width); margin: 0 auto; }
 
 .hero { display: flex; align-items: center; gap: 28px; padding: 36px 18px; }
@@ -102,11 +112,10 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .hero-title { font-family: 'Orbitron', sans-serif; font-size: 42px; margin-bottom: 15px; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
 .lead { color: rgba(255,255,255,0.9); line-height: 1.6; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-/* === 5. BOTÕES DE STREAMING (VERSÃO CORRIGIDA: GRANDE NO PC / PEQUENO NO MOBILE) === */
-
+/* === 5. BOTÕES DE STREAMING (ESTILO GLASSMORPHISM) === */
 .buttons-wrapper {
   display: flex;
-  gap: 20px; /* Mais espaço entre eles no PC */
+  gap: 20px; /* Espaço entre botões no PC */
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 30px;
@@ -114,27 +123,26 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
   position: relative;
 }
 
-/* Estilo Base (PC - AGORA MAIORES) */
+/* Estilo Base dos Botões */
 .btn-gold, .btn-spotify, .btn-ytmusic, .btn-amazonMusic {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.4); /* Fundo transparente escuro */
+  backdrop-filter: blur(4px);      /* Efeito embaçado atrás */
   color: #fff;
-  /* AUMENTEI AQUI PARA FICAR GRANDE NO PC: */
-  padding: 16px 32px; 
+  padding: 16px 32px;              /* Tamanho grande no PC */
   border-radius: 50px;
   text-decoration: none;
   font-weight: 700;
-  font-size: 16px; /* Letra maior no PC */
+  font-size: 16px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  text-transform: uppercase; /* Letras maiúsculas para dar mais presença */
+  text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-/* Cores Específicas */
+/* Cores e Efeitos Hover */
 .btn-gold { border-color: #d4af37; color: #d4af37; }
 .btn-gold:hover { background: #d4af37; color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.8); transform: scale(1.05); }
 
@@ -144,30 +152,10 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
 .btn-spotify { border-color: #1DB954; color: #1DB954; }
 .btn-spotify:hover { background: #1DB954; color: #fff; box-shadow: 0 0 20px rgba(29, 185, 84, 0.8); transform: scale(1.05); }
 
-.btn-amazonMusic { border-color: #1b9fb1; color: #1b9fb1; }
-.btn-amazonMusic:hover { background: #1b9fb1; color: #fff; box-shadow: 0 0 20px rgba(29, 180, 185, 0.8); transform: scale(1.05); }
+.btn-amazonMusic { border-color: #00a8e1; color: #00a8e1; }
+.btn-amazonMusic:hover { background: #00a8e1; color: #fff; box-shadow: 0 0 20px rgba(0, 168, 225, 0.8); transform: scale(1.05); }
 
-/* --- AJUSTES PARA CELULAR (AGORA BEM PEQUENOS) --- */
-@media (max-width: 600px) {
-  .buttons-wrapper {
-    gap: 5px; /* Coladinhos um no outro */
-    flex-wrap: nowrap; /* Força ficar na mesma linha */
-    justify-content: center;
-    padding: 0 5px;
-    margin-top: 15px; /* Menos margem do topo */
-  }
-
-  .btn-gold, .btn-spotify, .btn-ytmusic, .btn-amazonMusic {
-    /* DIMINUI AQUI PARA FICAR PEQUENO NO CELULAR: */
-    padding: 6px 4px; /* Quase sem borda interna */
-    font-size: 10px; /* Letra bem pequena */
-    flex: 1; /* Divide o espaço igualmente entre os 3 */
-    justify-content: center;
-    border-radius: 8px; /* Borda menos redonda para economizar espaço */
-    gap: 4px; /* Ícone colado no texto */
-  }
-}
-/* === 6. VISUALIZER (BARRINHAS PEQUENAS) === */
+/* === 6. VISUALIZER (BARRINHAS NO TOPO) === */
 .music-waves {
   display: flex; align-items: flex-end; gap: 3px; height: 20px; margin-left: 10px;
   opacity: 0.3; transition: opacity 0.3s;
@@ -176,35 +164,48 @@ main { position: relative; z-index: 5; padding-top: 96px; min-height: 100vh; max
   width: 4px; height: 3px; background: linear-gradient(to top, var(--accent1), var(--accent2));
   border-radius: 2px; animation: none;
 }
-
+/* Só anima quando a classe is-playing estiver ativa */
 body.is-playing .music-waves { opacity: 1; }
 body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-out; }
 
 @keyframes equalizer { 0% { height: 3px; } 50% { height: 100%; } 100% { height: 3px; } }
-
+/* Atrasos para criar o efeito de onda */
 .music-waves span:nth-child(1) { animation-delay: 0.0s; }
 .music-waves span:nth-child(2) { animation-delay: 0.2s; }
 .music-waves span:nth-child(3) { animation-delay: 0.4s; }
 .music-waves span:nth-child(4) { animation-delay: 0.1s; }
 .music-waves span:nth-child(5) { animation-delay: 0.3s; }
-.music-waves span:nth-child(6) { animation-delay: 0.15s; }
-.music-waves span:nth-child(7) { animation-delay: 0.05s; }
 
 .top-waves { display: none; }
 @media (min-width: 768px) { .top-waves { display: flex; } }
 .bottom-waves { justify-content: center; height: 40px; margin-bottom: 15px; }
 .bottom-waves span { width: 6px; }
 
-/* === 7. GRID & SEÇÕES === */
+/* === 7. SEÇÕES E TEXTOS === */
 .section { padding: 20px; }
 .section h3 { font-family: 'Orbitron', sans-serif; font-size: 24px; margin-bottom: 20px; border-left: 4px solid var(--accent1); padding-left: 15px; text-shadow: 0 2px 4px #000; }
 
+/* Barra de Streaming (Título) */
+.streaming-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  text-align: center;
+}
+.streaming-bar p {
+  font-size: 12px; opacity: 0.7; letter-spacing: 1px; margin-bottom: 15px;
+  text-transform: uppercase; font-weight: bold;
+}
+
+/* === 8. GRADE DE VÍDEOS === */
 #videoGrid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
 .video-card { flex: 1 1 300px; max-width: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.3s; background: #000; }
 .video-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
 .video-card iframe { width: 100%; height: 225px; border: none; display: block; }
 
-/* === 8. MODAL === */
+/* === 9. MODAL (JANELA POPUP) === */
 .modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 50; opacity: 0; pointer-events: none; transition: 0.3s; }
 .modal.open { opacity: 1; pointer-events: auto; }
 .modal-box { width: 90%; max-width: 900px; background: #000; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 0 50px rgba(59, 232, 255, 0.2); }
@@ -212,79 +213,112 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
 .modal-close { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 0; color: #fff; padding: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; width: 40px; height: 40px; }
 .modal-close:hover { background: red; }
 
-/* === 9. FOOTER === */
+/* === 10. RODAPÉ === */
 .site-footer { text-align: center; padding: 40px 20px; background: #000; color: rgba(255,255,255,0.5); font-size: 14px; position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.1); }
 
-/* === BARRA DE STREAMING (NOVO) === */
-.streaming-bar {
+/* === 11. TELA DE BOAS-VINDAS (NOVO) === */
+
+/* Impede rolagem enquanto a tela de boas-vindas estiver ativa */
+body.welcome-active { overflow: hidden; }
+
+#welcome-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  /* Fundo com sua foto + película escura 70% */
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../images/main-background.jpg') no-repeat center center/cover;
+  background-color: #030313; /* Cor de segurança */
+  z-index: 9999; /* Fica acima de TUDO */
   display: flex;
-  flex-direction: column; /* Coloca um em cima do outro */
-  align-items: center;    /* Centraliza tudo */
   justify-content: center;
-  margin: 20px 0;         /* Espaço em cima e embaixo */
+  align-items: center;
+  transition: opacity 0.8s ease-out, visibility 0.8s;
+}
+
+/* Classe para esconder suavemente */
+#welcome-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Caixa do botão */
+.welcome-content {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
 }
 
-.streaming-bar p {
-  font-size: 12px;
-  opacity: 0.7;
-  letter-spacing: 1px;
-  margin-bottom: 15px; /* Espaço entre o texto e os botões */
-  text-transform: uppercase; /* Deixa em maiúsculo bonito */
+/* O Botão que Brilha */
+.glowing-btn {
+  padding: 20px 40px;
+  font-size: 22px;
+  font-family: 'Orbitron', sans-serif;
   font-weight: bold;
+  color: #fff;
+  background: transparent;
+  border: 2px solid var(--accent1);
+  border-radius: 50px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  /* Brilho Dourado Inicial */
+  box-shadow: 0 0 20px rgba(255, 204, 0, 0.4), inset 0 0 20px rgba(255, 204, 0, 0.2);
+  animation: pulseGlow 2s infinite ease-in-out;
 }
-/* === 10. RESPONSIVO MOBILE (FINAL: BOTÕES GORDINHOS) === */
+
+.glowing-btn:hover {
+  background: var(--accent1);
+  color: #000;
+  box-shadow: 0 0 40px rgba(255, 204, 0, 0.8), 0 0 80px rgba(59, 232, 255, 0.4);
+  transform: scale(1.05);
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 20px rgba(255, 204, 0, 0.4), inset 0 0 10px rgba(255, 204, 0, 0.2); }
+  50% { box-shadow: 0 0 50px rgba(255, 204, 0, 0.7), 0 0 30px rgba(59, 232, 255, 0.5), inset 0 0 20px rgba(255, 204, 0, 0.5); border-color: var(--accent2); color: var(--accent2); }
+  100% { box-shadow: 0 0 20px rgba(255, 204, 0, 0.4), inset 0 0 10px rgba(255, 204, 0, 0.2); }
+}
+
+/* === 12. RESPONSIVO MOBILE (VERSÃO FINAL: TUDO OTIMIZADO) === */
 @media (max-width: 768px) {
   
-  /* --- 1. CABEÇALHO --- */
+  /* --- AJUSTES DO HEADER --- */
   .site-header {
-    display: flex;
-    flex-wrap: wrap; 
-    align-items: center;
-    padding: 8px 12px;
-    height: auto;
-    gap: 0; 
+    display: flex; flex-wrap: wrap; align-items: center;
+    padding: 8px 12px; height: auto; gap: 0; 
   }
 
-  /* Logo NaldoA (Esquerda) */
   .brand { flex: 0 0 40%; order: 1; }
-  .brand-title { display: none; } 
+  .brand-title { display: none; } /* Esconde texto NaldoA */
 
-  /* Rádio + Foto (Direita) */
   .header-right { display: contents; }
   
+  /* Rádio + Foto (Direita) */
   .radio-area {
-    flex: 0 0 60%; 
-    order: 2; 
-    justify-content: flex-end; 
-    margin: 0;
-  }  
+    flex: 0 0 60%; order: 2; 
+    justify-content: flex-end; margin: 0;
+  }
   .radio-mini {
     display: block !important;
-    width: 28px;
-    height: 28px;
-    margin-right: 6px;
+    width: 28px; height: 28px; margin-right: 6px;
   }
   .music-waves { display: none; }
   
   .radio-btn {
-    padding: 6px 12px;
-    font-size: 11px;
-    height: 30px; 
-    display: flex; align-items: center;
+    padding: 6px 12px; font-size: 11px;
+    height: 30px; display: flex; align-items: center;
   }
 
-  /* --- 2. MENU SOCIAL COMPACTO --- */
+  /* --- MENU SOCIAL (ROLAGEM HORIZONTAL) --- */
   .socials {
-    order: 3; 
-    width: 100%; 
-    margin-top: 8px; 
-    display: flex;
-    overflow-x: auto; 
-    padding-bottom: 5px;
-    gap: 6px; 
-    -webkit-overflow-scrolling: touch; 
-    scrollbar-width: none;
+    order: 3; width: 100%; margin-top: 8px; 
+    display: flex; overflow-x: auto; padding-bottom: 5px; gap: 6px; 
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .socials::-webkit-scrollbar { display: none; } 
 
@@ -292,44 +326,44 @@ body.is-playing .music-waves span { animation: equalizer 0.8s infinite ease-in-o
     flex-shrink: 0; 
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.1);
-    padding: 6px 12px; 
-    border-radius: 50px; 
-    font-size: 11px; 
-    white-space: nowrap;
-    height: 28px; 
+    padding: 6px 12px; border-radius: 50px; 
+    font-size: 11px; white-space: nowrap; height: 28px; 
     display: flex; align-items: center;
   }
 
-  /* --- 3. CONTEÚDO --- */
-  .hero { 
-    padding-top: 15px; 
-    flex-direction: column;
-    text-align: center;
-  }
+  /* --- HERO E CONTEÚDO --- */
+  .hero { padding-top: 15px; flex-direction: column; text-align: center; }
   .hero-title { font-size: 26px; }
   
-  /* --- 4. BOTÕES DO MEIO (AGORA MAIORES) --- */
+  /* --- BOTÕES DE STREAMING (NO MOBILE: DIVIDEM ESPAÇO) --- */
   .buttons-wrapper {
-    gap: 6px; /* Um pouco de espaço entre eles */
-    flex-wrap: nowrap; 
-    margin-top: 15px;
-    padding: 0 2px;
+    gap: 6px; flex-wrap: nowrap; 
+    margin-top: 15px; padding: 0 2px;
   }
   
   .btn-gold, .btn-spotify, .btn-ytmusic, .btn-amazonMusic {
     flex: 1; /* Divide o espaço igualmente */
-    
-    /* AQUI ESTÁ A CORREÇÃO DO "CISCO": */
-    padding: 12px 0;   /* Mais altura (gordinho) */
-    font-size: 11px;   /* Letra legível */
-    height: auto;      /* Altura automática */
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    padding: 12px 0; /* Altura confortável */
+    font-size: 11px; height: auto;      
+    display: flex; justify-content: center; align-items: center;
     border-radius: 50px; 
     white-space: nowrap;
-    overflow: hidden; /* Corta o texto se não couber */
-    text-overflow: ellipsis; 
+    overflow: hidden; text-overflow: ellipsis; 
   }
-}
+
+  /* --- VÍDEOS (1 POR LINHA) --- */
+  #videoGrid { padding: 0; }
+  .video-card { flex: 1 1 100%; max-width: 100%; }
+  .video-card iframe { height: 225px; }
+
+  /* --- AJUSTE DA TELA DE BOAS VINDAS NO CELULAR --- */
+  .glowing-btn {
+      font-size: 16px; /* Letra menor */
+      padding: 15px 30px; /* Botão menor */
+  }
+  .welcome-content {
+      width: 90%; /* Ocupa quase a tela toda */
+      padding: 30px 20px;
+  }
+
+} /* <--- FIM DO ARQUIVO */
