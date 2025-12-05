@@ -3,11 +3,13 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     // ==========================================================
+// ==========================================================
     // 1. TELA DE BOAS-VINDAS E ÁUDIO INICIAL
     // ==========================================================
     const welcomeOverlay = document.getElementById('welcome-overlay');
     const enterBtn = document.getElementById('enterBtn');
     const welcomeAudio = document.getElementById('welcomeAudio');
+    const radioAudioEl = document.getElementById('radioAudio'); // Pegamos a rádio aqui também
     const body = document.body;
 
     // Se a tela de boas-vindas existir no HTML
@@ -16,26 +18,32 @@ document.addEventListener("DOMContentLoaded", () => {
         body.style.overflow = 'hidden';
 
         enterBtn.addEventListener('click', () => {
-            // Tenta tocar o áudio de boas-vindas
+            // A. Tenta tocar o áudio de boas-vindas
             if(welcomeAudio) {
-                welcomeAudio.volume = 0.8; // Volume agradável
+                welcomeAudio.volume = 0.8; 
                 welcomeAudio.play().catch(e => console.log("Áudio bloqueado:", e));
             }
 
-            // Esconde a tela preta suavemente
+            // B. TRUQUE DE MESTRE: Começa a carregar a rádio em segredo agora!
+            // Assim, quando o usuário clicar em "Play", ela já estará carregada.
+            if (radioAudioEl) {
+                radioAudioEl.src = "https://stream.zeno.fm/xx785t45mf9uv"; // Seu link ZenoFM
+                radioAudioEl.load(); // Força a conexão imediata
+            }
+
+            // C. Esconde a tela preta suavemente
             welcomeOverlay.style.opacity = '0';
             welcomeOverlay.style.visibility = 'hidden';
             
-            // Libera a rolagem do site
+            // D. Libera a rolagem do site
             body.style.overflow = 'auto';
 
-            // Remove o elemento do HTML depois de 1 segundo (pra não pesar)
+            // Remove o elemento do HTML depois de 1 segundo
             setTimeout(() => {
                 welcomeOverlay.remove();
             }, 1000);
         });
     }
-
 
     // ==========================================================
     // 2. CONFIGURAÇÃO DA RÁDIO
