@@ -38,20 +38,29 @@
 
 <body>
 
-  <div id="welcome-overlay">
-    <div class="welcome-content">
-      <button id="enterBtn" class="glowing-btn">
-        ✨ Bem-Vindo ao universo NaldoA!
-      </button>
+  <canvas id="bgCanvas"></canvas>
+  <div class="overlay"></div>
+
+ <div class="dj-radio-bar">
+
+  <div class="dj-left">
+    <img src="images/logo.jpg" class="dj-logo">
+    <div class="live-badge">
+      <span class="live-dot"></span> AO VIVO
     </div>
   </div>
 
-  <audio id="welcomeAudio" preload="auto">
-      <source src="SejaBemVindoAudio/sejabemvindo.wav" type="audio/mpeg">
-  </audio>
+  <!-- LETRAS PASSANDO CENTRAL -->
+  <div class="dj-marquee-container">
+    <div class="dj-marquee">
+      <span>🎧 RÁDIO NALDOA PLAY • EDM • TRANCE • ENERGIA 24H • DJ NaldoA Oficial • Seja Bem-Vindo!  essas músicas estão em todas as plataformas digitais!</span>
+    </div>
+  </div>
 
-  <canvas id="bgCanvas"></canvas>
-  <div class="overlay"></div>
+  <!-- PLAY ISOLADO -->
+  <button id="topPlayBtn" class="dj-play">▶</button>
+
+</div>
 
   <header class="site-header" role="banner">
     
@@ -72,7 +81,7 @@
         <a href="https://www.tiktok.com/@DjNaldoAoficial" target="_blank" rel="noopener">TikTok</a>
       </nav>
 
-      <div class="radio-area">
+      <div class="radio-area" style="display:none;">
         <div class="radio-mini"><img src="images/logo.jpg" alt="NaldoA Play"></div>
         <button id="radioBtn" class="radio-btn">▶ NaldoA Play</button>
         
@@ -83,6 +92,8 @@
        <audio id="radioAudio" preload="auto" crossorigin="anonymous"></audio>
       </div>
     </div>
+
+    
   </header>
 
   <main id="main">

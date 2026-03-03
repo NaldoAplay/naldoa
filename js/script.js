@@ -2,53 +2,11 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // ==========================================================
-// ==========================================================
-    // 1. TELA DE BOAS-VINDAS E ÁUDIO INICIAL
-    // ==========================================================
-    const welcomeOverlay = document.getElementById('welcome-overlay');
-    const enterBtn = document.getElementById('enterBtn');
-    const welcomeAudio = document.getElementById('welcomeAudio');
-    const radioAudioEl = document.getElementById('radioAudio'); // Pegamos a rádio aqui também
-    const body = document.body;
-
-    // Se a tela de boas-vindas existir no HTML
-    if (welcomeOverlay && enterBtn) {
-        // Bloqueia a rolagem (scroll) enquanto o usuário não entrar
-        body.style.overflow = 'hidden';
-
-        enterBtn.addEventListener('click', () => {
-            // A. Tenta tocar o áudio de boas-vindas
-            if(welcomeAudio) {
-                welcomeAudio.volume = 0.8; 
-                welcomeAudio.play().catch(e => console.log("Áudio bloqueado:", e));
-            }
-
-            // B. TRUQUE DE MESTRE: Começa a carregar a rádio em segredo agora!
-            // Assim, quando o usuário clicar em "Play", ela já estará carregada.
-            if (radioAudioEl) {
-                radioAudioEl.src = "https://stream.zeno.fm/xx785t45mf9uv"; // Seu link ZenoFM
-                radioAudioEl.load(); // Força a conexão imediata
-            }
-
-            // C. Esconde a tela preta suavemente
-            welcomeOverlay.style.opacity = '0';
-            welcomeOverlay.style.visibility = 'hidden';
-            
-            // D. Libera a rolagem do site
-            body.style.overflow = 'auto';
-
-            // Remove o elemento do HTML depois de 1 segundo
-            setTimeout(() => {
-                welcomeOverlay.remove();
-            }, 1000);
-        });
-    }
-
+ 
     // ==========================================================
     // 2. CONFIGURAÇÃO DA RÁDIO
     // ==========================================================
-    const RADIO_STREAM = "https://stream.zeno.fm/xx785t45mf9uv"; 
+     
 
 
     // ==========================================================
@@ -127,58 +85,119 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // ==========================================================
-    // 4. CONTROLE DO PLAYER DE RÁDIO
-    // ==========================================================
-    const radioBtn = document.getElementById('radioBtn');
-    const audioEl = document.getElementById('radioAudio');
+   // ==========================================================
+// 4. CONTROLE COMPLETO DO PLAYER DE RÁDIO (VERSÃO FINAL)
+// ==========================================================
 
-    // Carregamento Turbo (Preload)
-    if(audioEl){
-        audioEl.src = RADIO_STREAM;
-        audioEl.crossOrigin = "anonymous";
+const RADIO_STREAM = "https://stream.zeno.fm/xx785t45mf9uv";
+
+const audioEl = document.getElementById('radioAudio');
+const radioBtn = document.getElementById('radioBtn');     // botão antigo (se existir)
+const topPlayBtn = document.getElementById('topPlayBtn'); // botão novo topo
+const topVolume = document.getElementById('topVolume');   // volume topo
+
+// Carrega o stream
+if (audioEl) {
+    audioEl.src = RADIO_STREAM;
+    audioEl.crossOrigin = "anonymous";
+    audioEl.volume = 1;
+}
+
+// ================= PLAY / PAUSE =================
+
+function playRadio() {
+    if (!audioEl) return;
+
+    const playPromise = audioEl.play();
+
+    if (playPromise !== undefined) {
+        playPromise
+            .then(() => updateInterface(true))
+            .catch(() => {
+                console.log("Reconectando stream...");
+                audioEl.src = RADIO_STREAM;
+                audioEl.load();
+                audioEl.play();
+                updateInterface(true);
+            });
+    }
+}
+
+function pauseRadio() {
+    if (!audioEl) return;
+    audioEl.pause();
+    updateInterface(false);
+}
+
+// Botão antigo
+if (radioBtn) {
+    radioBtn.addEventListener("click", () => {
+        audioEl.paused ? playRadio() : pauseRadio();
+    });
+}
+
+// Botão novo topo
+if (topPlayBtn) {
+    topPlayBtn.addEventListener("click", () => {
+        audioEl.paused ? playRadio() : pauseRadio();
+    });
+}
+
+// ================= VOLUME =================
+
+if (topVolume && audioEl) {
+    audioEl.volume = topVolume.value;
+
+    topVolume.addEventListener("input", () => {
+        audioEl.volume = topVolume.value;
+    });
+}
+
+// ================= ATUALIZA INTERFACE =================
+
+function updateInterface(isPlaying) {
+
+    if (radioBtn) {
+        radioBtn.textContent = isPlaying
+            ? "⏸ Pausar Rádio"
+            : "▶ NaldoA Play";
+
+        radioBtn.classList.toggle("playing", isPlaying);
     }
 
-    if(radioBtn && audioEl){
-        radioBtn.addEventListener('click', () => {
-            if(audioEl.paused){
-                // --- DAR PLAY ---
-                const playPromise = audioEl.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        updateInterface(true); // Sucesso
-                    })
-                    .catch(error => {
-                        console.log("Erro no Play, reconectando...");
-                        // Se falhar, recarrega o link e tenta de novo
-                        audioEl.src = RADIO_STREAM;
-                        audioEl.load();
-                        audioEl.play();
-                        updateInterface(true);
-                    });
-                }
-            } else {
-                // --- PAUSAR ---
-                audioEl.pause();
-                updateInterface(false);
-            }
-        });
+    if (topPlayBtn) {
+        topPlayBtn.textContent = isPlaying ? "⏸" : "▶";
     }
 
-    // Atualiza o botão e avisa o CSS que está tocando
-    function updateInterface(isPlaying) {
-        if(isPlaying) {
-            radioBtn.textContent = '⏸ Pausar Rádio';
-            radioBtn.classList.add('playing');
-            document.body.classList.add('is-playing'); // Liga o Espectro
-        } else {
-            radioBtn.textContent = '▶ NaldoA Play';
-            radioBtn.classList.remove('playing');
-            document.body.classList.remove('is-playing'); // Desliga o Espectro
+    document.body.classList.toggle("is-playing", isPlaying);
+}
+
+// ================= MEDIA SESSION (TELA BLOQUEIO) =================
+
+if (audioEl) {
+
+    audioEl.addEventListener('play', () => {
+
+        if ('mediaSession' in navigator) {
+
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: 'NaldoA Play',
+                artist: 'NaldoA',
+                album: 'Rádio Ao Vivo',
+                artwork: [
+                    {
+                        src: 'https://naldoaplay.github.io/naldoa/images/logo.jpg',
+                        sizes: '512x512',
+                        type: 'image/jpeg'
+                    }
+                ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', playRadio);
+            navigator.mediaSession.setActionHandler('pause', pauseRadio);
         }
-    }
-
-
+    });
+}
     // ==========================================================
     // 5. TELA DE BLOQUEIO DO CELULAR (FOTO DA RÁDIO)
     // ==========================================================
@@ -244,3 +263,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector('.brand')?.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
 
 }); // Fim do DOMContentLoaded
+
