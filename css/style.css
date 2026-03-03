@@ -488,11 +488,9 @@ main{ padding-top:160px; }
 /* Glow quando tocando */
 
 body.is-playing .dj-marquee span{
-  color:var(--accent1);
   text-shadow:
-    0 0 5px var(--accent1),
-    0 0 15px var(--accent1),
-    0 0 30px var(--accent1);
+    0 0 6px rgba(255,204,0,0.6),
+    0 0 12px rgba(255,204,0,0.3);
 }
 
 body.is-playing .dj-radio-bar{
