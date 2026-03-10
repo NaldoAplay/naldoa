@@ -51,26 +51,44 @@
   <canvas id="bgCanvas"></canvas>
   <div class="overlay"></div>
 
- <div class="dj-radio-bar">
+<div class="radio-bar">
 
-  <div class="dj-left">
-    <img src="images/logo.jpg" class="dj-logo">
-    <div class="live-badge">
-      <span class="live-dot"></span> AO VIVO
+  <div class="radio-left">
+
+    <img src="images/logo.jpg" class="radio-logo">
+
+    <div class="radio-info">
+      <div class="radio-name">📻 NaldoA Play</div>
+      <div id="radioSong">Carregando música...</div>
     </div>
+
   </div>
 
-  <!-- LETRAS PASSANDO CENTRAL -->
+  <!-- LETRAS PASSANDO -->
   <div class="dj-marquee-container">
     <div class="dj-marquee">
-      <span>🎧 RÁDIO NALDOA PLAY • EDM • TRANCE • ENERGIA 24H • DJ NaldoA Oficial • Seja Bem-Vindo!  essas músicas estão em todas as plataformas digitais!</span>
+      <span>🎧 RÁDIO NALDOA PLAY • EDM • TRANCE • ENERGIA 24H • DJ NaldoA Oficial • Seja Bem-Vindo!</span>
     </div>
   </div>
 
-  <!-- PLAY ISOLADO -->
-  <button id="topPlayBtn" class="dj-play">▶</button>
+  <div class="radio-right">
+
+    <button id="playBtn">▶</button>
+
+    <input id="volume"
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      value="1">
+
+  </div>
+
+  <audio id="radioAudio"></audio>
 
 </div>
+
+
 
   <header class="site-header" role="banner">
     
@@ -91,17 +109,7 @@
         <a href="https://www.tiktok.com/@DjNaldoAoficial" target="_blank" rel="noopener">TikTok</a>
       </nav>
 
-      <div class="radio-area" style="display:none;">
-        <div class="radio-mini"><img src="images/logo.jpg" alt="NaldoA Play"></div>
-        <button id="radioBtn" class="radio-btn">▶ NaldoA Play</button>
-        
-        <div class="music-waves top-waves">
-            <span></span><span></span><span></span><span></span><span></span>
-        </div>
-        
-       <audio id="radioAudio" preload="auto" crossorigin="anonymous"></audio>
-      </div>
-    </div>
+     
 
     
   </header>
@@ -186,6 +194,8 @@
       <p>@NaldoAOficial</p>
     </section>
   </main>
+
+  
 
   <div id="videoModal" class="modal" aria-hidden="true">
     <div class="modal-box">

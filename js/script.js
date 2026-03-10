@@ -264,3 +264,66 @@ if (audioEl) {
 
 }); // Fim do DOMContentLoaded
 
+const stream = "https://stream.zeno.fm/xx785t45mf9uv";
+
+const audio = document.getElementById("radioAudio");
+const playBtn = document.getElementById("playBtn");
+const volume = document.getElementById("volume");
+
+const radioSong = document.getElementById("radioSong");
+
+audio.src = stream;
+
+// PLAY / PAUSE
+
+playBtn.onclick = () => {
+
+if(audio.paused){
+
+audio.play();
+playBtn.innerHTML="⏸";
+
+document.body.classList.add("is-playing");
+
+}else{
+
+audio.pause();
+playBtn.innerHTML="▶";
+
+document.body.classList.remove("is-playing");
+
+}
+
+};
+
+// VOLUME
+
+volume.oninput = () => {
+  audio.volume = volume.value;
+};
+
+// METADADOS
+
+async function atualizarRadio(){
+
+  try{
+
+    const r = await fetch("https://zenoplay.zenomedia.com/api/zeno/xx785t45mf9uv");
+    const data = await r.json();
+
+    const song = data?.currentSong;
+
+    if(song){
+      radioSong.innerText = "🎵 " + song;
+    }else{
+      radioSong.innerText = "Rádio NaldoA Play";
+    }
+
+  }catch(e){
+    radioSong.innerText = "Rádio NaldoA Play";
+  }
+
+}
+
+setInterval(atualizarRadio,8000);
+atualizarRadio();
