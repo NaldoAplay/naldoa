@@ -327,3 +327,83 @@ async function atualizarRadio(){
 
 setInterval(atualizarRadio,8000);
 atualizarRadio();
+
+const canvas = document.getElementById("introParticles")
+const ctx = canvas.getContext("2d")
+
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+let particles=[]
+
+for(let i=0;i<100;i++){
+
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+size:Math.random()*2,
+speed:Math.random()*0.5
+})
+
+}
+
+function animateIntro(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+particles.forEach(p=>{
+
+p.y+=p.speed
+
+if(p.y>canvas.height){
+p.y=0
+p.x=Math.random()*canvas.width
+}
+
+ctx.fillStyle="gold"
+ctx.beginPath()
+ctx.arc(p.x,p.y,p.size,0,Math.PI*2)
+ctx.fill()
+
+})
+
+requestAnimationFrame(animateIntro)
+
+}
+
+animateIntro()
+
+setTimeout(()=>{
+
+document.getElementById("djIntro").style.opacity="0"
+
+setTimeout(()=>{
+document.getElementById("djIntro").remove()
+},800)
+
+},3500)
+const intro = document.getElementById("djIntro")
+
+// verifica se já mostrou a intro
+if(sessionStorage.getItem("introShown")){
+
+// se já mostrou, remove imediatamente
+intro.remove()
+
+}else{
+
+// marca que já mostrou
+sessionStorage.setItem("introShown","true")
+
+// tempo da intro (3 segundos por exemplo)
+setTimeout(()=>{
+
+intro.style.opacity="0"
+
+setTimeout(()=>{
+intro.remove()
+},800)
+
+},3000)
+
+}
