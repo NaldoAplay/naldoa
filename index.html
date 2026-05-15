@@ -1,931 +1,305 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1,
-maximum-scale=1,
-user-scalable=no,
-viewport-fit=cover" />
-
-<title>NaldoA Play | Official App</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600;900&display=swap" rel="stylesheet">
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-<style>
-
-:root{
-    --primary:#d4af37;
-    --bg-glass:rgba(0,0,0,.82);
-    --text-color:#fff;
-    --accent-glow:rgba(212,175,55,.45);
-}
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-}
-
-body{
-    background:#000;
-    color:var(--text-color);
-    font-family:'Montserrat',sans-serif;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-    display:flex;
-}
-
-/* BACKGROUND */
-
-#master-bg{
-    position:fixed;
-    inset:0;
-    z-index:-2;
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    background-image:url('https://images.unsplash.com/photo-1464802686167-b939a67e06a1');
-    transition:1s ease;
-    filter:brightness(.35);
-}
-
-/* SIDEBAR */
-
-aside{
-    width:290px;
-    background:var(--bg-glass);
-    backdrop-filter:blur(24px);
-    border-right:1px solid rgba(255,255,255,.08);
-    padding:35px 20px;
-    display:flex;
-    flex-direction:column;
-    z-index:99;
-}
-
-.logoSide{
-    text-align:center;
-    margin-bottom:35px;
-}
-
-.logoSide h1{
-    font-family:'Orbitron';
-    color:var(--primary);
-    letter-spacing:6px;
-    font-size:2rem;
-}
-
-.logoSide p{
-    opacity:.7;
-    letter-spacing:4px;
-    font-size:.6rem;
-}
-
-.nav-menu{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    flex:1;
-}
-
-.nav-item{
-    border:none;
-    background:none;
-    color:inherit;
-    padding:15px;
-    border-radius:16px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    cursor:pointer;
-    transition:.25s;
-    font-family:'Orbitron';
-    font-size:.7rem;
-}
-
-.nav-item:hover{
-    background:rgba(255,255,255,.08);
-}
-
-.nav-item.active{
-    background:var(--primary);
-    color:#000;
-    font-weight:900;
-    box-shadow:0 0 25px var(--accent-glow);
-}
-
-/* MAIN */
-
-main{
-    flex:1;
-    overflow-y:auto;
-    height:100vh;
-}
-
-.view{
-    display:none;
-    padding:35px;
-    animation:fade .4s ease;
-}
-
-.view.active{
-    display:flex;
-    flex-direction:column;
-}
-
-@keyframes fade{
-    from{
-        opacity:0;
-        transform:translateY(10px);
-    }
-    to{
-        opacity:1;
-        transform:none;
-    }
-}
-
-/* HOME */
-
-.home-grid{
-    display:grid;
-    grid-template-columns:340px 1fr;
-    gap:35px;
-    align-items:start;
-    max-width:1300px;
-    margin:auto;
-}
-
-.hero-img{
-    width:100%;
-    border-radius:28px;
-    border:4px solid var(--primary);
-    box-shadow:0 0 40px var(--accent-glow);
-}
-
-.hero-info h1{
-    font-family:'Orbitron';
-    font-size:4rem;
-    line-height:1;
-    color:var(--primary);
-    margin-bottom:15px;
-}
-
-.hero-info p{
-    line-height:1.7;
-}
-
-.extra-desc{
-    margin-top:20px;
-    border-left:3px solid var(--primary);
-    padding-left:15px;
-    opacity:.85;
-}
-
-.links-wall{
-    margin-top:28px;
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
-    gap:12px;
-}
-
-.link-card{
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:18px;
-    padding:18px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    text-decoration:none;
-    color:inherit;
-    transition:.25s;
-}
-
-.link-card:hover{
-    background:var(--primary);
-    color:#000;
-    transform:translateY(-5px);
-}
-
-.link-card span{
-    font-family:'Orbitron';
-    font-size:.58rem;
-    font-weight:700;
-}
-
-/* RADIO */
-
-.radio-center{
-    max-width:700px;
-    margin:auto;
-    text-align:center;
-}
-
-.radio-container{
-    position:relative;
-    width:280px;
-    height:280px;
-    margin:0 auto 30px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.spectrum-ring{
-    position:absolute;
-    inset:0;
-    border-radius:50%;
-    border:4px solid var(--primary);
-    box-shadow:0 0 40px var(--accent-glow);
-    animation:pulse 2s infinite;
-    animation-play-state:paused;
-}
-
-@keyframes pulse{
-    0%{
-        transform:scale(.92);
-        opacity:.9;
-    }
-
-    50%{
-        transform:scale(1.1);
-        opacity:.3;
-        border-width:10px;
-    }
-
-    100%{
-        transform:scale(.92);
-        opacity:.9;
-    }
-}
-
-.radio-logo-main{
-    width:220px;
-    height:220px;
-    object-fit:cover;
-    border-radius:50%;
-    border:4px solid #fff;
-    z-index:2;
-}
-
-.play-btn{
-    width:90px;
-    height:90px;
-    border-radius:50%;
-    border:none;
-    background:var(--primary);
-    color:#000;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:25px auto;
-    box-shadow:0 0 40px var(--accent-glow);
-    transition:.25s;
-}
-
-.play-btn:hover{
-    transform:scale(1.08);
-}
-
-.radio-status{
-    opacity:.65;
-    letter-spacing:5px;
-    font-family:'Orbitron';
-    font-size:.7rem;
-}
-
-.radio-song{
-    margin-top:12px;
-    font-size:.9rem;
-    opacity:.8;
-}
-
-/* VIDEOS */
-
-.video-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-    gap:25px;
-}
-
-.video-box{
-    aspect-ratio:16/9;
-    overflow:hidden;
-    border-radius:24px;
-    border:3px solid rgba(255,255,255,.08);
-    transition:.3s;
-    background:#000;
-}
-
-.video-box:hover{
-    border-color:var(--primary);
-    transform:scale(1.02);
-    box-shadow:0 0 35px var(--accent-glow);
-}
-
-.video-box iframe{
-    width:100%;
-    height:100%;
-    border:none;
-}
-
-/* THEMES */
-
-.catalog-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-    gap:15px;
-}
-
-.theme-opt{
-    background:rgba(255,255,255,.05);
-    padding:12px;
-    border-radius:18px;
-    cursor:pointer;
-    text-align:center;
-    transition:.25s;
-}
-
-.theme-opt:hover{
-    transform:translateY(-5px);
-    border-color:var(--primary);
-}
-
-.theme-opt .box{
-    height:70px;
-    border-radius:12px;
-    background-size:cover;
-    background-position:center;
-    margin-bottom:10px;
-}
-
-.palette{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    margin-top:25px;
-}
-
-.color-dot{
-    width:46px;
-    height:46px;
-    border-radius:50%;
-    border:3px solid #fff;
-    cursor:pointer;
-}
-
-/* FOOTER */
-
-.footer-nav{
-    margin:60px 0 20px;
-    text-align:center;
-    opacity:.5;
-    font-family:'Orbitron';
-    letter-spacing:4px;
-    font-size:.7rem;
-}
-
-/* MOBILE */
-
-@media(max-width:900px){
-
-body{
-    flex-direction:column;
-}
-
-aside{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    width:100%;
-    height:auto;
-    padding:10px;
-    flex-direction:row;
-    border-right:none;
-    border-top:1px solid rgba(255,255,255,.08);
-}
-
-.logoSide{
-    display:none;
-}
-
-.nav-menu{
-    flex-direction:row;
-    justify-content:space-around;
-    width:100%;
-}
-
-.nav-item{
-    flex-direction:column;
-    font-size:.5rem;
-    gap:5px;
-    padding:10px;
-}
-
-main{
-    height:calc(100vh - 75px);
-    padding-bottom:80px;
-}
-
-.home-grid{
-    grid-template-columns:1fr;
-    text-align:center;
-}
-
-.hero-img{
-    width:180px;
-    margin:auto;
-}
-
-.hero-info h1{
-    font-size:2.4rem;
-}
-
-.video-grid{
-    grid-template-columns:1fr;
-}
-
-}
-
-</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>NaldoA Play</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="manifest" href="./manifest.json">
+
+<meta name="theme-color" content="#030313">
+
+<link rel="apple-touch-icon" href="./images/icon.png">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<meta name="apple-mobile-web-app-title" content="NaldoA Play">
+
+    <style>
+        :root {
+            --primary: #d4af37;
+            --bg-glass: rgba(0, 0, 0, 0.85);
+            --text-color: #ffffff;
+            --accent-glow: rgba(212, 175, 55, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: #000; color: var(--text-color); 
+            font-family: 'Montserrat', sans-serif; 
+            height: 100vh; width: 100vw; overflow: hidden; display: flex;
+        }
+
+        #master-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+            background-size: cover; background-position: center; filter: brightness(0.4);
+            transition: 1s ease; background-image: url('https://images.unsplash.com/photo-1464802686167-b939a67e06a1');
+        }
+
+        /* SIDEBAR */
+        aside {
+            width: 280px; background: var(--bg-glass); backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; padding: 40px 20px; z-index: 1000;
+        }
+
+        .nav-menu { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .nav-item {
+            background: none; border: 1px solid transparent; color: inherit;
+            padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px;
+            font-family: 'Orbitron'; font-size: 0.7rem; cursor: pointer; transition: 0.3s;
+            text-decoration: none;
+        }
+        .nav-item.active { background: var(--primary); color: #000 !important; font-weight: 900; box-shadow: 0 10px 20px var(--accent-glow); }
+
+        /* AREA DE CONTEÚDO */
+        main { flex: 1; height: 100vh; position: relative; overflow-y: auto; scroll-behavior: smooth; }
+        .view { display: none; padding: 30px; animation: fadeIn 0.5s ease; width: 100%; }
+        .view.active { display: flex; flex-direction: column; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+        /* HOME HUB COMPLETO */
+        .home-grid { display: grid; grid-template-columns: 350px 1fr; gap: 30px; align-items: start; max-width: 1200px; margin: 0 auto; }
+        .hero-img { width: 100%; border-radius: 30px; border: 4px solid var(--primary); box-shadow: 0 0 30px var(--accent-glow); }
+        .hero-info h1 { font-family: 'Orbitron'; font-size: 3.5rem; color: var(--primary); line-height: 1; margin-bottom: 15px; }
+        
+        .extra-desc { margin-top: 20px; line-height: 1.6; font-size: 0.9rem; color: rgba(255,255,255,0.7); border-left: 2px solid var(--primary); padding-left: 15px; }
+
+        .links-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 25px; }
+        .link-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; text-align: center; text-decoration: none; color: inherit; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .link-card:hover { background: var(--primary); color: #000; transform: translateY(-5px); }
+        .link-card span { font-family: 'Orbitron'; font-size: 0.55rem; font-weight: 700; }
+
+        /* PLAYER COM ESPECTRO */
+        .radio-container { position: relative; width: 280px; height: 280px; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; }
+        .spectrum-ring {
+            position: absolute; width: 100%; height: 100%;
+            border: 4px solid var(--primary); border-radius: 50%;
+            animation: pulse-ring 2s infinite cubic-bezier(0.455, 0.03, 0.515, 0.955);
+            box-shadow: 0 0 30px var(--accent-glow);
+            animation-play-state: paused;
+        }
+        @keyframes pulse-ring { 0% { transform: scale(0.9); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 0.4; border-width: 10px; } 100% { transform: scale(0.9); opacity: 0.8; } }
+        .radio-logo-main { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; z-index: 2; border: 4px solid #fff; }
+        
+        .play-btn-vivo {
+            width: 90px; height: 90px; border-radius: 50%; background: var(--primary); border: none; 
+            margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 40px var(--accent-glow); transition: 0.3s;
+        }
+
+        /* VÍDEOS BORDAS LUXO */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; width: 100%; }
+        .video-box { 
+            background: #000; border-radius: 25px; overflow: hidden; 
+            border: 3px solid rgba(255,255,255,0.1); aspect-ratio: 16/9; 
+            transition: 0.4s; position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .video-box:hover { border-color: var(--primary); transform: scale(1.03); box-shadow: 0 15px 40px var(--accent-glow); }
+        .video-box iframe { width: 100%; height: 100%; border: none; }
+
+        /* MEGA CATÁLOGO DE TEMAS */
+        .catalog-section { margin-top: 20px; }
+        .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .theme-opt { cursor: pointer; text-align: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; border: 1px solid transparent; transition: 0.2s; }
+        .theme-opt:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .theme-opt .box { width: 100%; height: 60px; border-radius: 10px; margin-bottom: 8px; background-size: cover; background-position: center; }
+
+        /* PALETA DE CORES */
+        .palette { display: flex; flex-wrap: wrap; gap: 12px; }
+        .color-dot { width: 45px; height: 45px; border-radius: 50%; border: 3px solid #fff; cursor: pointer; transition: 0.3s; }
+        .color-dot:hover { transform: scale(1.2); }
+
+        .footer-nav { margin: 50px 0 20px; text-align: center; opacity: 0.5; font-size: 0.7rem; letter-spacing: 4px; font-family: 'Orbitron'; color: var(--primary); }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; position: fixed; bottom: 0; top: auto; flex-direction: row; padding: 10px; border-top: 1px solid var(--primary); border-right: none; }
+            .nav-menu { flex-direction: row; justify-content: space-around; width: 100%; }
+            .nav-item { flex-direction: column; font-size: 0.5rem; padding: 8px; border: none; gap: 5px; }
+            .hide-mobile { display: none; }
+            main { height: calc(100vh - 70px); }
+            .home-grid { grid-template-columns: 1fr; text-align: center; }
+            .hero-img { width: 150px; margin: 0 auto; }
+            .hero-info h1 { font-size: 2.2rem; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="master-bg"></div>
-
-<!-- SIDEBAR -->
-
-<aside>
-
-<div class="logoSide">
-<h1>NALDOA</h1>
-<p>NALDOA PLAY</p>
-</div>
-
-<nav class="nav-menu">
-
-<button class="nav-item active" onclick="tab('home',this)">
-<i data-lucide="user"></i>
-HOME
-</button>
-
-<button class="nav-item" onclick="tab('radio',this)">
-<i data-lucide="radio"></i>
-RÁDIO
-</button>
-
-<button class="nav-item" onclick="tab('videos',this)">
-<i data-lucide="play-circle"></i>
-VÍDEOS
-</button>
-
-<button class="nav-item" onclick="tab('config',this)">
-<i data-lucide="palette"></i>
-TEMAS
-</button>
-
-</nav>
-
-</aside>
-
-<!-- MAIN -->
-
-<main>
-
-<!-- HOME -->
-
-<section id="home" class="view active">
-
-<div class="home-grid">
-
-<img src="images/logo.jpg" class="hero-img">
-
-<div class="hero-info">
-
-<h1>NALDOA.</h1>
-
-<p style="color:var(--primary);font-weight:700;margin-bottom:15px;">
-DJ, Produtor de EDM & Trance
-</p>
-
-<div class="extra-desc">
-Explore o ecossistema oficial NaldoA Play.
-Mergulhe em uma experiência visual e sonora premium com músicas,
-sets exclusivos, rádio online e conteúdos oficiais.
-</div>
-
-<div class="links-wall">
-
-<a href="https://open.spotify.com/artist/05anJA6CE7Afkn0hYyVMRV"
-target="_blank"
-class="link-card">
-<i data-lucide="music"></i>
-<span>SPOTIFY</span>
-</a>
-
-<a href="https://youtube.com/@djnaldoaoficial"
-target="_blank"
-class="link-card">
-<i data-lucide="youtube"></i>
-<span>YOUTUBE</span>
-</a>
-
-<a href="https://music.apple.com/br/artist/naldoa/1782398892"
-target="_blank"
-class="link-card">
-<i data-lucide="apple"></i>
-<span>APPLE</span>
-</a>
-
-<a href="https://www.soundon.global/bio/naldoa"
-target="_blank"
-class="link-card">
-<i data-lucide="share-2"></i>
-<span>SOUNDON</span>
-</a>
-
-<a href="https://music.amazon.com.br/artists/B0DP59T244/naldoa"
-target="_blank"
-class="link-card">
-<i data-lucide="headphones"></i>
-<span>AMAZON</span>
-</a>
-
-<a href="https://deezer.page.link/x7uW8uBfUuX"
-target="_blank"
-class="link-card">
-<i data-lucide="mic-2"></i>
-<span>DEEZER</span>
-</a>
-
-<a href="https://instagram.com/naldoaoficial"
-target="_blank"
-class="link-card">
-<i data-lucide="instagram"></i>
-<span>INSTAGRAM</span>
-</a>
-
-<a href="https://github.com/naldoaplay"
-target="_blank"
-class="link-card">
-<i data-lucide="github"></i>
-<span>GITHUB</span>
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="footer-nav">
-NALDOA PLAY © 2026
-</div>
-
-</section>
-
-<!-- RADIO -->
-
-<section id="radio" class="view">
-
-<div class="radio-center">
-
-<div class="radio-container">
-
-<div class="spectrum-ring" id="ring"></div>
-
-<img src="images/logo1.jpg" class="radio-logo-main">
-
-</div>
-
-<h2 style="font-family:'Orbitron';font-size:2.2rem;color:var(--primary);">
-NALDOA PLAY
-</h2>
-
-<div class="radio-status">
-SINTONIZADO AO VIVO
-</div>
-
-<div class="radio-song" id="radioSong">
-🎧 Rádio Online EDM / Trance
-</div>
-
-<button class="play-btn" id="playBtn">
-
-<i
-data-lucide="play"
-id="playIcon"
-style="width:42px;height:42px;">
-</i>
-
-</button>
-
-<input
-id="volume"
-type="range"
-min="0"
-max="1"
-step="0.01"
-value="1"
-style="width:100%;max-width:350px;accent-color:var(--primary);">
-
-</div>
-
-<div class="footer-nav">
-RÁDIO OFICIAL NALDOA PLAY
-</div>
-
-</section>
-
-<!-- VIDEOS -->
-
-<section id="videos" class="view">
-
-<h2 style="font-family:'Orbitron';
-margin-bottom:30px;
-color:var(--primary);">
-DISCOGRAFIA VISUAL
-</h2>
-
-<div class="video-grid">
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/YwQkLOX8m0E" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/sQeY8CwXQ9w" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/3RpVyPb96sU" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/zKaXDl5Texk" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/mcx2w71PANE" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/aZHefqVqXpU" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/AnYGQcgD1nY" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/cSvC3vtNCkQ" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/dGdda27vfRM" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/dwYoOnT_7Pc" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/AHsb5xThjyk" allowfullscreen></iframe></div>
-
-<div class="video-box"><iframe src="https://www.youtube.com/embed/-wFl2OcdDnk" allowfullscreen></iframe></div>
-
-</div>
-
-</section>
-
-<!-- THEMES -->
-
-<section id="config" class="view">
-
-<h2 style="font-family:'Orbitron';
-color:var(--primary);
-margin-bottom:30px;">
-SUPER TEMAS
-</h2>
-
-<div class="catalog-grid">
-
-<div class="theme-opt"
-onclick="setT('https://images.unsplash.com/photo-1464802686167-b939a67e06a1','dark')">
-<div class="box"
-style="background-image:url('https://images.unsplash.com/photo-1464802686167-b939a67e06a1')"></div>
-UNIVERSO
-</div>
-
-<div class="theme-opt"
-onclick="setT('https://images.unsplash.com/photo-1441974231531-c6227db76b6e','light')">
-<div class="box"
-style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e')"></div>
-FLORESTA
-</div>
-
-<div class="theme-opt"
-onclick="setT('https://images.unsplash.com/photo-1514525253361-b83f859b73c0','dark')">
-<div class="box"
-style="background-image:url('https://images.unsplash.com/photo-1514525253361-b83f859b73c0')"></div>
-CLUB
-</div>
-
-<div class="theme-opt"
-onclick="setT('https://images.unsplash.com/photo-1550684848-fac1c5b4e853','dark')">
-<div class="box"
-style="background-image:url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853')"></div>
-CYBER
-</div>
-
-<div class="theme-opt"
-onclick="setT('linear-gradient(45deg,#00f2fe,#4facfe)','light',true)">
-<div class="box"
-style="background:linear-gradient(45deg,#00f2fe,#4facfe)"></div>
-CYAN
-</div>
-
-<div class="theme-opt"
-onclick="setT('linear-gradient(45deg,#ee0979,#ff6a00)','dark',true)">
-<div class="box"
-style="background:linear-gradient(45deg,#ee0979,#ff6a00)"></div>
-FIRE
-</div>
-
-<div class="theme-opt"
-onclick="setT('linear-gradient(45deg,#8e2de2,#4a00e0)','dark',true)">
-<div class="box"
-style="background:linear-gradient(45deg,#8e2de2,#4a00e0)"></div>
-PURPLE
-</div>
-
-<div class="theme-opt"
-onclick="setT('linear-gradient(45deg,#11998e,#38ef7d)','light',true)">
-<div class="box"
-style="background:linear-gradient(45deg,#11998e,#38ef7d)"></div>
-LIME
-</div>
-
-</div>
-
-<div class="palette">
-
-<button class="color-dot"
-style="background:#d4af37"
-onclick="setC('#d4af37')"></button>
-
-<button class="color-dot"
-style="background:#00f2fe"
-onclick="setC('#00f2fe')"></button>
-
-<button class="color-dot"
-style="background:#ff0055"
-onclick="setC('#ff0055')"></button>
-
-<button class="color-dot"
-style="background:#00ff00"
-onclick="setC('#00ff00')"></button>
-
-<button class="color-dot"
-style="background:#9d00ff"
-onclick="setC('#9d00ff')"></button>
-
-<button class="color-dot"
-style="background:#ff6a00"
-onclick="setC('#ff6a00')"></button>
-
-</div>
-
-</section>
-
-</main>
-
-<!-- AUDIO -->
-
-<audio
-id="radioAudio"
-playsinline
-webkit-playsinline
-preload="none">
-</audio>
-
-<script>
-
-lucide.createIcons();
-
-/* TABS */
-
-function tab(id,btn){
-
-document.querySelectorAll('.view')
-.forEach(v=>v.classList.remove('active'));
-
-document.querySelectorAll('.nav-item')
-.forEach(b=>b.classList.remove('active'));
-
-document.getElementById(id)
-.classList.add('active');
-
-btn.classList.add('active');
-
+    <div id="master-bg"></div>
+
+    <aside>
+        <div class="hide-mobile" style="text-align:center; margin-bottom:40px;">
+            <h2 style="font-family:'Orbitron'; color:var(--primary); letter-spacing:5px;">NALDOA</h2>
+            <p style="font-size:0.5rem; opacity:0.8; letter-spacing: 2px;">NALDOA PLAY</p>
+        </div>
+        <nav class="nav-menu">
+            <button class="nav-item active" onclick="tab('home', this)"><i data-lucide="user"></i> HOME</button>
+            <button class="nav-item" onclick="tab('radio', this)"><i data-lucide="radio"></i> RÁDIO</button>
+            <button class="nav-item" onclick="tab('videos', this)"><i data-lucide="play-circle"></i> VÍDEOS</button>
+            <button class="nav-item" onclick="tab('config', this)"><i data-lucide="palette"></i> TEMAS</button>
+        </nav>
+    </aside>
+
+    <main id="scroller">
+        <!-- HOME: TODOS OS LINKS + DESCRIÇÃO NOVA -->
+        <section id="home" class="view active">
+            <div class="home-grid">
+                <img src="images/logo.jpg" class="hero-img">
+                <div class="hero-info">
+                    <h1>NALDOA<span>.</span></h1>
+                    <p style="opacity:0.9; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; color: var(--primary);">DJ, Produtor de EDM & Trance</p>
+                    
+                    <div class="extra-desc">
+                        Explore o ecossistema oficial <b>NaldoA Play</b>. Aqui você encontra a fusão perfeita entre batidas Progressivas e a energia do Trance. Navegue pelos nossos canais oficiais, acompanhe lançamentos globais e mergulhe em uma experiência visual e sonora exclusiva feita para quem vive a música eletrônica intensamente.
+                    </div>
+
+                    <div class="links-wall">
+                        <a href="https://open.spotify.com/artist/05anJA6CE7Afkn0hYyVMRV" target="_blank" class="link-card"><i data-lucide="music"></i><span>SPOTIFY</span></a>
+                        <a href="https://youtube.com/@djnaldoaoficial" target="_blank" class="link-card"><i data-lucide="youtube"></i><span>YOUTUBE</span></a>
+                        <a href="https://music.apple.com/br/artist/naldoa/1782398892" target="_blank" class="link-card"><i data-lucide="apple"></i><span>APPLE</span></a>
+                        <a href="https://www.soundon.global/bio/naldoa" target="_blank" class="link-card"><i data-lucide="share-2"></i><span>SOUNDON</span></a>
+                        <a href="https://music.amazon.com.br/artists/B0DP59T244/naldoa" target="_blank" class="link-card"><i data-lucide="headphones"></i><span>AMAZON</span></a>
+                        <a href="https://deezer.page.link/x7uW8uBfUuX" target="_blank" class="link-card"><i data-lucide="mic-2"></i><span>DEEZER</span></a>
+                        <a href="https://instagram.com/naldoaoficial" target="_blank" class="link-card"><i data-lucide="instagram"></i><span>INSTAGRAM</span></a>
+                        <a href="https://github.com/naldoaplay" target="_blank" class="link-card"><i data-lucide="github"></i><span>GITHUB</span></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-nav">NALDOA PLAY © 2026</div>
+        </section>
+
+        <!-- RÁDIO: ESPECTRO -->
+        <section id="radio" class="view">
+            <div style="text-align: center; max-width: 600px; margin: auto;">
+                <div class="radio-container">
+                    <div class="spectrum-ring" id="ring"></div>
+                    <img src="images/logo1.jpg" class="radio-logo-main">
+                </div>
+                <h2 style="font-family:'Orbitron'; color:var(--primary); font-size: 2.2rem;">NALDOA PLAY</h2>
+                <p style="font-family:'Orbitron'; font-size:0.7rem; letter-spacing:8px; margin-bottom:30px; opacity:0.6;">SINTONIZADO AO VIVO</p>
+                <button onclick="toggleAudio()" class="play-btn-vivo">
+                    <i data-lucide="play" id="p-icon" style="width:45px; height:45px; fill:#000; color:#000;"></i>
+                </button>
+                <input type="range" oninput="setVol(this.value)" min="0" max="1" step="0.01" style="width:100%; max-width:350px; margin-top:40px; accent-color:var(--primary);">
+            </div>
+            <div class="footer-nav">NALDOA PLAY | RÁDIO</div>
+        </section>
+
+        <!-- VÍDEOS: GRADE COMPLETA VOLTOU -->
+        <section id="videos" class="view">
+            <h2 style="font-family:'Orbitron'; margin-bottom:30px; color:var(--primary);">DISCOGRAFIA VISUAL</h2>
+            <div class="video-grid">
+                <div class="video-box"><iframe src="https://www.youtube.com/embed/YwQkLOX8m0E"></iframe></div>
+                <div class="video-box"><iframe src="https://www.youtube.com/embed/sQeY8CwXQ9w"></iframe></div>
+                <div class="video-box"><iframe src="https://www.youtube.com/embed/3RpVyPb96sU"></iframe></div>
+                <div class="video-box"><iframe src="https://www.youtube.com/embed/zKaXDl5Texk"></iframe></div>
+                <div class="video-box"><iframe src="https://www.youtube.com/embed/mcx2w71PANE"></iframe></div>
+                <div class="video-box"><iframe src="https://www.youtube.com/embed/aZHefqVqXpU"></iframe></div>
+            </div>
+            <div class="footer-nav">CONTEÚDO OFICIAL NALDOA</div>
+        </section>
+
+        <!-- TEMAS: CATÁLOGO MASSIVO VOLTOU -->
+        <section id="config" class="view">
+            <h2 style="font-family:'Orbitron'; color:var(--primary); margin-bottom:30px;">SUPER CATÁLOGO DE TEMAS</h2>
+            
+            <div class="catalog-section">
+                <p style="font-family:'Orbitron'; font-size:0.7rem; opacity:0.5; margin-bottom:15px;">IMAGENS E CENÁRIOS</p>
+                <div class="catalog-grid">
+                    <div class="theme-opt" onclick="setT('https://images.unsplash.com/photo-1464802686167-b939a67e06a1', 'dark')"><div class="box" style="background-image:url('https://images.unsplash.com/photo-1464802686167-b939a67e06a1')"></div><span>UNIVERSO</span></div>
+                    <div class="theme-opt" onclick="setT('https://images.unsplash.com/photo-1441974231531-c6227db76b6e', 'light')"><div class="box" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e')"></div><span>FLORESTA</span></div>
+                    <div class="theme-opt" onclick="setT('https://images.unsplash.com/photo-1470225620780-dba8ba36b745', 'dark')"><div class="box" style="background-image:url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745')"></div><span>STUDIO</span></div>
+                    <div class="theme-opt" onclick="setT('https://images.unsplash.com/photo-1514525253361-b83f859b73c0', 'dark')"><div class="box" style="background-image:url('https://images.unsplash.com/photo-1514525253361-b83f859b73c0')"></div><span>NIGHT CLUB</span></div>
+                    <div class="theme-opt" onclick="setT('https://images.unsplash.com/photo-1550684848-fac1c5b4e853', 'dark')"><div class="box" style="background-image:url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853')"></div><span>CYBERPUNK</span></div>
+                </div>
+
+                <p style="font-family:'Orbitron'; font-size:0.7rem; opacity:0.5; margin-bottom:15px; margin-top:20px;">GRADIENTES VIVOS</p>
+                <div class="catalog-grid">
+                    <div class="theme-opt" onclick="setT('linear-gradient(45deg, #00f2fe, #4facfe)', 'light', true)"><div class="box" style="background:linear-gradient(45deg, #00f2fe, #4facfe)"></div><span>CYAN WAVE</span></div>
+                    <div class="theme-opt" onclick="setT('linear-gradient(45deg, #ee0979, #ff6a00)', 'dark', true)"><div class="box" style="background:linear-gradient(45deg, #ee0979, #ff6a00)"></div><span>NEON FIRE</span></div>
+                    <div class="theme-opt" onclick="setT('linear-gradient(45deg, #8e2de2, #4a00e0)', 'dark', true)"><div class="box" style="background:linear-gradient(45deg, #8e2de2, #4a00e0)"></div><span>PURPLE RAIN</span></div>
+                    <div class="theme-opt" onclick="setT('linear-gradient(45deg, #ff9a9e, #fad0c4)', 'light', true)"><div class="box" style="background:linear-gradient(45deg, #ff9a9e, #fad0c4)"></div><span>PASTEL SUN</span></div>
+                    <div class="theme-opt" onclick="setT('linear-gradient(45deg, #232526, #414345)', 'dark', true)"><div class="box" style="background:linear-gradient(45deg, #232526, #414345)"></div><span>PURE ONYX</span></div>
+                    <div class="theme-opt" onclick="setT('linear-gradient(45deg, #11998e, #38ef7d)', 'light', true)"><div class="box" style="background:linear-gradient(45deg, #11998e, #38ef7d)"></div><span>LIME FRESH</span></div>
+                </div>
+
+                <p style="font-family:'Orbitron'; font-size:0.7rem; opacity:0.5; margin-bottom:15px; margin-top:20px;">PALETA DE ACENTO</p>
+                <div class="palette">
+                    <button class="color-dot" style="background:#d4af37" onclick="setC('#d4af37')"></button>
+                    <button class="color-dot" style="background:#00f2fe" onclick="setC('#00f2fe')"></button>
+                    <button class="color-dot" style="background:#ff0055" onclick="setC('#ff0055')"></button>
+                    <button class="color-dot" style="background:#00ff00" onclick="setC('#00ff00')"></button>
+                    <button class="color-dot" style="background:#ffffff" onclick="setC('#ffffff')"></button>
+                    <button class="color-dot" style="background:#9d00ff" onclick="setC('#9d00ff')"></button>
+                    <button class="color-dot" style="background:#ff6a00" onclick="setC('#ff6a00')"></button>
+                    <button class="color-dot" style="background:#000000" onclick="setC('#000000')"></button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <audio id="core"></audio>
+
+    <script>
+        lucide.createIcons();
+        const audio = document.getElementById('core');
+        const ring = document.getElementById('ring');
+        const streamUrl = "https://stream.zeno.fm/s49f874w3vduv";
+
+        function tab(id, btn) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+            lucide.createIcons();
+        }
+
+        function toggleAudio() {
+            if(audio.paused || audio.src === "") { 
+                audio.src = streamUrl; // Garante que pegue o stream fresco
+                audio.play(); 
+                document.getElementById('p-icon').setAttribute('data-lucide', 'pause');
+                ring.style.animationPlayState = 'running';
+            } else { 
+                audio.pause(); 
+                audio.src = ""; // Reseta o source para não ficar baixando dados à toa
+                document.getElementById('p-icon').setAttribute('data-lucide', 'play');
+                ring.style.animationPlayState = 'paused';
+            }
+            lucide.createIcons();
+        }
+
+        function setVol(v) { audio.volume = v; }
+
+        function setT(src, mode, isGrad = false) {
+            const bg = document.getElementById('master-bg');
+            bg.style.backgroundImage = isGrad ? src : `url('${src}')`;
+            if(mode === 'light') {
+                document.documentElement.style.setProperty('--text-color', '#000');
+                document.documentElement.style.setProperty('--bg-glass', 'rgba(255,255,255,0.85)');
+            } else {
+                document.documentElement.style.setProperty('--text-color', '#fff');
+                document.documentElement.style.setProperty('--bg-glass', 'rgba(0,0,0,0.85)');
+            }
+        }
+
+        function setC(c) {
+            document.documentElement.style.setProperty('--primary', c);
+            document.documentElement.style.setProperty('--accent-glow', c + '66');
+        }
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
 }
-
-/* RADIO */
-
-const audio=document.getElementById('radioAudio');
-
-const playBtn=document.getElementById('playBtn');
-
-const volume=document.getElementById('volume');
-
-const ring=document.getElementById('ring');
-
-const streamUrl='https://stream.zeno.fm/s49f874w3vduv/stream';
-
-audio.src=streamUrl;
-
-volume.addEventListener('input',()=>{
-
-audio.volume=volume.value;
-
-});
-
-playBtn.addEventListener('click',async()=>{
-
-try{
-
-if(audio.paused){
-
-await audio.play();
-
-document.getElementById('playIcon')
-.setAttribute('data-lucide','pause');
-
-ring.style.animationPlayState='running';
-
-}else{
-
-audio.pause();
-
-document.getElementById('playIcon')
-.setAttribute('data-lucide','play');
-
-ring.style.animationPlayState='paused';
-
-}
-
-lucide.createIcons();
-
-}catch(err){
-
-console.log(err);
-
-alert('Erro ao iniciar a rádio.');
-
-}
-
-});
-
-/* THEMES */
-
-function setT(src,mode,isGrad=false){
-
-const bg=document.getElementById('master-bg');
-
-if(isGrad){
-
-bg.style.backgroundImage='none';
-
-bg.style.background=src;
-
-}else{
-
-bg.style.background='#000';
-
-bg.style.backgroundImage=`url('${src}')`;
-
-}
-
-if(mode==='light'){
-
-document.documentElement
-.style.setProperty('--text-color','#000');
-
-document.documentElement
-.style.setProperty('--bg-glass','rgba(255,255,255,.85)');
-
-}else{
-
-document.documentElement
-.style.setProperty('--text-color','#fff');
-
-document.documentElement
-.style.setProperty('--bg-glass','rgba(0,0,0,.82)');
-
-}
-
-}
-
-function setC(c){
-
-document.documentElement
-.style.setProperty('--primary',c);
-
-document.documentElement
-.style.setProperty('--accent-glow',c+'66');
-
-}
-
 </script>
-
 </body>
 </html>
