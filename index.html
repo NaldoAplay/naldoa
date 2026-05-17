@@ -3,123 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXNA Downloader - GitHub Edition</title>
+    <title>EXNA Downloader Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { background-color: #0b0f19; color: #f1f5f9; }</style>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        .custom-glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6">
 
-    <div class="w-full max-w-2xl bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+    <div class="w-full max-w-2xl custom-glass border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl my-auto">
+        
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+            <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent sm:text-4xl">
                 EXNA Downloader
             </h1>
-            <p class="text-slate-400 mt-2 text-sm">Versão GitHub Pages (Processamento via API Pública)</p>
+            <p class="text-slate-400 mt-2 text-sm sm:text-base">
+                Conversor inteligente multimídia para Playlists e Vídeos avulsos.
+            </p>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-2 mb-6">
-            <input type="text" id="playlistUrl" placeholder="Cole o link da playlist aqui..." 
-                class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-red-500">
-            <button onclick="carregarPlaylist()" id="btnAcao" class="bg-red-600 hover:bg-red-500 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg text-sm">
-                Analisar Lista
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Link do YouTube (Playlist ou Vídeo)</label>
+                <input type="text" id="playlistUrl" 
+                    placeholder="https://youtube.com/playlist?list=... ou watch?v=..." 
+                    class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-orange-500 text-sm shadow-inner mb-4">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800/60">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Formato de Saída</label>
+                    <select id="formatoMídia" onchange="alternarOpcoesQualidade()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500">
+                        <option value="mp3">Áudio (MP3)</option>
+                        <option value="mp4">Vídeo (MP4)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Qualidade Máxima</label>
+                    <select id="qualidadeMídia" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500">
+                        </select>
+                </div>
+            </div>
+
+            <button onclick="iniciarProcessamento()" id="btnAcao"
+                class="w-full mt-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-medium py-3 rounded-xl transition-all duration-300 shadow-lg shadow-orange-950/20 flex items-center justify-center gap-2 text-sm">
+                <span id="btnText">Analisar & Começar Download</span>
             </button>
         </div>
 
-        <div id="statusPainel" class="hidden space-y-4 border-t border-slate-800 pt-4">
-            <div class="flex justify-between items-center text-sm">
-                <span id="statusTxt" class="text-orange-400 font-medium">Buscando faixas...</span>
-                <span id="contador" class="text-slate-500 text-xs">0 / 0</span>
+        <div id="statusPainel" class="hidden mt-8 space-y-4 border-t border-slate-800/80 pt-6">
+            <div class="flex justify-between items-center text-sm bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2" id="pingStatus">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                    </span>
+                    <span id="statusTxt" class="font-medium text-orange-400">Analisando links...</span>
+                </div>
+                <span id="contador" class="text-slate-400 font-mono text-xs bg-slate-900 px-2 py-1 rounded border border-slate-800">0 / 0</span>
             </div>
-            <div id="listaMusicas" class="max-h-64 overflow-y-auto space-y-2 pr-1"></div>
+            
+            <div id="listaMusicas" class="max-h-80 overflow-y-auto space-y-3 pr-1">
+                </div>
         </div>
     </div>
 
+    <footer class="w-full text-center text-xs text-slate-600 tracking-wide pt-8 pb-4">
+        Ecossistemas EXNA &copy; 2026 — NaldoA
+    </footer>
+
     <script>
-        let fila = [];
+        // URL do seu motor backend no Render
+        const BACKEND_URL = 'https://exna-downloader.onrender.com'; 
+
+        let filaDeMidias = [];
         let indexAtual = 0;
 
-        async function carregarPlaylist() {
-            const url = document.getElementById('playlistUrl').value.trim();
-            if(!url) return alert('Insira um link!');
-
-            let listId = "";
-            if(url.includes("list=")) {
-                listId = url.split("list=")[1].split("&")[0];
+        // Gerencia as opções visuais de qualidade baseado na escolha de MP3 ou MP4
+        function alternarOpcoesQualidade() {
+            const formato = document.getElementById('formatoMídia').value;
+            const qualidadeSelect = document.getElementById('qualidadeMídia');
+            
+            if (formato === 'mp3') {
+                qualidadeSelect.innerHTML = `
+                    <option value="320">320 kbps (Alta Fidelidade)</option>
+                    <option value="256">256 kbps (Média-Alta)</option>
+                    <option value="128">128 kbps (Econômica)</option>
+                `;
             } else {
-                return alert('Por favor, insira um link de PLAYLIST válido.');
+                qualidadeSelect.innerHTML = `
+                    <option value="1080">1080p (Full HD)</option>
+                    <option value="720">720p (HD)</option>
+                    <option value="480">480p (Padrão)</option>
+                `;
             }
+        }
+        // Inicializa o select com os valores padrão de MP3
+        alternarOpcoesQualidade();
 
+        async function iniciarProcessamento() {
+            const urlInput = document.getElementById('playlistUrl').value.trim();
+            const formato = document.getElementById('formatoMídia').value;
+            const qualidade = document.getElementById('qualidadeMídia').value;
+            
             const btn = document.getElementById('btnAcao');
+            const btnText = document.getElementById('btnText');
             const painel = document.getElementById('statusPainel');
             const statusTxt = document.getElementById('statusTxt');
             const lista = document.getElementById('listaMusicas');
 
-            btn.disabled = true;
-            painel.classList.remove('hidden');
-            statusTxt.innerText = 'Buscando vídeos no YouTube...';
+            if (!urlInput) return alert('Por favor, insira uma URL do YouTube.');
+
+            filaDeMidias = [];
+            indexAtual = 0;
             lista.innerHTML = '';
+            painel.classList.remove('hidden');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+            btnText.innerText = 'Processando...';
+            statusTxt.innerText = 'Buscando informações no servidor...';
 
             try {
-                // Usando um espelho de API gratuito para ler os dados da lista sem precisar de backend
-                const res = await fetch(`https://yt.lemnoslife.com/noKey/playlistItems?playlistId=${listId}&part=snippet&maxResults=50`);
-                const data = await res.json();
+                let endpoint = `${BACKEND_URL}/api/playlist?url=${encodeURIComponent(urlInput)}`;
                 
-                if(!data || !data.items) throw new Error();
+                // Se for um link de vídeo avulso e não playlist, simulamos uma estrutura de array para reaproveitar a fila visual
+                if (!urlInput.includes('list=')) {
+                    // Expressão regular simples para pegar ID de vídeo avulso
+                    const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                    const match = urlInput.match(reg);
+                    const videoId = (match && match[2].length == 11) ? match[2] : null;
+                    
+                    if(!videoId) throw new Error('Link inválido');
+                    
+                    filaDeMidias = [{
+                        id: videoId,
+                        title: 'Vídeo Individual',
+                        url: urlInput
+                    }];
+                } else {
+                    const resposta = await fetch(endpoint);
+                    const dados = await resposta.json();
+                    if (dados.error) throw new Error(dados.error);
+                    filaDeMidias = dados.tracks;
+                }
 
-                fila = data.items.map(item => ({
-                    id: item.snippet.resourceId.videoId,
-                    title: item.snippet.title
-                }));
+                document.getElementById('contador').innerText = `0 / ${filaDeMidias.length}`;
 
-                document.getElementById('contador').innerText = `0 / ${fila.length}`;
-
-                lista.innerHTML = fila.map((track, i) => `
-                    <div id="item-${i}" class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-                        <span class="truncate max-w-[70%] text-slate-300 font-medium">${i+1}. ${track.title}</span>
-                        <span id="badge-${i}" class="text-slate-500 bg-slate-900 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]">Na Fila</span>
+                // Renderiza a lista exibindo a capa (thumbnail) e informações estruturadas de cada mídia
+                lista.innerHTML = filaDeMidias.map((track, idx) => `
+                    <div id="item-${idx}" class="flex items-center gap-3 p-3 bg-slate-950/50 rounded-xl border border-slate-800/60 text-xs transition-all duration-200">
+                        <img src="https://img.youtube.com/vi/${track.id}/mqdefault.jpg" alt="Capa" class="w-16 h-10 object-cover rounded-lg border border-slate-800 shadow">
+                        <div class="flex-1 min-w-0">
+                            <p class="truncate text-slate-200 font-medium text-sm">${track.title}</p>
+                            <p class="text-slate-500 text-[10px] mt-0.5">Formato selecionado: <span class="uppercase font-bold text-slate-400">${formato}</span> (${formato === 'mp3' ? qualidade+'kbps' : qualidade+'p'})</p>
+                        </div>
+                        <span id="badge-${idx}" class="text-slate-500 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider text-[10px] whitespace-nowrap">Na Fila</span>
                     </div>
                 `).join('');
 
-                indexAtual = 0;
-                baixarProxima();
+                baixarProximaMídia(formato, qualidade);
 
-            } catch (err) {
-                statusTxt.innerText = 'Erro ao ler playlist pública.';
+            } catch (erro) {
+                console.error(erro);
+                statusTxt.innerText = 'Erro ao processar o link. Verifique se o conteúdo é público.';
+                statusTxt.className = 'font-medium text-red-400';
                 btn.disabled = false;
+                btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnText.innerText = 'Analisar & Começar Download';
             }
         }
 
-        async function baixarProxima() {
-            if(indexAtual >= fila.length) {
-                document.getElementById('statusTxt').innerText = '🎉 Fila de downloads concluída!';
-                document.getElementById('statusTxt').className = 'text-emerald-400 font-medium';
-                document.getElementById('btnAcao').disabled = false;
+        async function baixarProximaMídia(formato, qualidade) {
+            const statusTxt = document.getElementById('statusTxt');
+            const btn = document.getElementById('btnAcao');
+            const btnText = document.getElementById('btnText');
+
+            if (indexAtual >= filaDeMidias.length) {
+                statusTxt.innerText = `🎉 Concluído! Arquivos enviados com sucesso no formato ${formato.toUpperCase()}.`;
+                statusTxt.className = 'font-medium text-emerald-400';
+                btn.disabled = false;
+                btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnText.innerText = 'Analisar & Começar Download';
                 return;
             }
 
-            const musica = fila[indexAtual];
-            document.getElementById('statusTxt').innerText = `Baixando: ${musica.title}`;
-            document.getElementById('contador').innerText = `${indexAtual + 1} / ${fila.length}`;
+            const midiaAtual = filaDeMidias[indexAtual];
+            statusTxt.innerText = `Baixando [${formato.toUpperCase()}]: ${midiaAtual.title}`;
+            document.getElementById('contador').innerText = `${indexAtual + 1} / ${filaDeMidias.length}`;
 
             const badge = document.getElementById(`badge-${indexAtual}`);
             const linha = document.getElementById(`item-${indexAtual}`);
             
-            badge.innerText = 'Baixando';
-            badge.className = 'text-orange-400 bg-orange-950/30 border border-orange-900/50 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]';
-            linha.classList.add('border-orange-500/30', 'bg-orange-950/10');
+            badge.innerText = 'Convertendo';
+            badge.className = 'text-orange-400 bg-orange-950/40 border border-orange-800/40 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider text-[10px]';
+            linha.classList.add('border-orange-500/20', 'bg-orange-950/10');
+            linha.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-            // Aciona o gateway externo de download
-            window.location.href = `https://api.vevioz.com/api/button/mp3/${musica.id}`;
+            // Monta o redirecionamento com os parâmetros escolhidos de formato e qualidade para a API no Render
+            window.location.href = `${BACKEND_URL}/api/download?url=${encodeURIComponent(midiaAtual.url)}&format=${formato}&quality=${qualidade}`;
 
-            // Dá um tempo de 5 segundos para o navegador iniciar o download antes de pular para o próximo item
+            // Delay de segurança calculado para o processamento do buffer de conversão
             setTimeout(() => {
-                badge.innerText = 'Iniciado';
-                badge.className = 'text-emerald-400 bg-emerald-950/30 border border-emerald-800/50 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]';
-                linha.classList.remove('border-orange-500/30', 'bg-orange-950/10');
-                linha.classList.add('opacity-40');
+                badge.innerText = `${formato === 'mp3' ? qualidade + 'K' : qualidade + 'P'} OK`;
+                badge.className = 'text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider text-[10px]';
+                linha.classList.remove('border-orange-500/20', 'bg-orange-950/10');
+                linha.classList.add('border-emerald-500/20', 'opacity-50');
+
                 indexAtual++;
-                baixarProxima();
-            }, 5000);
+                baixarProximaMídia(formato, qualidade);
+            }, 7500);
         }
     </script>
 </body>
