@@ -6,11 +6,15 @@ const ffmpeg = require('fluent-ffmpeg');
 
 const app = express();
 
-// Permite que qualquer site (inclusive o seu GitHub Pages) acesse essa API
 app.use(cors());
 app.use(express.json());
 
-// Rota para ler e destrinchar os vídeos da playlist
+// Endpoint de teste simples para o Front-end verificar se o servidor está acordado
+app.get('/api/ping', (req, res) => {
+    res.json({ status: "online" });
+});
+
+// 1. ROTA PARA LER A PLAYLIST
 app.get('/api/playlist', async (req, res) => {
     const playlistUrl = req.query.url;
     if (!playlistUrl) return res.status(400).json({ error: 'URL ausente' });
@@ -32,32 +36,48 @@ app.get('/api/playlist', async (req, res) => {
     }
 });
 
-// Rota que faz a conversão pesada e crava o arquivo em MP3 320 kbps
+// 2. ROTA DE DOWNLOAD ADAPTATIVA (MP3 320kbps ou MP4)
 app.get('/api/download', async (req, res) => {
     const videoUrl = req.query.url;
+    const format = req.query.format || 'mp3';
+    const quality = req.query.quality || '320';
+
     if (!videoUrl) return res.status(400).send('URL ausente');
 
     try {
         const info = await ytdl.getInfo(videoUrl);
         const title = info.videoDetails.title.replace(/[\\/*?:"<>|]/g, ''); 
 
-        res.header('Content-Disposition', `attachment; filename="${title}.mp3"`);
-        res.header('Content-Type', 'audio/mpeg');
+        if (format === 'mp3') {
+            // Configuração rigorosa para Áudio MP3
+            res.header('Content-Disposition', `attachment; filename="${title}.mp3"`);
+            res.header('Content-Type', 'audio/mpeg');
 
-        const audioStream = ytdl(videoUrl, {
-            filter: 'audioonly',
-            quality: 'highestaudio',
-            highWaterMark: 1 << 25
-        });
+            const audioStream = ytdl(videoUrl, {
+                filter: 'audioonly',
+                quality: 'highestaudio',
+                highWaterMark: 1 << 25
+            });
 
-        // O FFmpeg vai rodar no servidor da nuvem convertendo para 320 kbps reais
-        ffmpeg(audioStream)
-            .toFormat('mp3')
-            .audioBitrate(320)
-            .on('error', (err) => {
-                console.error('Erro no FFmpeg:', err.message);
-            })
-            .pipe(res, { end: true });
+            ffmpeg(audioStream)
+                .toFormat('mp3')
+                .audioBitrate(parseInt(quality)) // Força os 320, 256 ou 128 kbps escolhidos
+                .on('error', (err) => console.error('Erro FFmpeg:', err.message))
+                .pipe(res, { end: true });
+
+        } else {
+            // Configuração para Vídeo MP4
+            res.header('Content-Disposition', `attachment; filename="${title}.mp4"`);
+            res.header('Content-Type', 'video/mp4');
+
+            // Mapeia qualidade visual simplificada para o ytdl
+            const videoQuality = quality === '1080' ? 'highestvideo' : 'highest';
+
+            ytdl(videoUrl, {
+                quality: videoQuality,
+                filter: format => format.container === 'mp4' && format.hasAudio && format.hasVideo
+            }).pipe(res);
+        }
 
     } catch (error) {
         console.error(error);
@@ -68,4 +88,4 @@ app.get('/api/download', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Motor ativo na porta ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Engine EXNA ativa na porta ${PORT}`));
