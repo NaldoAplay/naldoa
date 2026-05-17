@@ -1,183 +1,203 @@
-const express = require('express');
-const ytdl = require('@distube/ytdl-core');
-const ytpl = require('ytpl');
-const ffmpeg = require('fluent-ffmpeg');
-
-const app = express();
-app.use(express.json());
-
-// 1. ROTA PARA MAPEAR A PLAYLIST
-app.get('/api/playlist', async (req, res) => {
-    const playlistUrl = req.query.url;
-    if (!playlistUrl) return res.status(400).json({ error: 'URL ausente' });
-
-    try {
-        const playlistId = await ytpl.getPlaylistID(playlistUrl);
-        const playlist = await ytpl(playlistId, { limit: Infinity });
-        
-        const tracks = playlist.items.map(item => ({
-            id: item.id,
-            title: item.title,
-            url: item.shortUrl
-        }));
-
-        res.json({ title: playlist.title, tracks });
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao ler a playlist. Verifique se ela é pública.' });
-    }
-});
-
-// 2. ROTA DE CONVERSÃO REAL PARA MP3 320 KBPS
-app.get('/api/download', async (req, res) => {
-    const videoUrl = req.query.url;
-    if (!videoUrl) return res.status(400).send('URL ausente');
-
-    try {
-        const info = await ytdl.getInfo(videoUrl);
-        // Limpa o título tirando caracteres que quebram o download no Windows/Linux
-        const title = info.videoDetails.title.replace(/[\\/*?:"<>|]/g, ''); 
-
-        // Configura os cabeçalhos para forçar o navegador a baixar como MP3
-        res.header('Content-Disposition', `attachment; filename="${title}.mp3"`);
-        res.header('Content-Type', 'audio/mpeg');
-
-        // Pega o fluxo de áudio de maior fidelidade do YouTube
-        const audioStream = ytdl(videoUrl, {
-            filter: 'audioonly',
-            quality: 'highestaudio',
-            highWaterMark: 1 << 25
-        });
-
-        // Alimenta o FFmpeg com o fluxo do YouTube, força a conversão para MP3 a 320 kbps e envia para a resposta (res)
-        ffmpeg(audioStream)
-            .toFormat('mp3')
-            .audioBitrate(320) // <--- GARANTE OS 320 KBPS REAIS
-            .on('error', (err) => {
-                console.error('Erro no processamento do FFmpeg:', err.message);
-            })
-            .pipe(res, { end: true });
-
-    } catch (error) {
-        console.error('Erro na requisição:', error);
-        if (!res.headersSent) {
-            res.status(500).send('Erro ao processar áudio.');
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXNA Downloader Pro - Pure 320kbps MP3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
         }
-    }
-});
+        .custom-glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        /* Custom scrollbar para a fila de músicas */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
 
-// 3. INTERFACE DO APP (INDEX INTEGRADO)
-app.get('/', (req, res) => {
-    res.send(`
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>EXNA Downloader - Pure 320kbps</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>body { background-color: #0b0f19; color: #f1f5f9; }</style>
-    </head>
-    <body class="min-h-screen flex flex-col items-center justify-center p-4">
-        <div class="w-full max-w-2xl bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-                    EXNA Downloader
-                </h1>
-                <p class="text-slate-400 mt-2 text-sm">Conversor Dedicado: Baixando listas completas cravadas em 320 kbps.</p>
-            </div>
+    <div class="w-full max-w-2xl custom-glass border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl transition-all duration-300">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent sm:text-4xl">
+                EXNA Downloader
+            </h1>
+            <p class="text-slate-400 mt-2 text-sm sm:text-base">
+                Conversor Inteligente de Playlist para <span class="text-emerald-400 font-bold">MP3 320 kbps</span> de Alta Fidelidade.
+            </p>
+        </div>
 
-            <div class="flex flex-col sm:flex-row gap-2 mb-6">
-                <input type="text" id="playlistUrl" placeholder="Cole o link da playlist aqui..." 
-                    class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-red-500">
-                <button onclick="carregarPlaylist()" id="btnAcao" class="bg-red-600 hover:bg-red-500 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg">
-                    Analisar Lista
-                </button>
-            </div>
-
-            <div id="statusPainel" class="hidden space-y-4 border-t border-slate-800 pt-4">
-                <div class="flex justify-between items-center text-sm">
-                    <span id="statusTxt" class="text-orange-400 font-medium">Aguardando início...</span>
-                    <span id="contador" class="text-slate-500 text-xs">0 / 0</span>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">URL da Playlist do YouTube</label>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="playlistUrl" 
+                        placeholder="https://youtube.com/playlist?list=..." 
+                        class="flex-1 bg-slate-950/90 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-orange-500 transition-all text-sm shadow-inner">
+                    <button onclick="iniciarProcessamento()" id="btnAcao"
+                        class="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 shadow-lg shadow-orange-950/20 flex items-center justify-center gap-2 whitespace-nowrap text-sm">
+                        <span id="btnText">Analisar & Baixar</span>
+                    </button>
                 </div>
-                <div id="listaMusicas" class="max-h-64 overflow-y-auto space-y-2 pr-1"></div>
             </div>
         </div>
 
-        <script>
-            let fila = [];
-            let indexAtual = 0;
+        <div id="statusPainel" class="hidden mt-8 space-y-4 border-t border-slate-800/80 pt-6">
+            <div class="flex justify-between items-center text-sm bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2" id="pingStatus">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                    </span>
+                    <span id="statusTxt" class="font-medium text-orange-400">Aguardando análise da lista...</span>
+                </div>
+                <span id="contador" class="text-slate-400 font-mono text-xs bg-slate-900 px-2 py-1 rounded border border-slate-800">0 / 0</span>
+            </div>
+            
+            <div id="listaMusicas" class="max-h-72 overflow-y-auto space-y-2 pr-1">
+                </div>
+        </div>
+    </div>
 
-            async function carregarPlaylist() {
-                const url = document.getElementById('playlistUrl').value.trim();
-                if(!url) return alert('Insira um link válido da playlist!');
+    <footer class="mt-8 text-center text-xs text-slate-600 tracking-wide">
+        Ecossistemas EXNA &copy; 2026 — Meta-Stream TV Project
+    </footer>
 
-                const btn = document.getElementById('btnAcao');
-                const painel = document.getElementById('statusPainel');
-                const statusTxt = document.getElementById('statusTxt');
-                const lista = document.getElementById('listaMusicas');
+    <script>
+        let filaDeMusicas = [];
+        let indexAtual = 0;
 
-                btn.disabled = true;
-                painel.classList.remove('hidden');
-                statusTxt.innerText = 'Processando faixas no servidor...';
-                lista.innerHTML = '';
+        // Função Principal disparada pelo botão
+        async function iniciarProcessamento() {
+            const urlInput = document.getElementById('playlistUrl').value.trim();
+            const btn = document.getElementById('btnAcao');
+            const btnText = document.getElementById('btnText');
+            const painel = document.getElementById('statusPainel');
+            const statusTxt = document.getElementById('statusTxt');
+            const lista = document.getElementById('listaMusicas');
+            const pingStatus = document.getElementById('pingStatus');
 
-                try {
-                    const res = await fetch(\`/api/playlist?url=\${encodeURIComponent(url)}\`);
-                    const data = await res.json();
-
-                    if(data.error) throw new Error(data.error);
-
-                    fila = data.tracks;
-                    document.getElementById('contador').innerText = \`0 / \${fila.length}\`;
-
-                    lista.innerHTML = fila.map((track, i) => \`
-                        <div id="item-\${i}" class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs">
-                            <span class="truncate max-w-[70%] text-slate-300 font-medium">\${i+1}. \${track.title}</span>
-                            <span id="badge-\${i}" class="text-slate-500 bg-slate-900 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]">Fila</span>
-                        </div>
-                    \`).join('');
-
-                    indexAtual = 0;
-                    baixarProxima();
-
-                } catch (err) {
-                    statusTxt.innerText = 'Erro ao carregar os dados.';
-                    btn.disabled = false;
-                }
+            if (!urlInput) {
+                alert('Por favor, insira uma URL válida do YouTube.');
+                return;
             }
 
-            async function baixarProxima() {
-                if(indexAtual >= fila.length) {
-                    document.getElementById('statusTxt').innerText = '🎉 Concluído! Tudo salvo em MP3 320kbps.';
-                    document.getElementById('statusTxt').className = 'text-emerald-400 font-medium';
-                    document.getElementById('btnAcao').disabled = false;
-                    return;
+            // Reset total de estados internos e visuais
+            filaDeMusicas = [];
+            indexAtual = 0;
+            lista.innerHTML = '';
+            painel.classList.remove('hidden');
+            btn.disabled = true;
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+            btnText.innerText = 'Processando...';
+            statusTxt.innerText = 'Lendo dados da playlist no YouTube...';
+            statusTxt.className = 'font-medium text-orange-400';
+            pingStatus.className = 'relative flex h-2 w-2';
+
+            try {
+                // Requisição para a rota do servidor para mapear os vídeos contidos na playlist
+                const resposta = await fetch(`/api/playlist?url=${encodeURIComponent(urlInput)}`);
+                const dados = await resposta.json();
+
+                if (dados.error) {
+                    throw new Error(dados.error);
                 }
 
-                const musica = fila[indexAtual];
-                document.getElementById('statusTxt').innerText = \`Convertendo para 320kbps: \${musica.title}\`;
-                document.getElementById('contador').innerText = \`\${indexAtual + 1} / \${fila.length}\`;
+                filaDeMusicas = dados.tracks;
+                document.getElementById('contador').innerText = `0 / ${filaDeMusicas.length}`;
 
-                const badge = document.getElementById(\`badge-\${indexAtual}\`);
-                badge.innerText = 'Processando';
-                badge.className = 'text-orange-400 bg-orange-950/30 border border-orange-900/50 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]';
+                // Renderiza toda a lista na tela com status de 'Fila'
+                lista.innerHTML = filaDeMusicas.map((track, idx) => `
+                    <div id="item-${idx}" class="flex items-center justify-between p-3.5 bg-slate-950/50 rounded-xl border border-slate-800/60 text-xs transition-all duration-200">
+                        <span class="truncate max-w-[72%] text-slate-300 font-medium">${idx + 1}. ${track.title}</span>
+                        <span id="badge-${idx}" class="text-slate-500 bg-slate-900 border border-slate-800 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]">Na Fila</span>
+                    </div>
+                `).join('');
 
-                // Inicia o download chamando a rota do servidor local que processa o FFmpeg
-                window.location.href = \`/api/download?url=\${encodeURIComponent(musica.url)}\`;
+                // Dispara recursivamente o download da fila
+                baixarProximaMusica();
 
-                // Como a conversão de 320kbps exige processamento, damos um intervalo seguro de 6 segundos antes de chamar o próximo arquivo da fila
-                setTimeout(() => {
-                    badge.innerText = '320kbps OK';
-                    badge.className = 'text-emerald-400 bg-emerald-950/30 border border-emerald-900/50 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]';
-                    indexAtual++;
-                    baixarProxima();
-                }, 6000);
+            } catch (erro) {
+                console.error(erro);
+                statusTxt.innerText = 'Erro ao processar o link. Certifique-se de que a lista é pública.';
+                statusTxt.className = 'font-medium text-red-400';
+                pingStatus.className = 'hidden';
+                btn.disabled = false;
+                btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnText.innerText = 'Analisar & Baixar';
             }
-        </script>
-    </body>
-    </html>
-    `);
-});
+        }
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🔥 Motor de áudio rodando em http://localhost:${PORT}`));
+        // Função de Fila Inteligente (Evita travamentos e faz downloads sequenciais)
+        async function baixarProximaMusica() {
+            const statusTxt = document.getElementById('statusTxt');
+            const btn = document.getElementById('btnAcao');
+            const btnText = document.getElementById('btnText');
+            const pingStatus = document.getElementById('pingStatus');
+
+            // Verifica se a fila chegou ao fim
+            if (indexAtual >= filaDeMusicas.length) {
+                statusTxt.innerText = '🎉 Concluído! Todas as músicas foram processadas em 320 kbps.';
+                statusTxt.className = 'font-medium text-emerald-400';
+                pingStatus.className = 'relative flex h-2 w-2';
+                document.getElementById('pingStatus').children[1].className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
+                document.getElementById('pingStatus').children[0].className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
+                
+                btn.disabled = false;
+                btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnText.innerText = 'Analisar & Baixar';
+                return;
+            }
+
+            const musicaAtual = filaDeMusicas[indexAtual];
+            
+            // Atualiza os contadores globais do painel
+            statusTxt.innerText = `Convertendo para 320 kbps: ${musicaAtual.title}`;
+            document.getElementById('contador').innerText = `${indexAtual + 1} / ${filaDeMusicas.length}`;
+
+            // Atualiza a linha específica da música na interface
+            const badge = document.getElementById(`badge-${indexAtual}`);
+            const linha = document.getElementById(`item-${indexAtual}`);
+            
+            badge.innerText = 'Convertendo';
+            badge.className = 'text-orange-400 bg-orange-950/40 border border-orange-800/40 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]';
+            linha.classList.add('border-orange-500/30', 'bg-orange-950/10');
+            linha.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Dispara a chamada nativa de streaming para o navegador iniciar o download do arquivo MP3
+            // O servidor aplica o encoder FFmpeg cravado em 320 kbps e envia em tempo real
+            window.location.href = `/api/download?url=${encodeURIComponent(musicaAtual.url)}`;
+
+            // Tempo de espera (delay) calculado para o servidor processar o buffer do FFmpeg 
+            // e o navegador registrar o início do download antes de puxar a próxima música da fila
+            setTimeout(() => {
+                badge.innerText = '320 kbps OK';
+                badge.className = 'text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]';
+                linha.classList.remove('border-orange-500/30', 'bg-orange-950/10');
+                linha.classList.add('border-emerald-500/20', 'opacity-50');
+
+                // Avança o ponteiro da fila e chama a si mesma
+                indexAtual++;
+                baixarProximaMusica();
+            }, 6500);
+        }
+    </script>
+</body>
+</html>
