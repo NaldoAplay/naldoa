@@ -182,7 +182,7 @@
             box-shadow: 0 0 30px #fff;
         }
 
-        /* ESTILO DO BOTÃO FLUTUANTE BONITINHO NO CANTO INFERIOR */
+        /* ESTILO DO BOTÃO FLUTUANTE NO CANTO INFERIOR */
         .pwa-float-btn {
             position: fixed;
             bottom: 25px;
@@ -317,6 +317,11 @@
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
         const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
 
+        // Chamada dos arquivos locais .wav salvos na raiz
+        const CHAMADA_1_URL = 'vinheta1.wav';
+        const CHAMADA_2_URL = 'vinheta2.wav';
+        const CHAMADA_3_URL = 'vinheta3.wav';
+
         const player = document.getElementById('audio-core');
         const btn = document.getElementById('master-play');
         const icon = document.getElementById('btn-icon');
@@ -330,6 +335,10 @@
         let indiceMusicaAtual = 0;
         let blocoTempoFixo = 200; 
         let deferredPrompt; 
+
+        let musicasTocadasContador = 0;
+        let proximaChamadaNumero = 1;
+        let estaTocandoChamadaAgora = false;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -378,7 +387,6 @@
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
-                    // GATILHO DE AUTO-PLAY AO ABRIR O APP (Roda nos navegadores/aparelhos com permissão livre)
                     console.log("Tentando iniciar transmissão automática...");
                     rodarTransmissaoAoVivo(true);
 
@@ -472,11 +480,24 @@
                 
                 updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             }).catch(() => {
-                // Se o navegador barrar o Auto-Play silencioso, devolve o play para clique manual limpo
                 icon.className = "fas fa-play";
-                btn.classList.remove('active');
-                card.classList.remove('playing');
                 txtStatus.innerText = "Toque no Play para iniciar transmissão";
+            });
+        }
+
+        function rodarChamadaProgramada(urlChamada) {
+            estaTocandoChamadaAgora = true;
+            player.src = urlChamada;
+            player.currentTime = 0;
+
+            player.play().then(() => {
+                txtTitle.innerText = "CHAMADA INSTITUCIONAL";
+                document.getElementById('artist-name').innerText = "RADIO EXNA FM";
+                txtCover.src = "logo-quadrada.png";
+                txtStatus.innerText = "Espaço comercial";
+            }).catch(() => {
+                estaTocandoChamadaAgora = false;
+                rodarTransmissaoAoVivo(false);
             });
         }
 
@@ -497,9 +518,35 @@
         }
 
         player.onended = () => {
-            console.log("Faixa finalizada. Puxando próxima música da grade...");
-            indiceMusicaAtual++; 
-            rodarTransmissaoAoVivo(false); 
+            if (estaTocandoChamadaAgora) {
+                estaTocandoChamadaAgora = false;
+                rodarTransmissaoAoVivo(false);
+                return;
+            }
+
+            musicasTocadasContador++;
+            console.log(`Músicas tocadas após a última vinheta: ${musicasTocadasContador}`);
+
+            if (musicasTocadasContador >= 2) {
+                musicasTocadasContador = 0; 
+                
+                let urlParaRodar = "";
+                if (proximaChamadaNumero === 1) {
+                    urlParaRodar = CHAMADA_1_URL;
+                    proximaChamadaNumero = 2;
+                } else if (proximaChamadaNumero === 2) {
+                    urlParaRodar = CHAMADA_2_URL;
+                    proximaChamadaNumero = 3;
+                } else {
+                    urlParaRodar = CHAMADA_3_URL;
+                    proximaChamadaNumero = 1; 
+                }
+
+                rodarChamadaProgramada(urlParaRodar);
+            } else {
+                indiceMusicaAtual++; 
+                rodarTransmissaoAoVivo(false); 
+            }
         };
 
         function updateLockScreen(title, artist, capaUrl) {
