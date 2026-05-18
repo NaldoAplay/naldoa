@@ -34,7 +34,6 @@
             position: relative;
         }
 
-        /* Camada traseira de efeito fosco dinâmico */
         .blur-background {
             position: fixed;
             top: -10%;
@@ -195,7 +194,6 @@
         }
         .play-btn.active { background: #fff; color: #000; box-shadow: 0 0 25px #fff; }
 
-        /* Menu lateral deslizante da Playlist */
         .playlist-sidebar {
             position: fixed;
             top: 0;
@@ -369,7 +367,7 @@
 
             <div class="info-area">
                 <h1 id="track-title">SINTONIZANDO...</h1>
-                <p id="artist-name">DJ NaldoA</p>
+                <p id="artist-name">EXNA MUSIC</p>
             </div>
 
             <div class="controls-row">
@@ -429,7 +427,6 @@
             sidebar.classList.toggle('open');
         }
 
-        // SWIPE TO CLOSE: Arrastar para fechar a playlist lateral
         let touchStartX = 0;
         sidebar.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
         sidebar.addEventListener('touchend', (e) => {
@@ -453,10 +450,11 @@
                         return;
                     }
 
-                    let gradeOriginal = musicas.map(m => {
+                    let gradeOriginal = musicas.map((m, index) => {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         
-                        let artistaDetectado = "EXNA STUDIO";
+                        // ALTERADO: Substituído "EXNA STUDIO" pelo padrão oficial solicitado "EXNA MUSIC"
+                        let artistaDetectado = "EXNA MUSIC";
                         let tituloDetectado = nomeSemExtensao;
                         if(nomeSemExtensao.includes(" - ")) {
                             let partes = nomeSemExtensao.split(" - ");
@@ -467,6 +465,7 @@
                         const capaCorrespondente = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
                         
                         return {
+                            idInterno: index,
                             id: m.id,
                             name: tituloDetectado,
                             artist: artistaDetectado,
@@ -474,7 +473,6 @@
                         };
                     });
                     
-                    // Embaralha uma vez na abertura para criar a programação do dia
                     gradeSincronizadaGlobal = gerarGradeMestreEstavel(gradeOriginal);
 
                     btn.disabled = false;
@@ -483,6 +481,9 @@
 
                     renderizarPlaylistVisual();
                     carregarFaixa(0);
+
+                    // Dispara a varredura inteligente de artes via API do iTunes em segundo plano
+                    buscarCapasNoiTunesEmMassa();
 
                 } else {
                     txtStatus.innerText = "Pasta vazia.";
@@ -494,7 +495,6 @@
 
         function gerarGradeMestreEstavel(poolOriginal) {
             let pool = [...poolOriginal];
-            let resultado = [];
             let dataAtual = new Date();
             let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
 
@@ -518,13 +518,56 @@
                 item.setAttribute('onclick', `pularParaMusicaDaLista(${index})`);
 
                 item.innerHTML = `
-                    <img src="${faixa.capaUrl}" class="list-thumb" alt="Thumb">
+                    <img src="${faixa.capaUrl}" id="list-thumb-${faixa.idInterno}" class="list-thumb" alt="Thumb">
                     <div class="track-meta-box">
                         ${ConvertName(faixa.name)}
-                        <span>${faixa.artist}</span>
+                        <span id="list-artist-${faixa.idInterno}">${faixa.artist}</span>
                     </div>
                 `;
                 playlistBox.appendChild(item);
+            });
+        }
+
+        // 📡 MOTOR DE BUSCA EM MASSA DA API DO ITUNES DA APPLE
+        function buscarCapasNoiTunesEmMassa() {
+            gradeSincronizadaGlobal.forEach(faixa => {
+                // Se a música já veio com capa dedicada da sua pasta de imagens do Drive, pula a busca da internet
+                if (faixa.capaUrl !== 'logo-quadrada.png') return;
+
+                // Limpa o termo de busca para melhorar a precisão da inteligência da Apple
+                let termoBusca = faixa.name.replace(/remix/gi, "").replace(/mix/gi, "").trim();
+                const urlSearch = `https://itunes.apple.com/search?term=${encodeURIComponent(termoBusca)}&media=music&limit=1`;
+
+                fetch(urlSearch)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.results && data.results.length > 0) {
+                            const track = data.results[0];
+                            // Transforma a miniatura padrão de 100x100 em uma imagem de alta fidelidade de 600x600
+                            const capaAltaDefinicao = track.artworkUrl100.replace("100x100bb.jpg", "600x600bb.jpg");
+                            
+                            faixa.capaUrl = capaAltaDefinicao;
+                            
+                            // Se o usuário não mudou a tag do artista no arquivo, traz o nome oficial do artista da internet
+                            if (faixa.artist === "EXNA MUSIC" && track.artistName) {
+                                faixa.artist = track.artistName.toUpperCase();
+                            }
+
+                            // Atualiza a linha correspondente na playlist flutuante em tempo real
+                            const thumbEl = document.getElementById(`list-thumb-${faixa.idInterno}`);
+                            const artistEl = document.getElementById(`list-artist-${faixa.idInterno}`);
+                            if (thumbEl) thumbEl.src = capaAltaDefinicao;
+                            if (artistEl) artistEl.innerText = faixa.artist;
+
+                            // Se for a música que está tocando agora na agulha, atualiza o visor principal imediatamente
+                            if (gradeSincronizadaGlobal[indiceMusicaAtual].idInterno === faixa.idInterno) {
+                                txtCover.src = capaAltaDefinicao;
+                                bgGlow.style.backgroundImage = `url('${capaAltaDefinicao}')`;
+                                txtArtist.innerText = faixa.artist;
+                                updateLockScreen(faixa.name, faixa.artist, capaAltaDefinicao);
+                            }
+                        }
+                    }).catch(err => console.log("Erro ao varrer o iTunes para:", faixa.name));
             });
         }
 
@@ -553,21 +596,20 @@
         function carregarFaixa(index) {
             if (gradeSincronizadaGlobal.length === 0) return;
 
-            // Regra de Loop Infinito da Playlist Inteira
             if (index >= gradeSincronizadaGlobal.length) index = 0;
             if (index < 0) index = gradeSincronizadaGlobal.length - 1;
             indiceMusicaAtual = index;
 
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
-            player.load(); // Força o buffer físico do aparelho
+            player.load(); 
 
             txtTitle.innerText = ConvertName(faixa.name);
             txtArtist.innerText = faixa.artist;
             txtCover.src = faixa.capaUrl;
             bgGlow.style.backgroundImage = `url('${faixa.capaUrl}')`;
 
-            txtStatus.innerText = "Pronto para reproduzir";
+            txtStatus.innerText = "Sinal Pronto";
             marcarFaixaAtivaNaLista();
             updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
         }
@@ -620,17 +662,14 @@
             }
         }
 
-        // MOTOR DE HARDWARE INFALÍVEL PARA BLOQUEIO DE TELA E TRANSIÇÃO CONTINUA
         player.onended = () => {
             if (estaPausadoManualmente) return;
-            console.log("Música finalizada. Forçando passagem de faixa...");
             proximaFaixa();
-            setTimeout(() => { player.play().catch(e => console.log("Aguardando play físico")); }, 150);
+            setTimeout(() => { player.play().catch(e => console.log("Aguardando play")); }, 150);
         };
 
         player.onerror = () => {
             if (!estaPausadoManualmente) {
-                console.log("Erro de token expirado do Drive. Pulando bloco...");
                 proximaFaixa();
                 setTimeout(() => { player.play(); }, 250);
             }
@@ -641,7 +680,7 @@
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: title,
                     artist: artist,
-                    album: 'EXNA MUSIC PLAYLIST',
+                    album: 'EXNA MUSIC',
                     artwork: [
                         { src: capaUrl, sizes: '512x512', type: 'image/png' },
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
