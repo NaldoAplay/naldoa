@@ -265,7 +265,7 @@
             body { background-image: none; background-color: transparent; min-height: auto; }
             main { padding: 5px; }
             .glass-player { max-width: 100%; border-radius: 20px; padding: 20px 15px; box-shadow: none; }
-            footer { display: none; } /* Esconde o rodapé grande se o espaço for mini */
+            footer { display: none; }
         }
     </style>
 </head>
@@ -385,7 +385,6 @@
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
-                    // Inicia o fluxo automaticamente ao carregar
                     estaPausadoManualmente = false;
                     tocarFaixaIndice(0, true);
 
@@ -402,8 +401,9 @@
             let resultado = [];
             let ultimoArtista = "";
 
+            // ARY_SEED: Semente baseada no ano, mês, dia e hora atual do mundo real para rotacionar as faixas o dia todo
             let dataAtual = new Date();
-            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
+            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate() + dataAtual.getHours();
 
             function randomSemente() {
                 let x = Math.sin(semente++) * 10000;
@@ -427,7 +427,21 @@
             return resultado;
         }
 
-        // NOVO MOTOR SEQUENCIAL IMEDIATO CONTRA TRAVAMENTOS
+        function obterPontoDaGradeAoVivo() {
+            if (gradeSincronizadaGlobal.length === 0) return null;
+            
+            // MOTOR CORRIGIDO: Distribui as 100+ músicas baseando-se no minuto absoluto atual do dia do relógio mestre
+            let data = new Date();
+            let minutosDoDia = (data.getHours() * 60) + data.getMinutes();
+            
+            let indexCalculado = minutosDoDia % gradeSincronizadaGlobal.length;
+            
+            return {
+                indice: indexCalculado,
+                seek: data.getSeconds() 
+            };
+        }
+
         function tocarFaixaIndice(index, doInicioAbsoluto = false) {
             if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
 
@@ -439,15 +453,16 @@
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            // Força a limpeza completa do buffer anterior para evitar o congelamento
             player.pause();
             player.removeAttribute('src');
             player.load();
 
             player.src = urlFonte;
             
-            // Se for do início absoluto, garante tempo zero para não quebrar a URL do Drive
             if (doInicioAbsoluto) {
+                const checkSinc = obterPontoDaGradeAoVivo();
+                player.currentTime = checkSinc ? checkSinc.seek : 0;
+            } else {
                 player.currentTime = 0;
             }
 
@@ -465,7 +480,6 @@
                 
                 updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             }).catch((err) => {
-                console.log("Erro ao reproduzir faixa, tentando re-iniciar:", err);
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
@@ -492,23 +506,17 @@
             }
         }
 
-        // EVENTO BLINDADO: Dispara a próxima música do início exato sem delay ou cálculos fantasmas
         player.onended = () => {
             if (estaPausadoManualmente) return;
-            
-            console.log("Faixa finalizada. Pulando para o índice:", indiceMusicaAtual + 1);
+            icon.className = "fas fa-spinner fa-spin";
             let proximoIndice = indiceMusicaAtual + 1;
-            
-            // Dispara a próxima sem nenhuma barreira de tempo
-            tocarFaixaIndice(proximoIndice, true);
+            tocarFaixaIndice(proximoIndice, false); // Próxima do início absoluto impede silêncio e travamento no bolso
         };
 
-        // GATILHO DE SEGURANÇA: Se o celular congelar em segundo plano e ficar mudo, ele força o avanço
         player.onerror = () => {
             if (!estaPausadoManualmente) {
-                console.log("Erro de buffer detectado no bolso. Forçando próxima música...");
                 let proximoIndice = indiceMusicaAtual + 1;
-                tocarFaixaIndice(proximoIndice, true);
+                tocarFaixaIndice(proximoIndice, false);
             }
         };
 
