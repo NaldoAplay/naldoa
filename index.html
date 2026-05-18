@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo-quadrada.png">
+    
     <style>
         :root {
             --primary-purple: #8a2be2;
@@ -146,7 +149,7 @@
         .info-area p {
             font-size: 1.1rem;
             color: var(--neon-aqua);
-            margin: 6px 0 30px;
+            margin: 6px 0 20px;
             font-weight: 600;
         }
 
@@ -241,6 +244,10 @@
             <div class="info-area">
                 <h1 id="track-title">SINTONIZANDO...</h1>
                 <p id="artist-name">DJ NaldoA</p>
+                
+                <button id="download-btn" onclick="baixarMusicaAtual()" style="background: transparent; border: none; color: var(--neon-aqua); cursor: pointer; font-size: 1.1rem; margin-top: -10px; margin-bottom: 5px; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; font-weight: bold; letter-spacing: 1px;">
+                    <i class="fas fa-download"></i> BAIXAR MÚSICA
+                </button>
             </div>
 
             <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
@@ -335,7 +342,6 @@
             }
         }
 
-        // AUTO-DJ MELHORADO: EMBARALHAMENTO SEGURO COM BLOQUEIO DE REPETIÇÃO DE ARTISTA/BANDA CONSECUTIVOS
         function gerarGradeAntiRepeticaoEstavel() {
             let pool = [...gradeOriginal];
             let resultado = [];
@@ -355,10 +361,7 @@
             }
 
             while(pool.length > 0) {
-                // Força a variação procurando um artista diferente do último que entrou na grade
                 let indexValido = pool.findIndex(m => m.artist.toLowerCase() !== ultimoArtista.toLowerCase());
-                
-                // Se restar apenas músicas da mesma banda, aceita o primeiro elemento para não travar
                 if(indexValido === -1) indexValido = 0;
 
                 let selecionada = pool.splice(indexValido, 1)[0];
@@ -403,11 +406,10 @@
             player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
             player.currentTime = segundoDePartida;
 
-            // CARREGADINHA ATIVA: Mostra o spinner rodando no botão enquanto puxa o arquivo
+            // CARREGADINHA ATIVA: Spinner ativo até o navegador decodificar o stream
             icon.className = "fas fa-spinner fa-spin";
 
             player.play().then(() => {
-                // Altera o ícone para STOP apenas quando o player começar a cuspir o som de verdade
                 icon.className = "fas fa-stop";
                 btn.classList.add('active');
                 card.classList.add('playing');
@@ -424,7 +426,6 @@
             });
         }
 
-        // Pequena função auxiliar para limpar os nomes das tracks na tela
         function ConvertName(str) {
             return str.replace(/_/g, " ").toUpperCase();
         }
@@ -451,6 +452,16 @@
             rodarTransmissaoAoVivo(false); 
         };
 
+        // Download da Música do Segundo Atual do Streaming
+        function baixarMusicaAtual() {
+            if (gradeSincronizadaGlobal.length === 0) return;
+            const faixaAtual = gradeSincronizadaGlobal[indiceMusicaAtual];
+            if (faixaAtual && faixaAtual.id) {
+                const urlDownload = `https://www.googleapis.com/drive/v3/files/${faixaAtual.id}?alt=media&key=${API_KEY}`;
+                window.open(urlDownload, '_blank');
+            }
+        }
+
         function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -465,6 +476,11 @@
                 navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
                 navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
             }
+        }
+
+        // Ativa o registro do PWA para disponibilizar a instalação do App
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
         }
 
         fetchDriveData();
