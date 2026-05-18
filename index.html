@@ -316,8 +316,6 @@
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
         const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
 
-        const VINHETAS = ['vinheta1.wav', 'vinheta2.wav', 'vinheta3.wav'];
-
         const player = document.getElementById('audio-core');
         const btn = document.getElementById('master-play');
         const icon = document.getElementById('btn-icon');
@@ -332,10 +330,6 @@
         let blocoTempoFixo = 200; 
         let deferredPrompt;
         let estaPausadoManualmente = true;
-
-        let contadorMusicasTocadas = 0;
-        let indiceProximaVinheta = 0;
-        let estaTocandoVinhetaAgora = false;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -359,7 +353,7 @@
                     gradeOriginal = musicas.map(m => {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         
-                        let artistaDetectado = "EXNA FM";
+                        let artistaDetectado = "EXNA FM - AO VIVO";
                         let tituloDetectado = nomeSemExtensao;
                         if(nomeSemExtensao.includes(" - ")) {
                             let partes = nomeSemExtensao.split(" - ");
@@ -442,7 +436,7 @@
         }
 
         function sincronizarEPlayComGradeGlobal(usarSincroniaHorarioMundial = false) {
-            if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente || estaTocandoVinhetaAgora) return;
+            if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
 
             const estadoGlobal = obterPontoDaGradeAoVivo();
             if (!estadoGlobal) return;
@@ -459,9 +453,8 @@
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            if (player.src !== urlFonte && !player.src.endsWith(faixa.id)) {
+            if (player.src !== urlFonte && !player.src.endsWith(urlFonte)) {
                 player.src = urlFonte;
-                player.load(); // FORÇA A LIMPEZA DA CONEXÃO LOCAL ANTES DE PUXAR O STREAM DO DRIVE
                 player.currentTime = tempoDeCorte;
                 icon.className = "fas fa-spinner fa-spin";
             }
@@ -485,30 +478,6 @@
             });
         }
 
-        function rodarVinhetaLocalIntercalada() {
-            estaTocandoVinhetaAgora = true;
-            
-            let vinhetaNome = VINHETAS[indiceProximaVinheta % VINHETAS.length];
-            indiceProximaVinheta++;
-
-            player.src = vinhetaNome;
-            player.load(); // Limpa a faixa de áudio e engatilha o arquivo .wav local imediatamente
-            player.currentTime = 0;
-            icon.className = "fas fa-spinner fa-spin";
-
-            player.play().then(() => {
-                icon.className = "fas fa-stop";
-                txtTitle.innerText = "CHAMADA INSTITUCIONAL";
-                document.getElementById('artist-name').innerText = "RADIO EXNA FM";
-                txtCover.src = "logo-quadrada.png";
-                txtStatus.innerText = "Espaço Comercial";
-                updateLockScreen("CHAMADA INSTITUCIONAL", "RADIO EXNA FM", "logo-quadrada.png");
-            }).catch(() => {
-                estaTocandoVinhetaAgora = false;
-                sincronizarEPlayComGradeGlobal(false);
-            });
-        }
-
         function ConvertName(str) {
             return str.replace(/_/g, " ").toUpperCase();
         }
@@ -516,7 +485,6 @@
         function toggleRadio() {
             if (player.paused) {
                 estaPausadoManualmente = false;
-                estaTocandoVinhetaAgora = false;
                 icon.className = "fas fa-spinner fa-spin";
                 sincronizarEPlayComGradeGlobal(true); 
             } else {
@@ -529,34 +497,66 @@
             }
         }
 
-        // MOTOR REESTRUTURADO COM HARD-LOAD REFRESH
+        // REPRODUÇÃO CONTÍNUA EXCLUSIVA: Fim do áudio puxa a próxima na hora sem travas ou delays
         player.onended = () => {
             if (estaPausadoManualmente) return;
-
             icon.className = "fas fa-spinner fa-spin";
-
-            if (estaTocandoVinhetaAgora) {
-                estaTocandoVinhetaAgora = false;
-                console.log("Fim da vinheta. Resetando conexões e puxando próxima música...");
-                indiceMusicaAtual++; 
-                
-                // Executa a limpeza física de buffer e chama a música do Drive sem travar a rede
-                sincronizarEPlayComGradeGlobal(false);
-            } else {
-                contadorMusicasTocadas++;
-
-                if (contadorMusicasTocadas >= 2) {
-                    contadorMusicasTocadas = 0; 
-                    rodarVinhetaLocalIntercalada(); 
-                } else {
-                    indiceMusicaAtual++; 
-                    sincronizarEPlayComGradeGlobal(false); 
-                }
-            }
+            
+            indiceMusicaAtual++; 
+            sincronizarEPlayComGradeGlobal(false); 
         };
 
         setInterval(() => {
-            if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0 && !estaTocandoVinhetaAgora) {
+            if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0) {
                 const checkEstado = obterPontoDaGradeAoVivo();
                 if (checkEstado && player.paused) {
                     sincronizarEPlayComGradeGlobal(true);
+                }
+            }
+        }, 5000);
+
+        function updateLockScreen(title, artist, capaUrl) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: title,
+                    artist: artist,
+                    album: 'RADIO EXNA FM',
+                    artwork: [
+                        { src: capaUrl, sizes: '512x512', type: 'image/png' },
+                        { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+                navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
+                navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
+            }
+        }
+
+        const pwaBtn = document.getElementById('pwa-install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBtn.classList.add('visible');
+        });
+
+        pwaBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                pwaBtn.classList.remove('visible');
+            }
+        });
+
+        window.addEventListener('appinstalled', (evt) => {
+            pwaBtn.classList.remove('visible');
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        fetchDriveData();
+    </script>
+</body>
+</html>
