@@ -225,13 +225,13 @@
             <div class="radio-header">
                 <img src="logo-quadrada.png" class="radio-top-logo" alt="EXNA Logo">
                 <div class="radio-brand-text">
-                    <h2>EXNA <span>FM</span></h2>
-                    <p> A Rádio que toca todas!</p></p>
+                    <h2>RADIO EXNA <span>FM</span></h2>
+                    <p>SÓ SUCESSO ATRÁS DE SUCESSO</p>
                 </div>
             </div>
 
             <div class="live-indicator">
-                <i class="fas fa-broadcast-tower"></i> TRANSMISSÃO AO VIVO SINCRO
+                <i class="fas fa-signal"></i> AUTODJ TRANSMISSÃO 24H
             </div>
 
             <div class="cover-area">
@@ -240,7 +240,7 @@
 
             <div class="info-area">
                 <h1 id="track-title">SINTONIZANDO...</h1>
-                <p id="artist-name">Dj NaldoA</p>
+                <p id="artist-name">DJ NaldoA</p>
             </div>
 
             <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
@@ -276,11 +276,12 @@
         const txtCover = document.getElementById('track-cover');
         const txtStatus = document.getElementById('status-text');
 
-        let gradeMusicas = [];
-        let estaPausadoManualmente = true;
+        let gradeOriginal = [];
+        let filaExecucao = [];
+        let indiceFila = 0;
 
         txtTitle.innerText = "SINTONIA ONLINE";
-        txtStatus.innerText = "Conectando à torre...";
+        txtStatus.innerText = "Buscando transmissão...";
 
         async function fetchDriveData() {
             const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
@@ -289,131 +290,147 @@
                 const data = await response.json();
                 
                 if(data.files && data.files.length > 0) {
-                    let arquivosAudio = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
-                    let arquivosImagem = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
+                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
+                    let imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
 
-                    if (arquivosAudio.length === 0) {
-                        txtTitle.innerText = "RADIO EXNA FM";
-                        txtStatus.innerText = "Grade de áudio vazia.";
+                    if (musicas.length === 0) {
+                        txtTitle.innerText = "EXNA FM";
+                        txtStatus.innerText = "Nenhuma música encontrada.";
                         return;
                     }
 
-                    // Monta a grade estável com duração padrão fixa para sincronia global perfeita
-                    gradeMusicas = arquivosAudio.map(m => {
-                        const nomeLimpo = m.name.replace(/\.[^/.]+$/, "");
-                        const imagemCorrespondente = arquivosImagem.find(img => img.name.startsWith(nomeLimpo));
+                    gradeOriginal = musicas.map(m => {
+                        const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
+                        
+                        // Tenta descobrir o artista dividindo o nome pelo traço " - " comum em mp3
+                        let artistaDetectado = "DJ NaldoA";
+                        let tituloDetectado = nomeSemExtensao;
+                        if(nomeSemExtensao.includes(" - ")) {
+                            let partes = nomeSemExtensao.split(" - ");
+                            artistaDetectado = partes[0].trim();
+                            tituloDetectado = partes[1].trim();
+                        }
+
+                        const capaCorrespondente = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
                         
                         return {
                             id: m.id,
-                            name: nomeLimpo,
-                            duracao: 200, // Cada música ganha um bloco de tempo exato na linha do tempo global
-                            capa: imagemCorrespondente ? `https://www.googleapis.com/drive/v3/files/${imagemCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
+                            name: tituloDetectado,
+                            artist: artistaDetectado,
+                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
                         };
                     });
                     
-                    txtTitle.innerText = "EXNA FM";
+                    // Monta a fila com as regras anti-repetição
+                    gerarFilaAutoDJ();
+
+                    txtTitle.innerText = "RADIO EXNA FM";
                     btn.disabled = false;
                     icon.className = "fas fa-play";
-                    txtStatus.innerText = "Sinal digital 100%";
+                    txtStatus.innerText = "Pronta para transmissão contínua";
                 } else {
-                    txtStatus.innerText = "Impossível ler a torre de streaming.";
+                    txtStatus.innerText = "Pasta indisponível.";
                 }
             } catch (e) {
-                txtStatus.innerText = "Erro de conexão de rede.";
+                txtStatus.innerText = "Erro de rede ao conectar com a nuvem.";
             }
         }
 
-        // CÁLCULO DA MATRIZ DO AO VIVO: Garante que todo mundo escute a mesma coisa no mesmo segundo do dia
-        function obterEstadoGradeAoVivo() {
-            let duracaoTotalGrade = gradeMusicas.reduce((acc, m) => acc + m.duracao, 0);
-            let timestampSegundos = Math.floor(Date.now() / 1000);
-            
-            // Ponto atual dentro do loop infinito do dia
-            let tempoGeralNaGrade = timestampSegundos % duracaoTotalGrade;
-            
-            let tempoAcumulado = 0;
-            for (let i = 0; i < gradeMusicas.length; i++) {
-                let m = gradeMusicas[i];
-                if (tempoGeralNaGrade < tempoAcumulado + m.duracao) {
-                    return {
-                        musica: m,
-                        segundoExato: tempoGeralNaGrade - tempoAcumulado,
-                        proximoIndice: (i + 1) % gradeMusicas.length
-                    };
-                }
-                tempoAcumulado += m.duracao;
+        // ALGORITMO AUTODJ INTELIGENTE ANTI-REPETIÇÃO
+        function gerarFilaAutoDJ() {
+            let pool = [...gradeOriginal];
+            let fila = [];
+            let ultimoArtista = "";
+
+            // Embaralhamento Fisher-Yates inicial
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
             }
-            return { musica: gradeMusicas[0], segundoExato: 0, proximoIndice: 1 };
-        }
 
-        function sincronizarEPlay() {
-            if (gradeMusicas.length === 0 || estaPausadoManualmente) return;
-
-            const estadoAtual = obterEstadoGradeAoVivo();
-            const fonteUrl = `https://www.googleapis.com/drive/v3/files/${estadoAtual.musica.id}?alt=media&key=${API_KEY}`;
-
-            // Só altera o áudio se a música mudou na linha do tempo global
-            if (player.src !== fonteUrl) {
-                player.src = fonteUrl;
-                player.currentTime = estadoAtual.segundoExato;
+            while(pool.length > 0) {
+                // Procura uma música cujo artista seja diferente do último que tocou
+                let indexValido = pool.findIndex(m => m.artist.toLowerCase() !== ultimoArtista.toLowerCase());
                 
-                player.play().then(() => {
-                    txtTitle.innerText = estadoAtual.musica.name;
-                    txtCover.src = estadoAtual.musica.capa;
-                    txtStatus.innerText = "Sintonizado ao Vivo";
-                    updateLockScreen(estadoAtual.musica.name, estadoAtual.musica.capa);
-                }).catch(() => {
-                    // Previne travamento caso o navegador bloqueie o autoplay
-                });
+                // Se não houver opção (só restaram músicas do mesmo artista), pega a primeira que sobrou
+                if(indexValido === -1) indexValido = 0;
+
+                let selecionada = pool.splice(indexValido, 1)[0];
+                fila.push(selecionada);
+                ultimoArtista = selecionada.artist;
             }
+
+            filaExecucao = fila;
+            indiceFila = 0;
+        }
+
+        function tocarMusicaDaFila(index) {
+            if (filaExecucao.length === 0) return;
+
+            // Se a fila chegar ao fim, gera um novo embaralhamento para nunca ficar em silêncio
+            if (index >= filaExecucao.length) {
+                gerarFilaAutoDJ();
+                index = 0;
+            }
+
+            indiceFila = index;
+            const faixa = filaExecucao[indiceFila];
+
+            player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+            
+            player.play().then(() => {
+                icon.className = "fas fa-stop";
+                btn.classList.add('active');
+                card.classList.add('playing');
+                
+                txtTitle.innerText = faixa.name;
+                document.getElementById('artist-name').innerText = faixa.artist;
+                txtCover.src = faixa.capaUrl;
+                txtStatus.innerText = "Transmitindo ao vivo";
+                
+                updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
+            }).catch((error) => {
+                console.log("Aguardando interação: ", error);
+            });
         }
 
         function toggleRadio() {
             if (player.paused) {
-                estaPausadoManualmente = false;
-                icon.className = "fas fa-stop";
-                btn.classList.add('active');
-                card.classList.add('playing');
-                sincronizarEPlay();
+                tocarMusicaDaFila(indiceFila);
             } else {
-                estaPausadoManualmente = true;
                 player.pause();
-                player.src = ""; // Corta o fluxo de dados para simular o desligamento do rádio
+                player.src = ""; 
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
                 txtTitle.innerText = "RADIO EXNA FM";
                 txtCover.src = "logo-quadrada.png";
-                txtStatus.innerText = "Estação em stand-by";
+                document.getElementById('artist-name').innerText = "DJ NaldoA";
+                txtStatus.innerText = "Transmissão pausada";
             }
         }
 
-        // MOTOR DA RÁDIO: De 3 em 3 segundos ele checa o relógio mundial e ajusta a música e a capa sozinho
-        setInterval(() => {
-            if (!estaPausadoManualmente) {
-                const estado = obterEstadoGradeAoVivo();
-                const urlEsperada = `https://www.googleapis.com/drive/v3/files/${estado.musica.id}?alt=media&key=${API_KEY}`;
-                
-                // Se o tempo mundial pulou para a próxima música, o site acompanha sozinho sem silenciar!
-                if (player.src !== urlEsperada) {
-                    sincronizarEPlay();
-                }
-            }
-        }, 3000);
+        // SOLUÇÃO DA TELA BLOQUEADA: Evento nativo disparado diretamente pelo sistema de áudio em background
+        player.onended = () => {
+            console.log("Faixa concluída no sistema. Rodando próxima música da fila...");
+            tocarMusicaDaFila(indiceFila + 1);
+        };
 
-        function updateLockScreen(title, capaUrl) {
+        function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: title,
-                    artist: 'EXNA FM',
+                    artist: artist,
                     album: 'RADIO EXNA FM',
                     artwork: [
                         { src: capaUrl, sizes: '512x512', type: 'image/png' },
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
                     ]
                 });
+                
                 navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
                 navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
+                navigator.mediaSession.setActionHandler('nexttrack', () => { tocarMusicaDaFila(indiceFila + 1); });
             }
         }
 
