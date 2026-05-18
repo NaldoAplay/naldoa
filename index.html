@@ -328,10 +328,15 @@
 
         let gradeOriginal = [];
         let gradeSincronizadaGlobal = [];
+        let indiceMusicaAtual = 0;
         let blocoTempoFixo = 200; 
         let deferredPrompt;
         let estaPausadoManualmente = true;
-        let forçarProximaMusicaNativa = false; 
+
+        // Gerenciadores mecânicos locais das vinhetas
+        let contadorMusicasTocadas = 0;
+        let indiceProximaVinheta = 0;
+        let estaTocandoVinhetaAgora = false;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -369,8 +374,7 @@
                             id: m.id,
                             name: tituloDetectado,
                             artist: artistaDetectado,
-                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png',
-                            isVinheta: false
+                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
                         };
                     });
                     
@@ -394,7 +398,7 @@
 
         function gerarGradeMestreEstavel() {
             let pool = [...gradeOriginal];
-            let listaBase = [];
+            let resultado = [];
             let ultimoArtista = "";
 
             let dataAtual = new Date();
@@ -415,34 +419,11 @@
                 if(indexValido === -1) indexValido = 0;
 
                 let selecionada = pool.splice(indexValido, 1)[0];
-                listaBase.push(selecionada);
+                resultado.push(selecionada);
                 ultimoArtista = selecionada.artist;
             }
 
-            let gradeFinalComVinhetas = [];
-            let contadorMusicas = 0;
-            let indiceVinheta = 0;
-
-            for (let i = 0; i < listaBase.length; i++) {
-                gradeFinalComVinhetas.push(listaBase[i]);
-                contadorMusicas++;
-
-                if (contadorMusicas === 2) {
-                    let vinhetaNome = VINHETAS[indiceVinheta % VINHETAS.length];
-                    gradeFinalComVinhetas.push({
-                        id: vinhetaNome,
-                        name: "CHAMADA INSTITUCIONAL",
-                        artist: "RADIO EXNA FM",
-                        capaUrl: "logo-quadrada.png",
-                        isVinheta: true,
-                        vinhetaUrl: vinhetaNome
-                    });
-                    indiceVinheta++;
-                    contadorMusicas = 0; 
-                }
-            }
-
-            return gradeFinalComVinhetas;
+            return resultado;
         }
 
         function obterPontoDaGradeAoVivo() {
@@ -462,9 +443,8 @@
         }
 
         function sincronizarEPlayComGradeGlobal() {
-            if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
-
-            if (forçarProximaMusicaNativa) return;
+            // BLOQUEIO SUPREMO: Se estiver rodando vinheta, o relógio mundial NÃO pode mexer no player de jeito nenhum!
+            if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente || estaTocandoVinhetaAgora) return;
 
             const estadoGlobal = obterPontoDaGradeAoVivo();
             if (!estadoGlobal) return;
@@ -472,12 +452,12 @@
             indiceMusicaAtual = estadoGlobal.indice;
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
 
-            let urlFonte = faixa.isVinheta ? faixa.vinhetaUrl : `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
-            let tempoDeCorte = faixa.isVinheta ? 0 : estadoGlobal.seek;
+            let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+            let tempoDeCorte = estadoGlobal.seek;
 
             if (player.src !== urlFonte && !player.src.endsWith(urlFonte)) {
                 player.src = urlFonte;
-                if (!faixa.isVinheta) player.currentTime = tempoDeCorte;
+                player.currentTime = tempoDeCorte;
                 icon.className = "fas fa-spinner fa-spin";
             }
 
@@ -500,6 +480,30 @@
             });
         }
 
+        function rodarVinhetaLocalIntercalada() {
+            estaTocandoVinhetaAgora = true;
+            
+            // Pega a vinheta da vez e faz o giro da fila (Varia perfeitamente: 1 -> 2 -> 3 -> 1...)
+            let vinhetaNome = VINHETAS[indiceProximaVinheta % VINHETAS.length];
+            indiceProximaVinheta++;
+
+            player.src = vinhetaNome;
+            player.currentTime = 0;
+            icon.className = "fas fa-spinner fa-spin";
+
+            player.play().then(() => {
+                icon.className = "fas fa-stop";
+                txtTitle.innerText = "CHAMADA INSTITUCIONAL";
+                document.getElementById('artist-name').innerText = "RADIO EXNA FM";
+                txtCover.src = "logo-quadrada.png";
+                txtStatus.innerText = "Espaço Comercial";
+                updateLockScreen("CHAMADA INSTITUCIONAL", "RADIO EXNA FM", "logo-quadrada.png");
+            }).catch(() => {
+                estaTocandoVinhetaAgora = false;
+                sincronizarEPlayComGradeGlobal();
+            });
+        }
+
         function ConvertName(str) {
             return str.replace(/_/g, " ").toUpperCase();
         }
@@ -507,7 +511,7 @@
         function toggleRadio() {
             if (player.paused) {
                 estaPausadoManualmente = false;
-                forçarProximaMusicaNativa = false;
+                estaTocandoVinhetaAgora = false;
                 icon.className = "fas fa-spinner fa-spin";
                 sincronizarEPlayComGradeGlobal();
             } else {
@@ -520,39 +524,38 @@
             }
         }
 
+        // CONTROLADOR DE FIM DE ÁUDIO (Background seguro)
         player.onended = () => {
-            if (!estaPausadoManualmente) {
-                console.log("Mídia concluída. Pulando bloco...");
-                forçarProximaMusicaNativa = true; 
+            if (estaPausadoManualmente) return;
 
-                indiceMusicaAtual = (indiceMusicaAtual + 1) % gradeSincronizadaGlobal.length;
-                const proximaFaixa = gradeSincronizadaGlobal[indiceMusicaAtual];
-                
-                player.src = proximaFaixa.isVinheta ? proximaFaixa.vinhetaUrl : `https://www.googleapis.com/drive/v3/files/${proximaFaixa.id}?alt=media&key=${API_KEY}`;
-                player.currentTime = 0;
-                icon.className = "fas fa-spinner fa-spin";
-                
-                player.play().then(() => {
-                    icon.className = "fas fa-stop";
-                    txtTitle.innerText = ConvertName(proximaFaixa.name);
-                    document.getElementById('artist-name').innerText = proximaFaixa.artist;
-                    txtCover.src = proximaFaixa.capaUrl;
-                    updateLockScreen(proximaFaixa.name, proximaFaixa.artist, proximaFaixa.capaUrl);
-                }).catch(() => {
-                    icon.className = "fas fa-play";
-                });
+            if (estaTocandoVinhetaAgora) {
+                // Terminou a vinheta? Desliga a trava e joga de volta pra música do relógio mundial na hora! (Garante tocar apenas UMA vez)
+                estaTocandoVinhetaAgora = false;
+                console.log("Vinheta finalizada com sucesso. Voltando para o ao vivo...");
+                sincronizarEPlayComGradeGlobal();
+            } else {
+                contadorMusicasTocadas++;
+                console.log(`Músicas tocadas consecutivamente: ${contadorMusicasTocadas}`);
+
+                if (contadorMusicasTocadas >= 2) {
+                    contadorMusicasTocadas = 0; // Zera o contador das 2 músicas
+                    rodarVinhetaLocalIntercalada(); // Dispara a chamada variada única
+                } else {
+                    sincronizarEPlayComGradeGlobal();
+                }
             }
         };
 
+        // RELÓGIO MESTRE MUNDIAL (Sincroniza a programação a cada 4 segundos)
         setInterval(() => {
-            if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0) {
+            // Se estiver tocando a vinheta, o relógio mundial fica congelado e bloqueado!
+            if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0 && !estaTocandoVinhetaAgora) {
                 const checkEstado = obterPontoDaGradeAoVivo();
                 if (checkEstado) {
                     const faixaEsperada = gradeSincronizadaGlobal[checkEstado.indice];
-                    const urlEsperada = faixaEsperada.isVinheta ? faixaEsperada.vinhetaUrl : `https://www.googleapis.com/drive/v3/files/${faixaEsperada.id}?alt=media&key=${API_KEY}`;
+                    const urlEsperada = `https://www.googleapis.com/drive/v3/files/${faixaEsperada.id}?alt=media&key=${API_KEY}`;
                     
                     if (player.src !== urlEsperada && !player.src.endsWith(urlEsperada)) {
-                        forçarProximaMusicaNativa = false; 
                         sincronizarEPlayComGradeGlobal();
                     }
                 }
