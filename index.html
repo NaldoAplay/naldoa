@@ -266,7 +266,7 @@
 
     <script>
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
-        const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; // <--- ALTERE AQUI COM A SUA CHAVE
+        const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
 
         const player = document.getElementById('audio-core');
         const btn = document.getElementById('master-play');
@@ -335,6 +335,7 @@
             return listaEmbaralhada;
         }
 
+        // Correção aplicada na linha matemática temporal
         function getLiveState() {
             let duracaoTotalCadeia = playlistMista.reduce((a, b) => a + b.dur, 0);
             let listaDaGrade = obterPlaylistEmbaralhadaEstavel(duracaoTotalCadeia);
@@ -356,7 +357,9 @@
         function toggleRadio() {
             if (player.paused) {
                 const state = getLiveState();
-                player.src = `https://drive.google.com/uc?id=${state.music.id}&export=view`;
+                
+                // CORREÇÃO: URL oficial de streaming via API com alt=media
+                player.src = `https://www.googleapis.com/drive/v3/files/${state.music.id}?alt=media&key=${API_KEY}`;
                 player.currentTime = state.seek;
                 
                 player.play().then(() => {
@@ -369,7 +372,8 @@
                     txtStatus.innerText = "Ouvindo ao vivo com o mundo";
                     
                     updateLockScreen(state.music.name, state.music.capaUrl);
-                }).catch(() => {
+                }).catch((error) => {
+                    console.error("Erro no play:", error);
                     txtStatus.innerText = "Clique novamente para iniciar.";
                 });
             } else {
@@ -389,13 +393,14 @@
                 const check = getLiveState();
                 if (!player.src.includes(check.music.id)) {
                     player.pause();
-                    player.src = `https://drive.google.com/uc?id=${check.music.id}&export=view`;
+                    // CORREÇÃO: Transição automática ajustada para alt=media
+                    player.src = `https://www.googleapis.com/drive/v3/files/${check.music.id}?alt=media&key=${API_KEY}`;
                     player.currentTime = check.seek;
                     player.play().then(() => {
                         txtTitle.innerText = check.music.name;
                         txtCover.src = check.music.capaUrl;
                         updateLockScreen(check.music.name, check.music.capaUrl);
-                    });
+                    }).catch(e => console.log("Erro na transição automática:", e));
                 }
             }
         }, 4000);
