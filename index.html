@@ -329,7 +329,7 @@
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
         let blocoTempoFixo = 200; 
-        let deferredPrompt; // Armazena o gatilho nativo de instalação do App
+        let deferredPrompt; 
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -377,6 +377,11 @@
                     btn.disabled = false;
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
+
+                    // GATILHO DE AUTO-PLAY AO ABRIR O APP (Roda nos navegadores/aparelhos com permissão livre)
+                    console.log("Tentando iniciar transmissão automática...");
+                    rodarTransmissaoAoVivo(true);
+
                 } else {
                     txtStatus.innerText = "Pasta vazia.";
                 }
@@ -446,8 +451,12 @@
             }
 
             faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
-            player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
-            player.currentTime = segundoDePartida;
+            
+            const urlEsperada = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+            if (player.src !== urlEsperada) {
+                player.src = urlEsperada;
+                player.currentTime = segundoDePartida;
+            }
 
             icon.className = "fas fa-spinner fa-spin";
 
@@ -463,8 +472,11 @@
                 
                 updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             }).catch(() => {
+                // Se o navegador barrar o Auto-Play silencioso, devolve o play para clique manual limpo
                 icon.className = "fas fa-play";
-                txtStatus.innerText = "Sinal instável. Toque no Play.";
+                btn.classList.remove('active');
+                card.classList.remove('playing');
+                txtStatus.innerText = "Toque no Play para iniciar transmissão";
             });
         }
 
@@ -477,14 +489,10 @@
                 rodarTransmissaoAoVivo(true);
             } else {
                 player.pause();
-                player.src = ""; 
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
-                txtTitle.innerText = "RADIO EXNA FM";
-                txtCover.src = "logo-quadrada.png";
-                document.getElementById('artist-name').innerText = "DJ NaldoA";
-                txtStatus.innerText = "Sintonia desligada";
+                txtStatus.innerText = "Transmissão em espera";
             }
         }
 
@@ -505,43 +513,33 @@
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
                     ]
                 });
+                
                 navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
                 navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
             }
         }
 
-        // LÓGICA DO CAPTURADOR DO APLICATIVO INSTALÁVEL (PWA)
         const pwaBtn = document.getElementById('pwa-install-btn');
 
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Impede o navegador de mostrar a caixinha padrão feia imediatamente
             e.preventDefault();
-            // Guarda o evento para ser disparado quando o usuário clicar no seu botão
             deferredPrompt = e;
-            // Torna o seu botão flutuante bonitinho visível na tela no canto inferior
             pwaBtn.classList.add('visible');
         });
 
         pwaBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
-                // Abre a tela de instalação nativa customizada
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                console.log(`Instalação do usuário: ${outcome}`);
-                // Reseta o prompt para não duplicar chamadas
                 deferredPrompt = null;
-                // Esconde o botão flutuante após a instalação concluída
                 pwaBtn.classList.remove('visible');
             }
         });
 
-        // Some com o botão caso o aplicativo já tenha sido instalado no aparelho
         window.addEventListener('appinstalled', (evt) => {
-            console.log('Rádio EXNA FM instalada como App com sucesso!');
             pwaBtn.classList.remove('visible');
         });
 
-        // Ativa o registro do PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
