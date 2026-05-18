@@ -164,7 +164,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             margin-bottom: 20px;
         }
 
@@ -172,11 +172,11 @@
             background: transparent;
             border: none;
             color: #fff;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             cursor: pointer;
             transition: 0.2s;
         }
-        .nav-btn:hover { color: var(--neon-aqua); filter: drop-shadow(0 0 5px var(--neon-aqua)); }
+        .nav-btn:hover, .nav-btn.active { color: var(--neon-aqua); filter: drop-shadow(0 0 5px var(--neon-aqua)); }
 
         .play-btn {
             width: 70px;
@@ -371,11 +371,13 @@
             </div>
 
             <div class="controls-row">
+                <button class="nav-btn" id="shuffle-btn" onclick="toggleShuffle()" title="Modo Aleatório"><i class="fas fa-random"></i></button>
                 <button class="nav-btn" onclick="voltarFaixa()" title="Faixa Anterior"><i class="fas fa-step-backward"></i></button>
                 <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
                     <i class="fas fa-spinner fa-spin" id="btn-icon"></i>
                 </button>
                 <button class="nav-btn" onclick="proximaFaixa()" title="Próxima Faixa"><i class="fas fa-step-forward"></i></button>
+                <button class="nav-btn" id="loop-btn" onclick="toggleLoop()" title="Repetir Faixa"><i class="fas fa-redo"></i></button>
             </div>
             
             <p id="status-text" style="margin-top:20px; font-size: 0.8rem; color: #45a29e; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;"></p>
@@ -414,11 +416,16 @@
         const txtStatus = document.getElementById('status-text');
         const playlistBox = document.getElementById('playlist-box');
         const sidebar = document.getElementById('sidebar');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const loopBtn = document.getElementById('loop-btn');
 
+        let acervoOriginal = [];
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
         let deferredPrompt;
         let estaPausadoManualmente = true;
+        let isShuffle = false;
+        let isLoop = false;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -427,7 +434,6 @@
             sidebar.classList.toggle('open');
         }
 
-        // SWIPE TO CLOSE (Mantido apenas o gesto físico lateral para fechar de propósito)
         let touchStartX = 0;
         sidebar.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
         sidebar.addEventListener('touchend', (e) => {
@@ -451,9 +457,8 @@
                         return;
                     }
 
-                    let gradeOriginal = musicas.map((m, index) => {
+                    acervoOriginal = musicas.map((m, index) => {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
-                        
                         let artistaDetectado = "EXNA MUSIC";
                         let tituloDetectado = nomeSemExtensao;
                         if(nomeSemExtensao.includes(" - ")) {
@@ -473,17 +478,15 @@
                         };
                     });
                     
-                    gradeSincronizadaGlobal = gerarGradeMestreEstavel(gradeOriginal);
+                    montarOrdemExecucao();
 
                     btn.disabled = false;
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
-                    // CORREÇÃO CRUCIAL: Primeiro joga todas as tracks do Drive na tela para renderizar a lista na hora
-                    renderizarPlaylistVisual();
+                    renderializarInterface();
                     carregarFaixa(0);
 
-                    // Só depois dispara a requisição do iTunes em background sem travar o app
                     setTimeout(buscarCapasNoiTunesEmMassa, 500);
 
                 } else {
@@ -494,33 +497,33 @@
             }
         }
 
-        function gerarGradeMestreEstavel(poolOriginal) {
-            let pool = [...poolOriginal];
-            let dataAtual = new Date();
-            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
+        function montarOrdemExecucao() {
+            gradeSincronizadaGlobal = [...acervoOriginal];
+            if (isShuffle) {
+                let pool = [...acervoOriginal];
+                let dataAtual = new Date();
+                let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
 
-            function randomSemente() {
-                let x = Math.sin(semente++) * 10000;
-                return x - Math.floor(x);
-            }
+                function randomSemente() {
+                    let x = Math.sin(semente++) * 10000;
+                    return x - Math.floor(x);
+                }
 
-            for (let i = pool.length - 1; i > 0; i--) {
-                const j = Math.floor(randomSemente() * (i + 1));
-                [pool[i], pool[j]] = [pool[j], pool[i]];
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(randomSemente() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                gradeSincronizadaGlobal = pool;
             }
-            return pool;
         }
 
-        function renderizarPlaylistVisual() {
+        function renderializarInterface() {
             playlistBox.innerHTML = "";
             gradeSincronizadaGlobal.forEach((faixa, index) => {
                 const item = document.createElement('div');
                 item.className = `playlist-item ${index === indiceMusicaAtual ? 'current-track' : ''}`;
                 
-                // Força o clique da lista a chamar a função sem interferir em outras camadas
-                item.addEventListener('click', (e) => {
-                    pularParaMusicaDaLista(index);
-                });
+                item.addEventListener('click', () => { pularParaMusicaDaLista(index); });
 
                 item.innerHTML = `
                     <img src="${faixa.capaUrl}" id="list-thumb-${faixa.idInterno}" class="list-thumb" alt="Thumb">
@@ -534,8 +537,7 @@
         }
 
         function buscarCapasNoiTunesEmMassa() {
-            gradeSincronizadaGlobal.forEach(faixa => {
-                // Mantém a imagem do Drive se ela já existir
+            acervoOriginal.forEach(faixa => {
                 if (faixa.capaUrl !== 'logo-quadrada.png') return;
 
                 let termoBusca = faixa.name.replace(/remix/gi, "").replace(/mix/gi, "").trim();
@@ -660,7 +662,25 @@
             }
         }
 
+        // FUNÇÕES DOS BOTÕES DE AJUSTES AVANÇADOS NA TELA
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            shuffleBtn.classList.toggle('active', isShuffle);
+            const idAtualReal = gradeSincronizadaGlobal[indiceMusicaAtual].idInterno;
+            montarOrdemExecucao();
+            indiceMusicaAtual = gradeSincronizadaGlobal.findIndex(m => m.idInterno === idAtualReal);
+            renderializarInterface();
+            marcarFaixaAtivaNaLista();
+        }
+
+        function toggleLoop() {
+            isLoop = !isLoop;
+            loopBtn.classList.toggle('active', isLoop);
+            player.loop = isLoop; // Injeta a regra nativa de repetição
+        }
+
         player.onended = () => {
+            if (isLoop) return;
             if (estaPausadoManualmente) return;
             proximaFaixa();
             setTimeout(() => { player.play().catch(e => console.log("Aguardando buffer")); }, 150);
@@ -673,6 +693,7 @@
             }
         };
 
+        // CONTROLES DE HARDWARE AMPLIADOS: Sincroniza Shuffle e Loop no ecossistema mobile
         function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
