@@ -497,11 +497,14 @@
             }
         }
 
-        // REPRODUÇÃO CONTÍNUA EXCLUSIVA: Fim do áudio puxa a próxima na hora sem travas ou delays
+        // MOTOR DE FLUXO TOTALMENTE LIMPO - SEM CONTADORES OU SEGREDO DE VINHETAS
         player.onended = () => {
             if (estaPausadoManualmente) return;
+            
+            // Joga o feedback do spinner na hora da virada física
             icon.className = "fas fa-spinner fa-spin";
             
+            // Pula direto e sem atrasos para a próxima música sequencial
             indiceMusicaAtual++; 
             sincronizarEPlayComGradeGlobal(false); 
         };
@@ -513,7 +516,7 @@
                     sincronizarEPlayComGradeGlobal(true);
                 }
             }
-        }, 5000);
+        }, 3000); // Encurtado o tempo de verificação mestre para evitar gaps silenciosos
 
         function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
