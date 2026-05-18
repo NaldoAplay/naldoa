@@ -333,7 +333,6 @@
         let gradeOriginal = [];
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
-        let blocoTempoFixo = 180; // Definição estável de 3 minutos por bloco para rádio real
         let deferredPrompt;
         let estaPausadoManualmente = true;
 
@@ -377,6 +376,7 @@
                         };
                     });
                     
+                    // Monta o sorteio dinâmico baseado na hora de abertura
                     gradeSincronizadaGlobal = gerarGradeMestreEstavel();
 
                     txtTitle.innerText = "RADIO EXNA FM";
@@ -384,8 +384,10 @@
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
+                    // AUTO-PLAY RE-ESTRUTURADO: Escolhe uma música aleatória de início para nunca abrir na mesma track!
+                    let indexInicialAleatorio = Math.floor(Math.random() * gradeSincronizadaGlobal.length);
                     estaPausadoManualmente = false;
-                    tocarFaixaIndice(0, true);
+                    tocarFaixaIndice(indexInicialAleatorio);
 
                 } else {
                     txtStatus.innerText = "Pasta vazia.";
@@ -400,9 +402,8 @@
             let resultado = [];
             let ultimoArtista = "";
 
-            // Embaralhamento fixado por data diária mantém a matriz estável para todos os ouvintes
-            let dataAtual = new Date();
-            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
+            // Semente randômica de boot mistura os artistas perfeitamente
+            let semente = Date.now();
 
             function randomSemente() {
                 let x = Math.sin(semente++) * 10000;
@@ -426,48 +427,23 @@
             return resultado;
         }
 
-        function obterPontoDaGradeAoVivo() {
-            if (gradeSincronizadaGlobal.length === 0) return null;
-            
-            // MOTOR CORRIGIDO: Retorna o cálculo absoluto por Unix Timestamp de segundos para espalhar as mais de 200 músicas na hora exata do planeta
-            let duracaoTotalGrade = gradeSincronizadaGlobal.length * blocoTempoFixo;
-            let timestampSegundos = Math.floor(Date.now() / 1000);
-            let tempoAtualNaLinhaGeral = timestampSegundos % duracaoTotalGrade;
-            
-            let indexCalculado = Math.floor(tempoAtualNaLinhaGeral / blocoTempoFixo);
-            let segundoExatoNaFaixa = tempoAtualNaLinhaGeral % blocoTempoFixo;
-
-            return {
-                indice: indexCalculado,
-                seek: segundoExatoNaFaixa
-            };
-        }
-
-        function tocarFaixaIndice(index, doInicioAbsoluto = false) {
+        // NOVO MOTOR SEQUENCIAL PURO: Destrói qualquer cálculo de relógio mundial e roda da raiz de forma agressiva
+        function tocarFaixaIndice(index) {
             if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
 
-            let tempoDeCorte = 0;
-
-            if (doInicioAbsoluto) {
-                // Alinha perfeitamente com o tempo real global no Play ou F5
-                const estadoAoVivo = obterPontoDaGradeAoVivo();
-                if (estadoAoVivo) {
-                    indiceMusicaAtual = estadoAoVivo.indice;
-                    tempoDeCorte = estadoAoVivo.seek;
-                }
-            } else {
-                indiceMusicaAtual = index;
-                if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) indiceMusicaAtual = 0;
+            if (index >= gradeSincronizadaGlobal.length || index < 0) {
+                index = 0; 
             }
+            indiceMusicaAtual = index;
 
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            // Transição rápida: Altera a fonte apenas se necessário, sem travar o hardware
+            // Troca o link fisicamente apenas se mudou a música, limpando o buffer travado anterior
             if (player.src !== urlFonte) {
                 player.src = urlFonte;
             }
-            player.currentTime = tempoDeCorte;
+            player.currentTime = 0; // Sempre começa do início da música!
 
             icon.className = "fas fa-spinner fa-spin";
 
@@ -477,12 +453,14 @@
                 card.classList.add('playing');
                 
                 txtTitle.innerText = ConvertName(faixa.name);
+                document.getElementById('artist-name').innerText = "../../" + faixa.artist; // Estiliza o prefixo limpo
                 document.getElementById('artist-name').innerText = faixa.artist;
                 txtCover.src = faixa.capaUrl;
-                txtStatus.innerText = "Transmissão Digital em Tempo Real";
+                txtStatus.innerText = "Transmissão Digital EXNA FM";
                 
                 updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             }).catch((err) => {
+                console.log("Erro de play automático interceptado:", err);
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
@@ -498,7 +476,7 @@
             if (player.paused) {
                 estaPausadoManualmente = false;
                 icon.className = "fas fa-spinner fa-spin";
-                tocarFaixaIndice(indiceMusicaAtual, true); 
+                tocarFaixaIndice(indiceMusicaAtual); 
             } else {
                 estaPausadoManualmente = true;
                 player.pause();
@@ -509,17 +487,18 @@
             }
         }
 
+        // BLINDAGEM DO BOLSO: Evento físico puramente sequencial engata a terceira, quarta... sem travar nunca!
         player.onended = () => {
             if (estaPausadoManualmente) return;
             icon.className = "fas fa-spinner fa-spin";
             let proximoIndice = indiceMusicaAtual + 1;
-            tocarFaixaIndice(proximoIndice, false); // Avanço físico direto impede silêncio ou paradas na tela bloqueada
+            tocarFaixaIndice(proximoIndice); 
         };
 
         player.onerror = () => {
             if (!estaPausadoManualmente) {
                 let proximoIndice = indiceMusicaAtual + 1;
-                tocarFaixaIndice(proximoIndice, false);
+                tocarFaixaIndice(proximoIndice);
             }
         };
 
