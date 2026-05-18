@@ -9,7 +9,14 @@
     
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo-quadrada.png">
-    
+            /* Ajuste automático para modo incorporado (Iframe) */
+        @media (max-height: 500px) {
+            body { background-image: none; background-color: transparent; min-height: auto; }
+            main { padding: 5px; }
+            .glass-player { max-width: 100%; border-radius: 20px; padding: 20px 15px; box-shadow: none; }
+            footer { display: none; } /* Esconde o rodapé grande se o espaço for mini */
+        }
+
     <style>
         :root {
             --primary-purple: #8a2be2;
