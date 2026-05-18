@@ -10,7 +10,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo-quadrada.png">
             
-
     <style>
         :root {
             --primary-purple: #8a2be2;
@@ -260,7 +259,6 @@
             .cover-area { width: 190px; height: 190px; }
             .pwa-float-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 1.1rem; }
         }
-        /* Ajuste automático para modo incorporado (Iframe) */
         @media (max-height: 500px) {
             body { background-image: none; background-color: transparent; min-height: auto; }
             main { padding: 5px; }
@@ -311,7 +309,7 @@
         <div class="social-links">
             <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
             <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
-            <a href="https://wa.me/" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
         </div>
         <div class="copyright">
             EXNA FM © 2026 | NaldoA | Todos os Direitos Reservados
@@ -401,7 +399,6 @@
             let resultado = [];
             let ultimoArtista = "";
 
-            // ARY_SEED: Semente baseada no ano, mês, dia e hora atual do mundo real para rotacionar as faixas o dia todo
             let dataAtual = new Date();
             let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate() + dataAtual.getHours();
 
@@ -430,10 +427,8 @@
         function obterPontoDaGradeAoVivo() {
             if (gradeSincronizadaGlobal.length === 0) return null;
             
-            // MOTOR CORRIGIDO: Distribui as 100+ músicas baseando-se no minuto absoluto atual do dia do relógio mestre
             let data = new Date();
             let minutosDoDia = (data.getHours() * 60) + data.getMinutes();
-            
             let indexCalculado = minutosDoDia % gradeSincronizadaGlobal.length;
             
             return {
@@ -453,11 +448,10 @@
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            player.pause();
-            player.removeAttribute('src');
-            player.load();
-
-            player.src = urlFonte;
+            // OTIMIZADO: Altera a fonte de forma direta sem forçar o recarregamento binário pesado do load()
+            if (player.src !== urlFonte) {
+                player.src = urlFonte;
+            }
             
             if (doInicioAbsoluto) {
                 const checkSinc = obterPontoDaGradeAoVivo();
@@ -510,7 +504,7 @@
             if (estaPausadoManualmente) return;
             icon.className = "fas fa-spinner fa-spin";
             let proximoIndice = indiceMusicaAtual + 1;
-            tocarFaixaIndice(proximoIndice, false); // Próxima do início absoluto impede silêncio e travamento no bolso
+            tocarFaixaIndice(proximoIndice, false); 
         };
 
         player.onerror = () => {
