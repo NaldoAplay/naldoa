@@ -231,7 +231,7 @@
             </div>
 
             <div class="live-indicator">
-                <i class="fas fa-microchip"></i> AUTODJ - LIVE
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 8px;"></i> EMISSÃO DIGITAL
             </div>
 
             <div class="cover-area">
@@ -239,7 +239,7 @@
             </div>
 
             <div class="info-area">
-                <h1 id="track-title">SINCRONIZANDO...</h1>
+                <h1 id="track-title">CONECTANDO...</h1>
                 <p id="artist-name">DJ NaldoA</p>
             </div>
 
@@ -280,6 +280,9 @@
         let imagens = [];
         let playlistMista = [];
 
+        txtTitle.innerText = "SINTONIA AO VIVO";
+        txtStatus.innerText = "Estação online";
+
         async function fetchDriveData() {
             const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
             try {
@@ -287,8 +290,14 @@
                 const data = await response.json();
                 
                 if(data.files && data.files.length > 0) {
-                    musicas = data.files.filter(f => f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
-                    imagens = data.files.filter(f => f.mimeType.includes('image'));
+                    musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
+                    imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
+
+                    if (musicas.length === 0) {
+                        txtTitle.innerText = "PROGRAMAÇÃO EXNA";
+                        txtStatus.innerText = "Sincronizando faixas...";
+                        return;
+                    }
 
                     playlistMista = musicas.map(m => {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
@@ -302,16 +311,17 @@
                         };
                     });
                     
-                    txtTitle.innerText = "EXNA FM CONNECTED";
+                    txtTitle.innerText = "EXNA FM - STREAMING";
                     btn.disabled = false;
                     icon.className = "fas fa-play";
-                    txtStatus.innerText = "AUTO-DJ ALEATÓRIO ATIVO";
+                    txtStatus.innerText = "Estação sintonizada";
                 } else {
-                    txtTitle.innerText = "PASTA VAZIA";
+                    txtTitle.innerText = "EXNA FM SINTONIA";
+                    txtStatus.innerText = "Estação vazia ou inacessível";
                 }
             } catch (e) {
-                txtTitle.innerText = "ERRO DE CONEXÃO";
-                txtStatus.innerText = "Verifique os limites da sua API.";
+                txtTitle.innerText = "EXNA FM";
+                txtStatus.innerText = "Erro na rede.";
             }
         }
 
@@ -335,7 +345,6 @@
             return listaEmbaralhada;
         }
 
-        // Correção aplicada na linha matemática temporal
         function getLiveState() {
             let duracaoTotalCadeia = playlistMista.reduce((a, b) => a + b.dur, 0);
             let listaDaGrade = obterPlaylistEmbaralhadaEstavel(duracaoTotalCadeia);
@@ -355,10 +364,11 @@
         }
 
         function toggleRadio() {
+            if (playlistMista.length === 0) return;
+
             if (player.paused) {
                 const state = getLiveState();
                 
-                // CORREÇÃO: URL oficial de streaming via API com alt=media
                 player.src = `https://www.googleapis.com/drive/v3/files/${state.music.id}?alt=media&key=${API_KEY}`;
                 player.currentTime = state.seek;
                 
@@ -369,12 +379,11 @@
                     
                     txtTitle.innerText = state.music.name;
                     txtCover.src = state.music.capaUrl;
-                    txtStatus.innerText = "Ouvindo ao vivo com o mundo";
+                    txtStatus.innerText = "Transmissão Digital Coletiva";
                     
                     updateLockScreen(state.music.name, state.music.capaUrl);
                 }).catch((error) => {
-                    console.error("Erro no play:", error);
-                    txtStatus.innerText = "Clique novamente para iniciar.";
+                    txtStatus.innerText = "Tente iniciar novamente.";
                 });
             } else {
                 player.pause();
@@ -382,9 +391,9 @@
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
-                txtTitle.innerText = "EXNA FM";
+                txtTitle.innerText = "SINTONIA AO VIVO";
                 txtCover.src = "logo-quadrada.png";
-                txtStatus.innerText = "Sintonia Pausada.";
+                txtStatus.innerText = "Estação online";
             }
         }
 
@@ -393,14 +402,13 @@
                 const check = getLiveState();
                 if (!player.src.includes(check.music.id)) {
                     player.pause();
-                    // CORREÇÃO: Transição automática ajustada para alt=media
                     player.src = `https://www.googleapis.com/drive/v3/files/${check.music.id}?alt=media&key=${API_KEY}`;
                     player.currentTime = check.seek;
                     player.play().then(() => {
                         txtTitle.innerText = check.music.name;
                         txtCover.src = check.music.capaUrl;
                         updateLockScreen(check.music.name, check.music.capaUrl);
-                    }).catch(e => console.log("Erro na transição automática:", e));
+                    });
                 }
             }
         }, 4000);
@@ -410,7 +418,7 @@
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: title,
                     artist: 'DJ NaldoA',
-                    album: 'EXNA FM - AutoDJ',
+                    album: 'EXNA FM',
                     artwork: [
                         { src: capaUrl, sizes: '512x512', type: 'image/png' },
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
