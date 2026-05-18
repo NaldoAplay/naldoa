@@ -333,7 +333,7 @@
         let gradeOriginal = [];
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
-        let blocoTempoFixo = 180; // 3 minutos por faixa
+        let blocoTempoFixo = 180; 
         let deferredPrompt;
         let estaPausadoManualmente = true;
 
@@ -384,7 +384,6 @@
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
-                    // Sintoniza o "Ao Vivo" simulado pelo relógio mestre na abertura do site
                     estaPausadoManualmente = false;
                     sincronizarEPlayComGradeGlobal(true);
 
@@ -460,14 +459,11 @@
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            // Troca a fonte direto sem quebrar o buffer do hardware móvel
             if (player.src !== urlFonte) {
                 player.src = urlFonte;
             }
             
-            // Só injeta o tempo quebrado se for a primeira abertura (Ao Vivo), se não, roda do zero (bolso contínuo)
             player.currentTime = tempoDeCorte;
-
             icon.className = "fas fa-spinner fa-spin";
 
             player.play().then(() => {
@@ -475,6 +471,7 @@
                 btn.classList.add('active');
                 card.classList.add('playing');
                 
+                // CORREÇÃO CRUCIAL: Injeta as strings de informação e capas reais na interface na hora do Play!
                 txtTitle.innerText = ConvertName(faixa.name);
                 document.getElementById('artist-name').innerText = faixa.artist;
                 txtCover.src = faixa.capaUrl;
@@ -498,7 +495,6 @@
                 estaPausadoManualmente = false;
                 icon.className = "fas fa-spinner fa-spin";
                 
-                // CORREÇÃO DO PAUSE: Se o player já tem uma música carregada na agulha, dá play de onde parou sem pular de faixa!
                 if (player.src && player.src !== "") {
                     player.play().then(() => {
                         icon.className = "fas fa-stop";
@@ -512,7 +508,6 @@
                     sincronizarEPlayComGradeGlobal(true);
                 }
             } else {
-                // Apenas pausa o elemento de áudio nativo, mantendo a música travada na posição correta
                 player.pause();
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
@@ -521,13 +516,12 @@
             }
         }
 
-        // CORTA O SILÊNCIO E DEFIENDE O BOLSO: Passa para a próxima música sequencial perfeitamente com a tela apagada
         player.onended = () => {
             if (estaPausadoManualmente) return;
             icon.className = "fas fa-spinner fa-spin";
             
             indiceMusicaAtual++; 
-            sincronizarEPlayComGradeGlobal(false); // Carrega do início absoluto sem travar a internet do celular
+            sincronizarEPlayComGradeGlobal(false); 
         };
 
         player.onerror = () => {
@@ -555,7 +549,6 @@
         }
 
         const pwaBtn = document.getElementById('pwa-install-btn');
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
