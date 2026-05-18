@@ -3,228 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXNA Downloader Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>EXNA FM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { background-color: #0b0f19; color: #f1f5f9; }
-        .custom-glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+        :root {
+            --primary-purple: #8a2be2;
+            --neon-aqua: #66fcf1;
+            --neon-pink: #ff0055;
+            --dark-bg: #050608;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(138, 43, 226, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(255, 0, 85, 0.15) 0%, transparent 45%);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glass-player {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            width: 100%;
+            max-width: 380px;
+            padding: 35px 25px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.02);
+            position: relative;
+        }
+
+        .radio-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+        }
+
+        .radio-top-logo {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px var(--neon-aqua));
+        }
+
+        .radio-brand-text h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            margin: 0;
+            letter-spacing: 1px;
+            text-align: left;
+        }
+
+        .radio-brand-text h2 span { color: var(--neon-aqua); }
+
+        .radio-brand-text p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--neon-pink);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .live-indicator {
+            background: var(--neon-pink);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px var(--neon-pink);
+            animation: pulse 2s infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        .cover-area {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 25px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: all 0.5s ease;
+        }
+
+        .playing .cover-area {
+            border-color: var(--neon-aqua);
+            box-shadow: 0 0 30px rgba(102, 252, 241, 0.25);
+            transform: scale(1.02);
+        }
+
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: #111;
+        }
+
+        .info-area h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            margin: 0;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .info-area p {
+            font-size: 1.1rem;
+            color: var(--neon-aqua);
+            margin: 6px 0 30px;
+            font-weight: 600;
+        }
+
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(45deg, var(--primary-purple), var(--neon-pink));
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 35px rgba(255, 0, 85, 0.5);
+        }
+
+        .play-btn.active {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 30px #fff;
+        }
+
+        footer {
+            padding: 25px;
+            text-align: center;
+            background: rgba(0,0,0,0.4);
+            border-top: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .social-links {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+        }
+
+        .social-links a {
+            color: var(--neon-aqua);
+            font-size: 1.4rem;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--neon-pink);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 480px) {
+            .glass-player { padding: 30px 20px; margin: 10px; }
+            .cover-area { width: 190px; height: 190px; }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-4">
+<body>
 
-    <div class="w-full max-w-2xl custom-glass border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl my-auto">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent sm:text-4xl">
-                EXNA Downloader
-            </h1>
-            <p class="text-slate-400 mt-2 text-sm">Conversor inteligente multimídia para Playlists e Vídeos avulsos.</p>
-        </div>
-
-        <div class="space-y-4">
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">URL da Playlist ou Vídeo do YouTube</label>
-                <input type="text" id="playlistUrl" 
-                    placeholder="https://youtube.com/playlist?list=... ou watch?v=..." 
-                    class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-orange-500 text-sm mb-4">
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800/60">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Formato de Saída</label>
-                    <select id="formatoMídia" onchange="alternarOpcoesQualidade()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500">
-                        <option value="mp3">Áudio (MP3)</option>
-                        <option value="mp4">Vídeo (MP4)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Qualidade Máxima</label>
-                    <select id="qualidadeMídia" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"></select>
-                </div>
-            </div>
-
-            <button onclick="iniciarProcessamento()" id="btnAcao"
-                class="w-full mt-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-medium py-3 rounded-xl transition-all duration-300 shadow-lg flex items-center justify-center gap-2 text-sm">
-                <span id="btnText">Analisar & Começar Download</span>
-            </button>
-        </div>
-
-        <div id="statusPainel" class="hidden mt-8 space-y-4 border-t border-slate-800/80 pt-6">
-            <div class="flex justify-between items-center text-sm bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
-                <div class="flex items-center gap-2">
-                    <span class="relative flex h-2 w-2" id="pingStatus">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-                    </span>
-                    <span id="statusTxt" class="font-medium text-orange-400">Iniciando conexão...</span>
-                </div>
-                <span id="contador" class="text-slate-400 font-mono text-xs bg-slate-900 px-2 py-1 rounded border border-slate-800">0 / 0</span>
-            </div>
+    <main>
+        <div class="glass-player" id="main-player">
             
-            <div id="listaMusicas" class="max-h-80 overflow-y-auto space-y-3 pr-1"></div>
-        </div>
-    </div>
+            <div class="radio-header">
+                <img src="logo-quadrada.png" class="radio-top-logo" alt="EXNA Logo">
+                <div class="radio-brand-text">
+                    <h2>EXNA <span>FM</span></h2>
+                    <p>Ecossistemas EXNA</p>
+                </div>
+            </div>
 
-    <footer class="w-full text-center text-xs text-slate-600 tracking-wide pt-8 pb-4">
-        Ecossistemas EXNA &copy; 2026 — NaldoA
+            <div class="live-indicator">
+                <i class="fas fa-microchip"></i> AUTODJ - LIVE
+            </div>
+
+            <div class="cover-area">
+                <img src="logo-quadrada.png" id="track-cover" class="cover-img" alt="Capa da Música">
+            </div>
+
+            <div class="info-area">
+                <h1 id="track-title">SINCRONIZANDO...</h1>
+                <p id="artist-name">DJ NaldoA</p>
+            </div>
+
+            <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
+                <i class="fas fa-spinner fa-spin" id="btn-icon"></i>
+            </button>
+            
+            <p id="status-text" style="margin-top:20px; font-size: 0.8rem; color: #45a29e; font-weight: bold; letter-spacing: 1px;"></p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://wa.me/" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="copyright">
+            EXNA FM © 2026 | NaldoA | Todos os Direitos Reservados
+        </div>
     </footer>
 
+    <audio id="audio-core" crossorigin="anonymous"></audio>
+
     <script>
-        const BACKEND_URL = 'https://exna-downloader.onrender.com'; 
-        let filaDeMidias = [];
-        let indexAtual = 0;
+        const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
+        const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; // <--- ALTERE AQUI COM A SUA CHAVE
 
-        function alternarOpcoesQualidade() {
-            const formato = document.getElementById('formatoMídia').value;
-            const qualidadeSelect = document.getElementById('qualidadeMídia');
-            if (formato === 'mp3') {
-                qualidadeSelect.innerHTML = `
-                    <option value="320">320 kbps (Alta Fidelidade)</option>
-                    <option value="256">256 kbps (Média-Alta)</option>
-                    <option value="128">128 kbps (Econômica)</option>
-                `;
-            } else {
-                qualidadeSelect.innerHTML = `
-                    <option value="1080">1080p (Full HD)</option>
-                    <option value="720">720p (HD)</option>
-                    <option value="480">480p (Padrão)</option>
-                `;
-            }
-        }
-        alternarOpcoesQualidade();
+        const player = document.getElementById('audio-core');
+        const btn = document.getElementById('master-play');
+        const icon = document.getElementById('btn-icon');
+        const card = document.getElementById('main-player');
+        const txtTitle = document.getElementById('track-title');
+        const txtCover = document.getElementById('track-cover');
+        const txtStatus = document.getElementById('status-text');
 
-        // Função inteligente para esperar o Render acordar antes de dar erro
-        async function aguardarServidor() {
-            const statusTxt = document.getElementById('statusTxt');
-            let tentativas = 0;
-            while (tentativas < 15) {
-                try {
-                    statusTxt.innerText = "Acordando o servidor na nuvem (pode levar 1 min)...";
-                    const checagem = await fetch(`${BACKEND_URL}/api/ping`);
-                    if (checagem.ok) return true;
-                } catch (e) {
-                    tentativas++;
-                    await new Promise(r => setTimeout(r, 5000)); // Espera 5 segundos antes de tentar de novo
-                }
-            }
-            return false;
-        }
+        let musicas = [];
+        let imagens = [];
+        let playlistMista = [];
 
-        async function iniciarProcessamento() {
-            const urlInput = document.getElementById('playlistUrl').value.trim();
-            const formato = document.getElementById('formatoMídia').value;
-            const qualidade = document.getElementById('qualidadeMídia').value;
-            
-            const btn = document.getElementById('btnAcao');
-            const btnText = document.getElementById('btnText');
-            const painel = document.getElementById('statusPainel');
-            const statusTxt = document.getElementById('statusTxt');
-            const lista = document.getElementById('listaMusicas');
-
-            if (!urlInput) return alert('Por favor, insira uma URL.');
-
-            filaDeMidias = [];
-            indexAtual = 0;
-            lista.innerHTML = '';
-            painel.classList.remove('hidden');
-            btn.disabled = true;
-            btn.classList.add('opacity-40', 'cursor-not-allowed');
-            btnText.innerText = 'Conectando...';
-
-            // Executa a checagem inteligente do servidor em modo de repouso
-            const servidorPronto = await aguardarServidor();
-            if(!servidorPronto) {
-                statusTxt.innerText = 'O servidor demorou muito para responder. Tente novamente em instantes.';
-                statusTxt.className = 'font-medium text-red-400';
-                btn.disabled = false;
-                btn.classList.remove('opacity-40', 'cursor-not-allowed');
-                btnText.innerText = 'Analisar & Começar Download';
-                return;
-            }
-
-            statusTxt.innerText = 'Buscando informações da lista...';
-
+        async function fetchDriveData() {
+            const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
             try {
-                if (!urlInput.includes('list=')) {
-                    const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                    const match = urlInput.match(reg);
-                    const videoId = (match && match[2].length == 11) ? match[2] : null;
-                    if(!videoId) throw new Error();
-                    filaDeMidias = [{ id: videoId, title: 'Vídeo Individual', url: urlInput }];
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if(data.files && data.files.length > 0) {
+                    musicas = data.files.filter(f => f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
+                    imagens = data.files.filter(f => f.mimeType.includes('image'));
+
+                    playlistMista = musicas.map(m => {
+                        const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
+                        const capaCorrespondente = imagens.find(img => img.name.startsWith(nomeSemExtensao));
+                        
+                        return {
+                            id: m.id,
+                            name: nomeSemExtensao,
+                            dur: 240, 
+                            capaUrl: capaCorrespondente ? `https://drive.google.com/uc?id=${capaCorrespondente.id}&export=view` : 'logo-quadrada.png'
+                        };
+                    });
+                    
+                    txtTitle.innerText = "EXNA FM CONNECTED";
+                    btn.disabled = false;
+                    icon.className = "fas fa-play";
+                    txtStatus.innerText = "AUTO-DJ ALEATÓRIO ATIVO";
                 } else {
-                    const resposta = await fetch(`${BACKEND_URL}/api/playlist?url=${encodeURIComponent(urlInput)}`);
-                    const dados = await resposta.json();
-                    if (dados.error) throw new Error(dados.error);
-                    filaDeMidias = dados.tracks;
+                    txtTitle.innerText = "PASTA VAZIA";
                 }
-
-                document.getElementById('contador').innerText = `0 / ${filaDeMidias.length}`;
-                statusTxt.innerText = 'Lista carregada com sucesso!';
-                statusTxt.className = 'font-medium text-emerald-400';
-
-                lista.innerHTML = filaDeMidias.map((track, idx) => `
-                    <div id="item-${idx}" class="flex items-center gap-3 p-3 bg-slate-950/50 rounded-xl border border-slate-800/60 text-xs">
-                        <img src="https://img.youtube.com/vi/${track.id}/mqdefault.jpg" alt="Capa" class="w-16 h-10 object-cover rounded-lg border border-slate-800 shadow">
-                        <div class="flex-1 min-w-0">
-                            <p class="truncate text-slate-200 font-medium text-sm">${track.title}</p>
-                            <p class="text-slate-500 text-[10px] mt-0.5">Formato: <span class="uppercase font-bold text-slate-400">${formato}</span> (${formato === 'mp3' ? qualidade+'kbps' : qualidade+'p'})</p>
-                        </div>
-                        <span id="badge-${idx}" class="text-slate-500 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider text-[10px]">Fila</span>
-                    </div>
-                `).join('');
-
-                baixarProximaMídia(formato, qualidade);
-
-            } catch (erro) {
-                statusTxt.innerText = 'Erro ao processar os links. Verifique se a lista é pública.';
-                statusTxt.className = 'font-medium text-red-400';
-                btn.disabled = false;
-                btn.classList.remove('opacity-40', 'cursor-not-allowed');
-                btnText.innerText = 'Analisar & Começar Download';
+            } catch (e) {
+                txtTitle.innerText = "ERRO DE CONEXÃO";
+                txtStatus.innerText = "Verifique os limites da sua API.";
             }
         }
 
-        async function baixarProximaMídia(formato, qualidade) {
-            const statusTxt = document.getElementById('statusTxt');
-            const btn = document.getElementById('btnAcao');
-            const btnText = document.getElementById('btnText');
-
-            if (indexAtual >= filaDeMidias.length) {
-                statusTxt.innerText = `🎉 Pronto! Playlist processada e baixada com sucesso.`;
-                statusTxt.className = 'font-medium text-emerald-400';
-                btn.disabled = false;
-                btn.classList.remove('opacity-40', 'cursor-not-allowed');
-                btnText.innerText = 'Analisar & Começar Download';
-                return;
-            }
-
-            const midiaAtual = filaDeMidias[indexAtual];
-            statusTxt.innerText = `Baixando: ${midiaAtual.title}`;
-            statusTxt.className = 'font-medium text-orange-400';
-            document.getElementById('contador').innerText = `${indexAtual + 1} / ${filaDeMidias.length}`;
-
-            const badge = document.getElementById(`badge-${indexAtual}`);
-            const linha = document.getElementById(`item-${indexAtual}`);
+        function obterPlaylistEmbaralhadaEstavel(duracaoTotal) {
+            let tempoAtual = Math.floor(Date.now() / 1000);
+            let tempoBase = 1767222000;
+            let cicloAtual = Math.floor((tempoAtual - tempoBase) / duracaoTotal);
             
-            badge.innerText = 'Baixando';
-            badge.className = 'text-orange-400 bg-orange-950/40 border border-orange-800/40 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider text-[10px]';
-            linha.classList.add('border-orange-500/20', 'bg-orange-950/10');
-            linha.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            let listaEmbaralhada = [...playlistMista];
+            let semente = cicloAtual || 1;
+            
+            function randomEstavel() {
+                let x = Math.sin(semente++) * 10000;
+                return x - Math.floor(x);
+            }
 
-            window.location.href = `${BACKEND_URL}/api/download?url=${encodeURIComponent(midiaAtual.url)}&format=${formato}&quality=${qualidade}`;
-
-            setTimeout(() => {
-                badge.innerText = `${formato === 'mp3' ? qualidade + 'K' : quality + 'P'} OK`;
-                badge.className = 'text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider text-[10px]';
-                linha.classList.remove('border-orange-500/20', 'bg-orange-950/10');
-                linha.classList.add('border-emerald-500/20', 'opacity-50');
-
-                indexAtual++;
-                baixarProximaMídia(formato, qualidade);
-            }, 8000); // Janela estável para processamento de codec do FFmpeg
+            for (let i = listaEmbaralhada.length - 1; i > 0; i--) {
+                const j = Math.floor(randomEstavel() * (i + 1));
+                [listaEmbaralhada[i], listaEmbaralhada[j]] = [listaEmbaralhada[j], listaEmbaralhada[i]];
+            }
+            return listaEmbaralhada;
         }
+
+        function getLiveState() {
+            let duracaoTotalCadeia = playlistMista.reduce((a, b) => a + b.dur, 0);
+            let listaDaGrade = obterPlaylistEmbaralhadaEstavel(duracaoTotalCadeia);
+
+            let tempoBase = 1767222000;
+            let now = Math.floor(Date.now() / 1000);
+            let elapsed = (now - tempoBase) % duracaoTotalCadeia;
+            if (elapsed < 0) elapsed += duracaoTotalCadeia;
+
+            let current = 0;
+            for (let m of listaDaGrade) {
+                if (elapsed < current + m.dur) {
+                    return { music: m, seek: elapsed - current };
+                }
+                current += m.dur;
+            }
+        }
+
+        function toggleRadio() {
+            if (player.paused) {
+                const state = getLiveState();
+                player.src = `https://drive.google.com/uc?id=${state.music.id}&export=view`;
+                player.currentTime = state.seek;
+                
+                player.play().then(() => {
+                    icon.className = "fas fa-stop";
+                    btn.classList.add('active');
+                    card.classList.add('playing');
+                    
+                    txtTitle.innerText = state.music.name;
+                    txtCover.src = state.music.capaUrl;
+                    txtStatus.innerText = "Ouvindo ao vivo com o mundo";
+                    
+                    updateLockScreen(state.music.name, state.music.capaUrl);
+                }).catch(() => {
+                    txtStatus.innerText = "Clique novamente para iniciar.";
+                });
+            } else {
+                player.pause();
+                player.src = "";
+                icon.className = "fas fa-play";
+                btn.classList.remove('active');
+                card.classList.remove('playing');
+                txtTitle.innerText = "EXNA FM";
+                txtCover.src = "logo-quadrada.png";
+                txtStatus.innerText = "Sintonia Pausada.";
+            }
+        }
+
+        setInterval(() => {
+            if (!player.paused && playlistMista.length > 0) {
+                const check = getLiveState();
+                if (!player.src.includes(check.music.id)) {
+                    player.pause();
+                    player.src = `https://drive.google.com/uc?id=${check.music.id}&export=view`;
+                    player.currentTime = check.seek;
+                    player.play().then(() => {
+                        txtTitle.innerText = check.music.name;
+                        txtCover.src = check.music.capaUrl;
+                        updateLockScreen(check.music.name, check.music.capaUrl);
+                    });
+                }
+            }
+        }, 4000);
+
+        function updateLockScreen(title, capaUrl) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: title,
+                    artist: 'DJ NaldoA',
+                    album: 'EXNA FM - AutoDJ',
+                    artwork: [
+                        { src: capaUrl, sizes: '512x512', type: 'image/png' },
+                        { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+                
+                navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
+                navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
+            }
+        }
+
+        fetchDriveData();
     </script>
 </body>
 </html>
