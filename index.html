@@ -231,7 +231,7 @@
             </div>
 
             <div class="live-indicator">
-                <i class="fas fa-signal"></i> EMISSÃO DIGITAL AO VIVO
+                <i class="fas fa-signal"></i> TRANSMISSÃO CONTÍNUA 24H
             </div>
 
             <div class="cover-area">
@@ -278,7 +278,8 @@
 
         let musicas = [];
         let imagens = [];
-        let playlistMista = [];
+        let gradeProgramacao = [];
+        let indiceMusicaAtual = 0;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Buscando transmissão...";
@@ -295,135 +296,112 @@
 
                     if (musicas.length === 0) {
                         txtTitle.innerText = "EXNA FM";
-                        txtStatus.innerText = "Nenhuma música encontrada.";
+                        txtStatus.innerText = "Playlist sem arquivos mp3.";
                         return;
                     }
 
-                    playlistMista = musicas.map(m => {
+                    // Associa as capas
+                    gradeProgramacao = musicas.map(m => {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         const capaCorrespondente = imagens.find(img => img.name.startsWith(nomeSemExtensao));
                         
-                        // CORREÇÃO: Capas agora passam com alt=media via API oficial para evitar bloqueios
                         return {
                             id: m.id,
                             name: nomeSemExtensao,
-                            dur: 240, 
                             capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
                         };
                     });
                     
-                    txtTitle.innerText = "EXNA FM SINTONIZADA";
+                    // Sincroniza um embaralhamento fixo baseado no ciclo do dia para fingir a grade viva ao abrir
+                    gradeProgramacao = embaralharGradeEstavel(gradeProgramacao);
+
+                    txtTitle.innerText = "RADIO EXNA FM";
                     btn.disabled = false;
                     icon.className = "fas fa-play";
-                    txtStatus.innerText = "Pronta para tocar";
+                    txtStatus.innerText = "Estação sintonizada e pronta";
                 } else {
                     txtTitle.innerText = "EXNA FM";
-                    txtStatus.innerText = "Pasta vazia ou protegida.";
+                    txtStatus.innerText = "Pasta do Drive indisponível.";
                 }
             } catch (e) {
                 txtTitle.innerText = "EXNA FM";
-                txtStatus.innerText = "Erro na conexão com o Drive.";
+                txtStatus.innerText = "Erro ao ler dados da nuvem.";
             }
         }
 
-        function obterPlaylistEmbaralhadaEstavel(duracaoTotal) {
+        function embaralharGradeEstavel(lista) {
+            let resultado = [...lista];
             let tempoAtual = Math.floor(Date.now() / 1000);
-            let tempoBase = 1767222000;
-            let cicloAtual = Math.floor((tempoAtual - tempoBase) / duracaoTotal);
+            let semente = Math.floor(tempoAtual / 86400); // Muda a ordem de forma estável uma vez por dia
             
-            let listaEmbaralhada = [...playlistMista];
-            let semente = cicloAtual || 1;
-            
-            function randomEstavel() {
+            function random() {
                 let x = Math.sin(semente++) * 10000;
                 return x - Math.floor(x);
             }
 
-            for (let i = listaEmbaralhada.length - 1; i > 0; i--) {
-                const j = Math.floor(randomEstavel() * (i + 1));
-                [listaEmbaralhada[i], listaEmbaralhada[j]] = [listaEmbaralhada[j], listaEmbaralhada[i]];
+            for (let i = resultado.length - 1; i > 0; i--) {
+                const j = Math.floor(random() * (i + 1));
+                [resultado[i], resultado[j]] = [resultado[j], resultado[i]];
             }
-            return listaEmbaralhada;
+            return resultado;
         }
 
-        function getLiveState() {
-            let duracaoTotalCadeia = playlistMista.reduce((a, b) => a + b.dur, 0);
-            let listaDaGrade = obterPlaylistEmbaralhadaEstavel(duracaoTotalCadeia);
-
-            let tempoBase = 1767222000;
-            let now = Math.floor(Date.now() / 1000);
-            let elapsed = (now - tempoBase) % duracaoTotalCadeia;
-            if (elapsed < 0) elapsed += duracaoTotalCadeia;
-
-            let current = 0;
-            for (let m of listaDaGrade) {
-                if (elapsed < current + m.dur) {
-                    return { music: m, seek: elapsed - current };
-                }
-                current += m.dur;
-            }
-        }
-
-        function tocarGradeAoVivo() {
-            if (playlistMista.length === 0) return;
-            const state = getLiveState();
+        // FUNÇÃO DE EXECUÇÃO DA MÚSICA ATUAL DA PROGRAMAÇÃO
+        function tocarMusicaDaGrade(indice, pularSegundos = 0) {
+            if (gradeProgramacao.length === 0) return;
             
-            player.src = `https://www.googleapis.com/drive/v3/files/${state.music.id}?alt=media&key=${API_KEY}`;
-            player.currentTime = state.seek;
+            // Garante o loop infinito dentro do array da lista
+            if (indice >= gradeProgramacao.length) indice = 0;
+            if (indice < 0) indice = gradeProgramacao.length - 1;
             
+            indiceMusicaAtual = indice;
+            const faixa = gradeProgramacao[indiceMusicaAtual];
+
+            player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+            player.currentTime = pularSegundos;
+
             player.play().then(() => {
                 icon.className = "fas fa-stop";
                 btn.classList.add('active');
                 card.classList.add('playing');
                 
-                txtTitle.innerText = state.music.name;
-                txtCover.src = state.music.capaUrl;
-                txtStatus.innerText = "Transmissão Coletiva Sincronizada";
+                // Atualiza tela principal com dados da faixa real
+                txtTitle.innerText = faixa.name;
+                txtCover.src = f = faixa.capaUrl;
+                txtStatus.innerText = "Transmitindo ao vivo";
                 
-                updateLockScreen(state.music.name, state.music.capaUrl);
+                // Atualiza a tela de bloqueio com os dados reais
+                updateLockScreen(faixa.name, faixa.capaUrl);
             }).catch(() => {
-                txtStatus.innerText = "Toque para reproduzir.";
+                txtStatus.innerText = "Sintonia interrompida. Toque no Play.";
             });
         }
 
         function toggleRadio() {
             if (player.paused) {
-                tocarGradeAoVivo();
+                // Ao dar o play pela primeira vez, calcula um ponto de partida pseudo-live
+                let pontoPartidaIndice = Math.floor(Math.random() * gradeProgramacao.length);
+                tocarMusicaDaGrade(pontoPartidaIndice, 0);
             } else {
                 player.pause();
                 player.src = "";
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
-                txtTitle.innerText = "SINTONIA ONLINE";
+                txtTitle.innerText = "RADIO EXNA FM";
                 txtCover.src = "logo-quadrada.png";
-                txtStatus.innerText = "Pronta para tocar";
+                txtStatus.innerText = "Estação online";
             }
         }
 
-        // CORREÇÃO: Quando o arquivo atual termina, pula imediatamente para a próxima da lista
+        // SOLUÇÃO DO TRAVAMENTO: Evento disparado nativamente pelo navegador assim que o arquivo acaba
         player.onended = () => {
-            console.log("Faixa finalizada. Sincronizando próxima da grade...");
-            tocarGradeAoVivo();
+            console.log("Música encerrada. Emendando próxima faixa automaticamente...");
+            let próximoIndice = indiceMusicaAtual + 1;
+            tocarMusicaDaGrade(próximoIndice, 0); // Dispara a próxima sem silenciar ou parar a rádio
         };
 
-        // Monitor de Sincronia de Grade Dinâmica
-        setInterval(() => {
-            if (!player.paused && playlistMista.length > 0) {
-                const check = getLiveState();
-                if (!player.src.includes(check.music.id)) {
-                    player.pause();
-                    player.src = `https://www.googleapis.com/drive/v3/files/${check.music.id}?alt=media&key=${API_KEY}`;
-                    player.currentTime = check.seek;
-                    player.play().then(() => {
-                        txtTitle.innerText = check.music.name;
-                        txtCover.src = check.music.capaUrl;
-                        updateLockScreen(check.music.name, check.music.capaUrl);
-                    });
-                }
-            }
-        }, 4000);
-
+        // Gerenciador da Tela de Bloqueio do Aparelho
         function updateLockScreen(title, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -436,8 +414,11 @@
                     ]
                 });
                 
+                // Permite controlar o fluxo de play/pause direto pelo painel de notificações/bloqueio
                 navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
                 navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
+                navigator.mediaSession.setActionHandler('nexttrack', () => { tocarMusicaDaGrade(indiceMusicaAtual + 1, 0); });
+                navigator.mediaSession.setActionHandler('previoustrack', () => { tocarMusicaDaGrade(indiceMusicaAtual - 1, 0); });
             }
         }
 
