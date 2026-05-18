@@ -289,7 +289,7 @@
             </div>
 
             <div class="info-area">
-                <h1 id="track-title">SINTONIZANDO...</h1>
+                <h1 id="track-title">CONECTANDO...</h1>
                 <p id="artist-name">DJ NaldoA</p>
             </div>
 
@@ -379,11 +379,12 @@
                     
                     gradeSincronizadaGlobal = gerarGradeMestreEstavel();
 
-                    txtTitle.innerText = "RADIO EXNA FM";
+                    // Interface liberada
                     btn.disabled = false;
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
+                    // GATILHO DIRETO: Atualiza as informações da música atual na tela ANTES do play rodar
                     estaPausadoManualmente = false;
                     sincronizarEPlayComGradeGlobal(true);
 
@@ -462,27 +463,28 @@
             if (player.src !== urlFonte) {
                 player.src = urlFonte;
             }
-            
             player.currentTime = tempoDeCorte;
+
+            // CORREÇÃO FIEL: Injeta os textos e a capa de forma imediata na tela, independente do sucesso do autoplay do navegador!
+            txtTitle.innerText = ConvertName(faixa.name);
+            document.getElementById('artist-name').innerText = faixa.artist;
+            txtCover.src = faixa.capaUrl;
+            txtStatus.innerText = "Sintonizando transmissão ao vivo...";
+
             icon.className = "fas fa-spinner fa-spin";
 
             player.play().then(() => {
                 icon.className = "fas fa-stop";
                 btn.classList.add('active');
                 card.classList.add('playing');
-                
-                // CORREÇÃO CRUCIAL: Injeta as strings de informação e capas reais na interface na hora do Play!
-                txtTitle.innerText = ConvertName(faixa.name);
-                document.getElementById('artist-name').innerText = faixa.artist;
-                txtCover.src = faixa.capaUrl;
                 txtStatus.innerText = "Transmissão Digital em Tempo Real";
-                
                 updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             }).catch((err) => {
+                // Se o navegador barrar o autoplay, o visual fica montado certinho com as informações da música e espera o clique do usuário
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
-                txtStatus.innerText = "Toque no Play para sintonizar.";
+                txtStatus.innerText = "Toque no Play para ouvir ao vivo.";
             });
         }
 
@@ -519,7 +521,6 @@
         player.onended = () => {
             if (estaPausadoManualmente) return;
             icon.className = "fas fa-spinner fa-spin";
-            
             indiceMusicaAtual++; 
             sincronizarEPlayComGradeGlobal(false); 
         };
