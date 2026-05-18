@@ -331,7 +331,7 @@
         let blocoTempoFixo = 200; 
         let deferredPrompt;
         let estaPausadoManualmente = true;
-        let forçarProximaMusicaNativa = false; // Trava inteligente anti-loop de vinheta
+        let forçarProximaMusicaNativa = false; 
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -453,7 +453,7 @@
             let tempoAtualNaLinhaGeral = timestampSegundos % duracaoTotalGrade;
             
             let indexCalculado = Math.floor(tempoAtualNaLinhaGeral / blocoTempoFixo);
-            let segundoExatoNaFaixa = tempoAtualNaGrade = tempoAtualNaLinhaGeral % blocoTempoFixo;
+            let segundoExatoNaFaixa = tempoAtualNaLinhaGeral % blocoTempoFixo;
 
             return {
                 indice: indexCalculado,
@@ -464,7 +464,6 @@
         function sincronizarEPlayComGradeGlobal() {
             if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
 
-            // Se a música acabou de passar nativamente em background, ignora a trava do relógio mestre para evitar o loop!
             if (forçarProximaMusicaNativa) return;
 
             const estadoGlobal = obterPontoDaGradeAoVivo();
@@ -474,11 +473,10 @@
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
 
             let urlFonte = faixa.isVinheta ? faixa.vinhetaUrl : `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
-            let tempoDeCorte = faixa.isVinheta ? 0 : estadoGlobal.seek; // Vinhetas sempre começam do início absoluto
+            let tempoDeCorte = faixa.isVinheta ? 0 : estadoGlobal.seek;
 
-            if (player.src !== urlFonte) {
+            if (player.src !== urlFonte && !player.src.endsWith(urlFonte)) {
                 player.src = urlFonte;
-                // Só joga a agulha de tempo se não for vinheta local
                 if (!faixa.isVinheta) player.currentTime = tempoDeCorte;
                 icon.className = "fas fa-spinner fa-spin";
             }
@@ -510,6 +508,7 @@
             if (player.paused) {
                 estaPausadoManualmente = false;
                 forçarProximaMusicaNativa = false;
+                icon.className = "fas fa-spinner fa-spin";
                 sincronizarEPlayComGradeGlobal();
             } else {
                 estaPausadoManualmente = true;
@@ -521,28 +520,30 @@
             }
         }
 
-        // DESTRAVAMENTO DO SEGUNDO PLANO: Próxima mídia engatilha na hora sem obedecer ao congelamento do relógio
         player.onended = () => {
             if (!estaPausadoManualmente) {
                 console.log("Mídia concluída. Pulando bloco...");
-                forçarProximaMusicaNativa = true; // Ativa a blindagem temporária anti-loop
+                forçarProximaMusicaNativa = true; 
 
                 indiceMusicaAtual = (indiceMusicaAtual + 1) % gradeSincronizadaGlobal.length;
                 const proximaFaixa = gradeSincronizadaGlobal[indiceMusicaAtual];
                 
                 player.src = proximaFaixa.isVinheta ? proximaFaixa.vinhetaUrl : `https://www.googleapis.com/drive/v3/files/${proximaFaixa.id}?alt=media&key=${API_KEY}`;
                 player.currentTime = 0;
+                icon.className = "fas fa-spinner fa-spin";
                 
                 player.play().then(() => {
+                    icon.className = "fas fa-stop";
                     txtTitle.innerText = ConvertName(proximaFaixa.name);
                     document.getElementById('artist-name').innerText = proximaFaixa.artist;
                     txtCover.src = proximaFaixa.capaUrl;
                     updateLockScreen(proximaFaixa.name, proximaFaixa.artist, proximaFaixa.capaUrl);
+                }).catch(() => {
+                    icon.className = "fas fa-play";
                 });
             }
         };
 
-        // MONITOR DO RELÓGIO GLOBAL EM SEGUNDO PLANO
         setInterval(() => {
             if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0) {
                 const checkEstado = obterPontoDaGradeAoVivo();
@@ -550,9 +551,8 @@
                     const faixaEsperada = gradeSincronizadaGlobal[checkEstado.indice];
                     const urlEsperada = faixaEsperada.isVinheta ? faixaEsperada.vinhetaUrl : `https://www.googleapis.com/drive/v3/files/${faixaEsperada.id}?alt=media&key=${API_KEY}`;
                     
-                    // Se o relógio do mundo mudou o bloco de música natural da grade, desativa a blindagem nativa
-                    if (player.src !== urlEsperada && !player.src.includes(faixaEsperada.id)) {
-                        forçarProximaMusicaNativa = false; // Devolve o controle para a sincronia global estável
+                    if (player.src !== urlEsperada && !player.src.endsWith(urlEsperada)) {
+                        forçarProximaMusicaNativa = false; 
                         sincronizarEPlayComGradeGlobal();
                     }
                 }
