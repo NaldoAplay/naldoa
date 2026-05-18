@@ -289,7 +289,7 @@
             </div>
 
             <div class="info-area">
-                <h1 id="track-title">CONECTANDO...</h1>
+                <h1 id="track-title">SINTONIZANDO...</h1>
                 <p id="artist-name">DJ NaldoA</p>
             </div>
 
@@ -379,12 +379,10 @@
                     
                     gradeSincronizadaGlobal = gerarGradeMestreEstavel();
 
-                    // Interface liberada
                     btn.disabled = false;
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
-                    // GATILHO DIRETO: Atualiza as informações da música atual na tela ANTES do play rodar
                     estaPausadoManualmente = false;
                     sincronizarEPlayComGradeGlobal(true);
 
@@ -465,11 +463,14 @@
             }
             player.currentTime = tempoDeCorte;
 
-            // CORREÇÃO FIEL: Injeta os textos e a capa de forma imediata na tela, independente do sucesso do autoplay do navegador!
+            // BLINDAGEM VISUAL: Injeta o título, artista e a capa no app imediatamente
             txtTitle.innerText = ConvertName(faixa.name);
             document.getElementById('artist-name').innerText = faixa.artist;
             txtCover.src = faixa.capaUrl;
             txtStatus.innerText = "Sintonizando transmissão ao vivo...";
+
+            // CORREÇÃO CRUCIAL DA TELA BLOQUEADA: Atualiza o sistema do celular na hora, ANTES do play rodar de verdade!
+            updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
 
             icon.className = "fas fa-spinner fa-spin";
 
@@ -478,9 +479,8 @@
                 btn.classList.add('active');
                 card.classList.add('playing');
                 txtStatus.innerText = "Transmissão Digital em Tempo Real";
-                updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             }).catch((err) => {
-                // Se o navegador barrar o autoplay, o visual fica montado certinho com as informações da música e espera o clique do usuário
+                // Se o navegador barrar o autoplay no início, as informações já estão salvas na barra de notificações e na tela bloqueada esperando o play físico do usuário!
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
