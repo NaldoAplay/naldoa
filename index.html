@@ -265,7 +265,6 @@
     <audio id="audio-core" crossorigin="anonymous"></audio>
 
     <script>
-        // ID DA PASTA E CHAVE DE API DO GOOGLE DRIVE
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
         const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
 
@@ -285,20 +284,18 @@
         txtStatus.innerText = "Buscando transmissão...";
 
         async function fetchDriveData() {
-            // Busca os arquivos direto da pasta informada
             const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
                 if(data.files && data.files.length > 0) {
-                    // Separa os arquivos de áudio .mp3 e as imagens de capa
                     musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
                     imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
 
                     if (musicas.length === 0) {
                         txtTitle.innerText = "EXNA FM";
-                        txtStatus.innerText = "Nenhuma música encontrada na pasta.";
+                        txtStatus.innerText = "Nenhuma música encontrada.";
                         return;
                     }
 
@@ -306,26 +303,26 @@
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         const capaCorrespondente = imagens.find(img => img.name.startsWith(nomeSemExtensao));
                         
+                        // CORREÇÃO: Capas agora passam com alt=media via API oficial para evitar bloqueios
                         return {
                             id: m.id,
                             name: nomeSemExtensao,
                             dur: 240, 
-                            capaUrl: capaCorrespondente ? `https://drive.google.com/uc?id=${capaCorrespondente.id}&export=view` : 'logo-quadrada.png'
+                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
                         };
                     });
                     
-                    // Interface carregada com sucesso
                     txtTitle.innerText = "EXNA FM SINTONIZADA";
                     btn.disabled = false;
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Pronta para tocar";
                 } else {
                     txtTitle.innerText = "EXNA FM";
-                    txtStatus.innerText = "Pasta do Drive inacessível.";
+                    txtStatus.innerText = "Pasta vazia ou protegida.";
                 }
             } catch (e) {
                 txtTitle.innerText = "EXNA FM";
-                txtStatus.innerText = "Erro ao conectar com o Google Drive.";
+                txtStatus.innerText = "Erro na conexão com o Drive.";
             }
         }
 
@@ -367,29 +364,31 @@
             }
         }
 
-        function toggleRadio() {
+        function tocarGradeAoVivo() {
             if (playlistMista.length === 0) return;
+            const state = getLiveState();
+            
+            player.src = `https://www.googleapis.com/drive/v3/files/${state.music.id}?alt=media&key=${API_KEY}`;
+            player.currentTime = state.seek;
+            
+            player.play().then(() => {
+                icon.className = "fas fa-stop";
+                btn.classList.add('active');
+                card.classList.add('playing');
+                
+                txtTitle.innerText = state.music.name;
+                txtCover.src = state.music.capaUrl;
+                txtStatus.innerText = "Transmissão Coletiva Sincronizada";
+                
+                updateLockScreen(state.music.name, state.music.capaUrl);
+            }).catch(() => {
+                txtStatus.innerText = "Toque para reproduzir.";
+            });
+        }
 
+        function toggleRadio() {
             if (player.paused) {
-                const state = getLiveState();
-                
-                // Formato correto de streaming brutos via API Rest
-                player.src = `https://www.googleapis.com/drive/v3/files/${state.music.id}?alt=media&key=${API_KEY}`;
-                player.currentTime = state.seek;
-                
-                player.play().then(() => {
-                    icon.className = "fas fa-stop";
-                    btn.classList.add('active');
-                    card.classList.add('playing');
-                    
-                    txtTitle.innerText = state.music.name;
-                    txtCover.src = state.music.capaUrl;
-                    txtStatus.innerText = "Transmissão Digital Digital";
-                    
-                    updateLockScreen(state.music.name, state.music.capaUrl);
-                }).catch((error) => {
-                    txtStatus.innerText = "Clique no botão para tentar rodar.";
-                });
+                tocarGradeAoVivo();
             } else {
                 player.pause();
                 player.src = "";
@@ -402,6 +401,13 @@
             }
         }
 
+        // CORREÇÃO: Quando o arquivo atual termina, pula imediatamente para a próxima da lista
+        player.onended = () => {
+            console.log("Faixa finalizada. Sincronizando próxima da grade...");
+            tocarGradeAoVivo();
+        };
+
+        // Monitor de Sincronia de Grade Dinâmica
         setInterval(() => {
             if (!player.paused && playlistMista.length > 0) {
                 const check = getLiveState();
