@@ -306,112 +306,40 @@
 
 <script>
 
-const STREAM_URL = "COLOQUE_SEU_STREAM_AQUI";
+function updateLockScreen(title, artist, capaUrl) {
 
-const player = document.getElementById('audio-core');
-const btn = document.getElementById('master-play');
-const icon = document.getElementById('btn-icon');
-const card = document.getElementById('main-player');
+    if (!('mediaSession' in navigator)) return;
 
-const txtTitle = document.getElementById('track-title');
-const txtCover = document.getElementById('track-cover');
-const txtStatus = document.getElementById('status-text');
-const artistName = document.getElementById('artist-name');
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: title,
+        artist: artist,
+        album: 'RADIO EXNA FM',
 
-player.src = STREAM_URL;
+        artwork: [
+            {
+                src: capaUrl,
+                sizes: '512x512',
+                type: 'image/png'
+            },
+            {
+                src: 'logo-quadrada.png',
+                sizes: '512x512',
+                type: 'image/png'
+            }
+        ]
+    });
 
-btn.disabled = false;
+    navigator.mediaSession.playbackState =
+        player.paused ? 'paused' : 'playing';
 
-icon.className = "fas fa-play";
+    // PLAY
+    navigator.mediaSession.setActionHandler('play', async () => {
 
-txtTitle.innerText = "EXNA FM";
-artistName.innerText = "A Rádio que toca todas!";
-txtStatus.innerText = "Pronto para tocar";
+        try {
 
-function updateLockScreen() {
+            await player.play();
 
-    if ('mediaSession' in navigator) {
-
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: txtTitle.innerText,
-            artist: artistName.innerText,
-            album: 'RADIO EXNA FM',
-
-            artwork: [
-                {
-                    src: txtCover.src,
-                    sizes: '512x512',
-                    type: 'image/png'
-                }
-            ]
-        });
-
-        navigator.mediaSession.playbackState =
-            player.paused ? "paused" : "playing";
-
-        navigator.mediaSession.setActionHandler('play', async () => {
-
-            try {
-
-                await player.play();
-
-                navigator.mediaSession.playbackState = "playing";
-
-                icon.className = "fas fa-stop";
-
-                btn.classList.add('active');
-
-                card.classList.add('playing');
-
-                txtStatus.innerText =
-                    "Transmissão Digital em Tempo Real";
-
-            } catch(e) {}
-
-        });
-
-        navigator.mediaSession.setActionHandler('pause', () => {
-
-            player.pause();
-
-            navigator.mediaSession.playbackState = "paused";
-
-            icon.className = "fas fa-play";
-
-            btn.classList.remove('active');
-
-            card.classList.remove('playing');
-
-            txtStatus.innerText = "Transmissão em espera";
-
-        });
-
-        navigator.mediaSession.setActionHandler('stop', () => {
-
-            player.pause();
-
-            navigator.mediaSession.playbackState = "paused";
-
-            icon.className = "fas fa-play";
-
-            btn.classList.remove('active');
-
-            card.classList.remove('playing');
-
-            txtStatus.innerText = "Transmissão parada";
-
-        });
-
-    }
-}
-
-function toggleRadio() {
-
-    if (player.paused) {
-
-        icon.className = "fas fa-spinner fa-spin";
-
-        player.play().then(() => {
+            navigator.mediaSession.playbackState = 'playing';
 
             icon.className = "fas fa-stop";
 
@@ -422,24 +350,15 @@ function toggleRadio() {
             txtStatus.innerText =
                 "Transmissão Digital em Tempo Real";
 
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = "playing";
-            }
+        } catch(e) {}
+    });
 
-            updateLockScreen();
-
-        }).catch(() => {
-
-            icon.className = "fas fa-play";
-
-            txtStatus.innerText =
-                "Erro ao iniciar transmissão";
-
-        });
-
-    } else {
+    // PAUSE
+    navigator.mediaSession.setActionHandler('pause', () => {
 
         player.pause();
+
+        navigator.mediaSession.playbackState = 'paused';
 
         icon.className = "fas fa-play";
 
@@ -447,28 +366,121 @@ function toggleRadio() {
 
         card.classList.remove('playing');
 
-        txtStatus.innerText = "Transmissão em espera";
+        txtStatus.innerText =
+            "Transmissão em espera";
+    });
 
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = "paused";
+    // PRÓXIMA
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+
+        indiceMusicaAtual++;
+
+        if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) {
+            indiceMusicaAtual = 0;
         }
-    }
+
+        sincronizarEPlayComGradeGlobal(false);
+    });
+
+    // ANTERIOR
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+
+        indiceMusicaAtual--;
+
+        if (indiceMusicaAtual < 0) {
+            indiceMusicaAtual =
+                gradeSincronizadaGlobal.length - 1;
+        }
+
+        sincronizarEPlayComGradeGlobal(false);
+    });
+
+    // STOP
+    navigator.mediaSession.setActionHandler('stop', () => {
+
+        player.pause();
+
+        navigator.mediaSession.playbackState = 'paused';
+
+        icon.className = "fas fa-play";
+
+        btn.classList.remove('active');
+
+        card.classList.remove('playing');
+
+        txtStatus.innerText =
+            "Transmissão parada";
+    });
 }
 
-player.addEventListener('play', () => {
-    updateLockScreen();
-});
 
-player.addEventListener('pause', () => {
+// ==========================================
+// ADICIONE ISSO DENTRO DO PLAY
+// ==========================================
 
-    if ('mediaSession' in navigator') {
-        navigator.mediaSession.playbackState = "paused";
-    }
-});
+/*
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
+Dentro do:
+
+player.play().then(() => {
+
+adicione:
+
+*/
+
+if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'playing';
 }
+
+
+// ==========================================
+// ADICIONE ISSO DENTRO DO PAUSE
+// ==========================================
+
+/*
+
+Depois do:
+
+player.pause();
+
+adicione:
+
+*/
+
+if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'paused';
+}
+
+
+// ==========================================
+// IMPORTANTE
+// ==========================================
+
+/*
+
+NO iPHONE:
+
+1. Tem que estar:
+- HTTPS
+- PWA instalado
+- Safari
+
+2. O áudio precisa REALMENTE estar tocando.
+
+3. A tela bloqueada só aparece após interação do usuário.
+
+4. NÃO funciona abrindo arquivo local.
+
+5. O navegador precisa permitir autoplay.
+
+6. O controle aparece:
+- Tela bloqueada
+- Central de controle
+- Fone Bluetooth
+- Apple Watch
+- CarPlay
+
+*/
 
 </script>
 
