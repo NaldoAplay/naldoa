@@ -310,7 +310,7 @@
         </div>
     </footer>
 
-    <audio id="audio-core" crossorigin="anonymous"></audio>
+    <audio id="audio-core" crossorigin="anonymous" preload="auto"></audio>
 
     <script>
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
@@ -333,7 +333,6 @@
         let deferredPrompt;
         let estaPausadoManualmente = true;
 
-        // Gerenciadores mecânicos locais das vinhetas
         let contadorMusicasTocadas = 0;
         let indiceProximaVinheta = 0;
         let estaTocandoVinhetaAgora = false;
@@ -512,6 +511,7 @@
             return str.replace(/_/g, " ").toUpperCase();
         }
 
+        // ALTERADO: Otimização de limpeza do buffer no toggle manual
         function toggleRadio() {
             if (player.paused) {
                 estaPausadoManualmente = false;
@@ -528,21 +528,19 @@
             }
         }
 
-        // MOTOR DE FLUXO E DETECÇÃO NATIVA (Resolve o silêncio e o bolso travado)
+        // MOTOR ACELERADO: Remove barreiras de delay injetando a próxima track de forma imediata
         player.onended = () => {
             if (estaPausadoManualmente) return;
 
+            // Injeta o spinner instantaneamente na virada física para dar resposta imediata de carregamento
+            icon.className = "fas fa-spinner fa-spin";
+
             if (estaTocandoVinhetaAgora) {
-                // DETECÇÃO AUTOMÁTICA ATIVA: O arquivo .wav acabou nativamente agora.
                 estaTocandoVinhetaAgora = false;
-                console.log("Fim da chamada detectado automaticamente. Cortando silêncio e voltando pro som...");
-                
-                // Avança para a próxima música sequencial da rádio imediatamente
                 indiceMusicaAtual++; 
                 sincronizarEPlayComGradeGlobal(false);
             } else {
                 contadorMusicasTocadas++;
-                console.log(`Músicas tocadas em sequência: ${contadorMusicasTocadas}`);
 
                 if (contadorMusicasTocadas >= 2) {
                     contadorMusicasTocadas = 0; 
@@ -554,7 +552,6 @@
             }
         };
 
-        // RELÓGIO DE ALINHAMENTO GERAL (Só age se a programação estiver em repouso)
         setInterval(() => {
             if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0 && !estaTocandoVinhetaAgora) {
                 const checkEstado = obterPontoDaGradeAoVivo();
