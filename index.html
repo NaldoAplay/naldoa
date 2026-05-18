@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXNA FM</title>
+    <title>RADIO EXNA FM</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -225,13 +225,13 @@
             <div class="radio-header">
                 <img src="logo-quadrada.png" class="radio-top-logo" alt="EXNA Logo">
                 <div class="radio-brand-text">
-                    <h2>EXNA <span>FM</span></h2>
-                    <p>Ecossistemas EXNA</p>
+                    <h2>RADIO EXNA <span>FM</span></h2>
+                    <p>SÓ SUCESSO ATRÁS DE SUCESSO</p>
                 </div>
             </div>
 
             <div class="live-indicator">
-                <i class="fas fa-circle-notch fa-spin" style="font-size: 8px;"></i> EMISSÃO DIGITAL
+                <i class="fas fa-signal"></i> EMISSÃO DIGITAL AO VIVO
             </div>
 
             <div class="cover-area">
@@ -265,6 +265,7 @@
     <audio id="audio-core" crossorigin="anonymous"></audio>
 
     <script>
+        // ID DA PASTA E CHAVE DE API DO GOOGLE DRIVE
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
         const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
 
@@ -280,22 +281,24 @@
         let imagens = [];
         let playlistMista = [];
 
-        txtTitle.innerText = "SINTONIA AO VIVO";
-        txtStatus.innerText = "Estação online";
+        txtTitle.innerText = "SINTONIA ONLINE";
+        txtStatus.innerText = "Buscando transmissão...";
 
         async function fetchDriveData() {
+            // Busca os arquivos direto da pasta informada
             const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
                 if(data.files && data.files.length > 0) {
+                    // Separa os arquivos de áudio .mp3 e as imagens de capa
                     musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
                     imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
 
                     if (musicas.length === 0) {
-                        txtTitle.innerText = "PROGRAMAÇÃO EXNA";
-                        txtStatus.innerText = "Sincronizando faixas...";
+                        txtTitle.innerText = "EXNA FM";
+                        txtStatus.innerText = "Nenhuma música encontrada na pasta.";
                         return;
                     }
 
@@ -311,17 +314,18 @@
                         };
                     });
                     
-                    txtTitle.innerText = "EXNA FM - STREAMING";
+                    // Interface carregada com sucesso
+                    txtTitle.innerText = "EXNA FM SINTONIZADA";
                     btn.disabled = false;
                     icon.className = "fas fa-play";
-                    txtStatus.innerText = "Estação sintonizada";
+                    txtStatus.innerText = "Pronta para tocar";
                 } else {
-                    txtTitle.innerText = "EXNA FM SINTONIA";
-                    txtStatus.innerText = "Estação vazia ou inacessível";
+                    txtTitle.innerText = "EXNA FM";
+                    txtStatus.innerText = "Pasta do Drive inacessível.";
                 }
             } catch (e) {
                 txtTitle.innerText = "EXNA FM";
-                txtStatus.innerText = "Erro na rede.";
+                txtStatus.innerText = "Erro ao conectar com o Google Drive.";
             }
         }
 
@@ -369,6 +373,7 @@
             if (player.paused) {
                 const state = getLiveState();
                 
+                // Formato correto de streaming brutos via API Rest
                 player.src = `https://www.googleapis.com/drive/v3/files/${state.music.id}?alt=media&key=${API_KEY}`;
                 player.currentTime = state.seek;
                 
@@ -379,11 +384,11 @@
                     
                     txtTitle.innerText = state.music.name;
                     txtCover.src = state.music.capaUrl;
-                    txtStatus.innerText = "Transmissão Digital Coletiva";
+                    txtStatus.innerText = "Transmissão Digital Digital";
                     
                     updateLockScreen(state.music.name, state.music.capaUrl);
                 }).catch((error) => {
-                    txtStatus.innerText = "Tente iniciar novamente.";
+                    txtStatus.innerText = "Clique no botão para tentar rodar.";
                 });
             } else {
                 player.pause();
@@ -391,9 +396,9 @@
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
-                txtTitle.innerText = "SINTONIA AO VIVO";
+                txtTitle.innerText = "SINTONIA ONLINE";
                 txtCover.src = "logo-quadrada.png";
-                txtStatus.innerText = "Estação online";
+                txtStatus.innerText = "Pronta para tocar";
             }
         }
 
@@ -418,7 +423,7 @@
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: title,
                     artist: 'DJ NaldoA',
-                    album: 'EXNA FM',
+                    album: 'RADIO EXNA FM',
                     artwork: [
                         { src: capaUrl, sizes: '512x512', type: 'image/png' },
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
