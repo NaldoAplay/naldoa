@@ -378,8 +378,9 @@
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
+                    // AUTO-PLAY: Liga direto ao carregar o banco de dados
                     estaPausadoManualmente = false;
-                    sincronizarEPlayComGradeGlobal(true);
+                    tocarMusicaAtual(true);
 
                 } else {
                     txtStatus.innerText = "Pasta vazia.";
@@ -435,29 +436,33 @@
             };
         }
 
-        function sincronizarEPlayComGradeGlobal(usarSincroniaHorarioMundial = false) {
+        // NOVO MOTOR FLUIDO: Sincroniza apenas na partida e garante fluxo emendado contínuo
+        function tocarMusicaAtual(buscarSincroniaDoMundo = false) {
             if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
 
-            const estadoGlobal = obterPontoDaGradeAoVivo();
-            if (!estadoGlobal) return;
+            let agulhaTempo = 0;
 
-            let tempoDeCorte = 0;
-
-            if (usarSincroniaHorarioMundial) {
-                indiceMusicaAtual = estadoGlobal.indice;
-                tempoDeCorte = estadoGlobal.seek;
+            if (buscarSincroniaDoMundo) {
+                // Sintoniza com o relógio do planeta APENAS na abertura ou quando sai do pause
+                const estadoAoVivo = obterPontoDaGradeAoVivo();
+                if (estadoAoVivo) {
+                    indiceMusicaAtual = estadoAoVivo.indice;
+                    agulhaTempo = estadoAoVivo.seek;
+                }
             } else {
+                // Se for transição nativa de fim de música, valida o estouro de array de forma sequencial pura
                 if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) indiceMusicaAtual = 0;
             }
 
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            if (player.src !== urlFonte && !player.src.endsWith(urlFonte)) {
-                player.src = urlFonte;
-                player.currentTime = tempoDeCorte;
-                icon.className = "fas fa-spinner fa-spin";
-            }
+            // Troca a fonte obrigatoriamente e injeta o tempo correto
+            player.src = urlFonte;
+            player.currentTime = agulhaTempo;
+            
+            // CARREGADINHA ATIVA: Ícone de girar entra imediatamente em ação
+            icon.className = "fas fa-spinner fa-spin";
 
             player.play().then(() => {
                 icon.className = "fas fa-stop";
@@ -474,7 +479,7 @@
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
-                txtStatus.innerText = "Toque no Play para sincronizar.";
+                txtStatus.innerText = "Toque no Play para sintonizar.";
             });
         }
 
@@ -486,7 +491,7 @@
             if (player.paused) {
                 estaPausadoManualmente = false;
                 icon.className = "fas fa-spinner fa-spin";
-                sincronizarEPlayComGradeGlobal(true); 
+                tocarMusicaAtual(true); // Despausou? Recalcula o relógio do mundo e volta pra transmissão real
             } else {
                 estaPausadoManualmente = true;
                 player.pause();
@@ -497,26 +502,14 @@
             }
         }
 
-        // MOTOR DE FLUXO TOTALMENTE LIMPO - SEM CONTADORES OU SEGREDO DE VINHETAS
+        // CORTA O SILÊNCIO: Transição mecânica imediata sem depender de verificações em segundo plano
         player.onended = () => {
             if (estaPausadoManualmente) return;
             
-            // Joga o feedback do spinner na hora da virada física
-            icon.className = "fas fa-spinner fa-spin";
-            
-            // Pula direto e sem atrasos para a próxima música sequencial
-            indiceMusicaAtual++; 
-            sincronizarEPlayComGradeGlobal(false); 
+            console.log("Música finalizada nativamente. Pulando bloco sem delay...");
+            indiceMusicaAtual++; // Passa para a próxima música sequencial da lista
+            tocarMusicaAtual(false); // Carrega do início absoluto sem gaps silenciosos
         };
-
-        setInterval(() => {
-            if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0) {
-                const checkEstado = obterPontoDaGradeAoVivo();
-                if (checkEstado && player.paused) {
-                    sincronizarEPlayComGradeGlobal(true);
-                }
-            }
-        }, 3000); // Encurtado o tempo de verificação mestre para evitar gaps silenciosos
 
         function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
