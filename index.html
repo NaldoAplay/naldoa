@@ -459,8 +459,9 @@
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            if (player.src !== urlFonte && !player.src.endsWith(urlFonte)) {
+            if (player.src !== urlFonte && !player.src.endsWith(faixa.id)) {
                 player.src = urlFonte;
+                player.load(); // FORÇA A LIMPEZA DA CONEXÃO LOCAL ANTES DE PUXAR O STREAM DO DRIVE
                 player.currentTime = tempoDeCorte;
                 icon.className = "fas fa-spinner fa-spin";
             }
@@ -491,6 +492,7 @@
             indiceProximaVinheta++;
 
             player.src = vinhetaNome;
+            player.load(); // Limpa a faixa de áudio e engatilha o arquivo .wav local imediatamente
             player.currentTime = 0;
             icon.className = "fas fa-spinner fa-spin";
 
@@ -511,7 +513,6 @@
             return str.replace(/_/g, " ").toUpperCase();
         }
 
-        // ALTERADO: Otimização de limpeza do buffer no toggle manual
         function toggleRadio() {
             if (player.paused) {
                 estaPausadoManualmente = false;
@@ -528,16 +529,18 @@
             }
         }
 
-        // MOTOR ACELERADO: Remove barreiras de delay injetando a próxima track de forma imediata
+        // MOTOR REESTRUTURADO COM HARD-LOAD REFRESH
         player.onended = () => {
             if (estaPausadoManualmente) return;
 
-            // Injeta o spinner instantaneamente na virada física para dar resposta imediata de carregamento
             icon.className = "fas fa-spinner fa-spin";
 
             if (estaTocandoVinhetaAgora) {
                 estaTocandoVinhetaAgora = false;
+                console.log("Fim da vinheta. Resetando conexões e puxando próxima música...");
                 indiceMusicaAtual++; 
+                
+                // Executa a limpeza física de buffer e chama a música do Drive sem travar a rede
                 sincronizarEPlayComGradeGlobal(false);
             } else {
                 contadorMusicasTocadas++;
@@ -557,52 +560,3 @@
                 const checkEstado = obterPontoDaGradeAoVivo();
                 if (checkEstado && player.paused) {
                     sincronizarEPlayComGradeGlobal(true);
-                }
-            }
-        }, 5000);
-
-        function updateLockScreen(title, artist, capaUrl) {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: title,
-                    artist: artist,
-                    album: 'RADIO EXNA FM',
-                    artwork: [
-                        { src: capaUrl, sizes: '512x512', type: 'image/png' },
-                        { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
-                    ]
-                });
-                navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
-                navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
-            }
-        }
-
-        const pwaBtn = document.getElementById('pwa-install-btn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            pwaBtn.classList.add('visible');
-        });
-
-        pwaBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                pwaBtn.classList.remove('visible');
-            }
-        });
-
-        window.addEventListener('appinstalled', (evt) => {
-            pwaBtn.classList.remove('visible');
-        });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-
-        fetchDriveData();
-    </script>
-</body>
-</html>
