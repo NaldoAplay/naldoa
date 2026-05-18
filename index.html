@@ -327,7 +327,6 @@
         let gradeOriginal = [];
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
-        let blocoTempoFixo = 200; 
         let deferredPrompt;
         let estaPausadoManualmente = true;
 
@@ -378,9 +377,9 @@
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado";
 
-                    // AUTO-PLAY: Liga direto ao carregar o banco de dados
+                    // Inicia o fluxo automaticamente ao carregar
                     estaPausadoManualmente = false;
-                    tocarMusicaAtual(true);
+                    tocarFaixaIndice(0, true);
 
                 } else {
                     txtStatus.innerText = "Pasta vazia.";
@@ -420,48 +419,30 @@
             return resultado;
         }
 
-        function obterPontoDaGradeAoVivo() {
-            if (gradeSincronizadaGlobal.length === 0) return null;
-            
-            let duracaoTotalGrade = gradeSincronizadaGlobal.length * blocoTempoFixo;
-            let timestampSegundos = Math.floor(Date.now() / 1000);
-            let tempoAtualNaLinhaGeral = timestampSegundos % duracaoTotalGrade;
-            
-            let indexCalculado = Math.floor(tempoAtualNaLinhaGeral / blocoTempoFixo);
-            let segundoExatoNaFaixa = tempoAtualNaLinhaGeral % blocoTempoFixo;
-
-            return {
-                indice: indexCalculado,
-                seek: segundoExatoNaFaixa
-            };
-        }
-
-        // NOVO MOTOR FLUIDO: Sincroniza apenas na partida e garante fluxo emendado contínuo
-        function tocarMusicaAtual(buscarSincroniaDoMundo = false) {
+        // NOVO MOTOR SEQUENCIAL IMEDIATO CONTRA TRAVAMENTOS
+        function tocarFaixaIndice(index, doInicioAbsoluto = false) {
             if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
 
-            let agulhaTempo = 0;
-
-            if (buscarSincroniaDoMundo) {
-                // Sintoniza com o relógio do planeta APENAS na abertura ou quando sai do pause
-                const estadoAoVivo = obterPontoDaGradeAoVivo();
-                if (estadoAoVivo) {
-                    indiceMusicaAtual = estadoAoVivo.indice;
-                    agulhaTempo = estadoAoVivo.seek;
-                }
-            } else {
-                // Se for transição nativa de fim de música, valida o estouro de array de forma sequencial pura
-                if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) indiceMusicaAtual = 0;
+            if (index >= gradeSincronizadaGlobal.length || index < 0) {
+                index = 0; 
             }
+            indiceMusicaAtual = index;
 
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            // Troca a fonte obrigatoriamente e injeta o tempo correto
+            // Força a limpeza completa do buffer anterior para evitar o congelamento
+            player.pause();
+            player.removeAttribute('src');
+            player.load();
+
             player.src = urlFonte;
-            player.currentTime = agulhaTempo;
             
-            // CARREGADINHA ATIVA: Ícone de girar entra imediatamente em ação
+            // Se for do início absoluto, garante tempo zero para não quebrar a URL do Drive
+            if (doInicioAbsoluto) {
+                player.currentTime = 0;
+            }
+
             icon.className = "fas fa-spinner fa-spin";
 
             player.play().then(() => {
@@ -475,7 +456,8 @@
                 txtStatus.innerText = "Transmissão Digital em Tempo Real";
                 
                 updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
-            }).catch(() => {
+            }).catch((err) => {
+                console.log("Erro ao reproduzir faixa, tentando re-iniciar:", err);
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
@@ -491,7 +473,7 @@
             if (player.paused) {
                 estaPausadoManualmente = false;
                 icon.className = "fas fa-spinner fa-spin";
-                tocarMusicaAtual(true); // Despausou? Recalcula o relógio do mundo e volta pra transmissão real
+                tocarFaixaIndice(indiceMusicaAtual, true); 
             } else {
                 estaPausadoManualmente = true;
                 player.pause();
@@ -502,13 +484,24 @@
             }
         }
 
-        // CORTA O SILÊNCIO: Transição mecânica imediata sem depender de verificações em segundo plano
+        // EVENTO BLINDADO: Dispara a próxima música do início exato sem delay ou cálculos fantasmas
         player.onended = () => {
             if (estaPausadoManualmente) return;
             
-            console.log("Música finalizada nativamente. Pulando bloco sem delay...");
-            indiceMusicaAtual++; // Passa para a próxima música sequencial da lista
-            tocarMusicaAtual(false); // Carrega do início absoluto sem gaps silenciosos
+            console.log("Faixa finalizada. Pulando para o índice:", indiceMusicaAtual + 1);
+            let proximoIndice = indiceMusicaAtual + 1;
+            
+            // Dispara a próxima sem nenhuma barreira de tempo
+            tocarFaixaIndice(proximoIndice, true);
+        };
+
+        // GATILHO DE SEGURANÇA: Se o celular congelar em segundo plano e ficar mudo, ele força o avanço
+        player.onerror = () => {
+            if (!estaPausadoManualmente) {
+                console.log("Erro de buffer detectado no bolso. Forçando próxima música...");
+                let proximoIndice = indiceMusicaAtual + 1;
+                tocarFaixaIndice(proximoIndice, true);
+            }
         };
 
         function updateLockScreen(title, artist, capaUrl) {
