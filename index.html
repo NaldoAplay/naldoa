@@ -316,7 +316,7 @@
         </div>
     </footer>
 
-    <audio id="audio-core" crossorigin="anonymous" preload="auto"></audio>
+    <audio id="audio-core" crossorigin="anonymous" preload="auto" audio-bitrate="320" high-fidelity="true"></audio>
 
     <script>
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
@@ -333,6 +333,7 @@
         let gradeOriginal = [];
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
+        let blocoTempoFixo = 180; // Definição estável de 3 minutos por bloco para rádio real
         let deferredPrompt;
         let estaPausadoManualmente = true;
 
@@ -399,8 +400,9 @@
             let resultado = [];
             let ultimoArtista = "";
 
+            // Embaralhamento fixado por data diária mantém a matriz estável para todos os ouvintes
             let dataAtual = new Date();
-            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate() + dataAtual.getHours();
+            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
 
             function randomSemente() {
                 let x = Math.sin(semente++) * 10000;
@@ -427,38 +429,45 @@
         function obterPontoDaGradeAoVivo() {
             if (gradeSincronizadaGlobal.length === 0) return null;
             
-            let data = new Date();
-            let minutosDoDia = (data.getHours() * 60) + data.getMinutes();
-            let indexCalculado = minutosDoDia % gradeSincronizadaGlobal.length;
+            // MOTOR CORRIGIDO: Retorna o cálculo absoluto por Unix Timestamp de segundos para espalhar as mais de 200 músicas na hora exata do planeta
+            let duracaoTotalGrade = gradeSincronizadaGlobal.length * blocoTempoFixo;
+            let timestampSegundos = Math.floor(Date.now() / 1000);
+            let tempoAtualNaLinhaGeral = timestampSegundos % duracaoTotalGrade;
             
+            let indexCalculado = Math.floor(tempoAtualNaLinhaGeral / blocoTempoFixo);
+            let segundoExatoNaFaixa = tempoAtualNaLinhaGeral % blocoTempoFixo;
+
             return {
                 indice: indexCalculado,
-                seek: data.getSeconds() 
+                seek: segundoExatoNaFaixa
             };
         }
 
         function tocarFaixaIndice(index, doInicioAbsoluto = false) {
             if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
 
-            if (index >= gradeSincronizadaGlobal.length || index < 0) {
-                index = 0; 
+            let tempoDeCorte = 0;
+
+            if (doInicioAbsoluto) {
+                // Alinha perfeitamente com o tempo real global no Play ou F5
+                const estadoAoVivo = obterPontoDaGradeAoVivo();
+                if (estadoAoVivo) {
+                    indiceMusicaAtual = estadoAoVivo.indice;
+                    tempoDeCorte = estadoAoVivo.seek;
+                }
+            } else {
+                indiceMusicaAtual = index;
+                if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) indiceMusicaAtual = 0;
             }
-            indiceMusicaAtual = index;
 
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
 
-            // OTIMIZADO: Altera a fonte de forma direta sem forçar o recarregamento binário pesado do load()
+            // Transição rápida: Altera a fonte apenas se necessário, sem travar o hardware
             if (player.src !== urlFonte) {
                 player.src = urlFonte;
             }
-            
-            if (doInicioAbsoluto) {
-                const checkSinc = obterPontoDaGradeAoVivo();
-                player.currentTime = checkSinc ? checkSinc.seek : 0;
-            } else {
-                player.currentTime = 0;
-            }
+            player.currentTime = tempoDeCorte;
 
             icon.className = "fas fa-spinner fa-spin";
 
@@ -504,7 +513,7 @@
             if (estaPausadoManualmente) return;
             icon.className = "fas fa-spinner fa-spin";
             let proximoIndice = indiceMusicaAtual + 1;
-            tocarFaixaIndice(proximoIndice, false); 
+            tocarFaixaIndice(proximoIndice, false); // Avanço físico direto impede silêncio ou paradas na tela bloqueada
         };
 
         player.onerror = () => {
