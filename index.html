@@ -333,10 +333,11 @@
         let deferredPrompt;
         let estaPausadoManualmente = true;
 
-        // Gerenciadores mecânicos locais das vinhetas
+        // Gerenciadores de fluxo das vinhetas
         let contadorMusicasTocadas = 0;
         let indiceProximaVinheta = 0;
         let estaTocandoVinhetaAgora = false;
+        let ignoreRelogioMestreTemporario = false; // Trava contra loops na tela bloqueada
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -386,7 +387,8 @@
                     txtStatus.innerText = "Sinal sintonizado";
 
                     estaPausadoManualmente = false;
-                    sincronizarEPlayComGradeGlobal();
+                    ignoreRelogioMestreTemporario = false;
+                    sincronizarEPlayComGradeGlobal(true);
 
                 } else {
                     txtStatus.innerText = "Pasta vazia.";
@@ -442,18 +444,25 @@
             };
         }
 
-        function sincronizarEPlayComGradeGlobal() {
-            // BLOQUEIO SUPREMO: Se estiver rodando vinheta, o relógio mundial NÃO pode mexer no player de jeito nenhum!
+        function sincronizarEPlayComGradeGlobal(usarSincroniaHorarioMundial = false) {
             if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente || estaTocandoVinhetaAgora) return;
 
-            const estadoGlobal = obterPontoDaGradeAoVivo();
-            if (!estadoGlobal) return;
+            let tempoDeCorte = 0;
 
-            indiceMusicaAtual = estadoGlobal.indice;
+            if (usarSincroniaHorarioMundial) {
+                // Sincronia de horário mundial disparada APENAS no F5 ou no retorno do Pause manual
+                const estadoGlobal = obterPontoDaGradeAoVivo();
+                if (!estadoGlobal) return;
+                indiceMusicaAtual = estadoGlobal.indice;
+                tempoDeCorte = estadoGlobal.seek;
+            } else {
+                // Em reprodução contínua sequencial, valida as travas de estouro de array da grade
+                if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) indiceMusicaAtual = 0;
+                if (indiceMusicaAtual < 0) indiceMusicaAtual = gradeSincronizadaGlobal.length - 1;
+            }
+
             const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
-
             let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
-            let tempoDeCorte = estadoGlobal.seek;
 
             if (player.src !== urlFonte && !player.src.endsWith(urlFonte)) {
                 player.src = urlFonte;
@@ -476,14 +485,14 @@
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
-                txtStatus.innerText = "Toque no Play para sincronizar.";
+                txtStatus.innerText = "Toque no Play para sintonizar.";
             });
         }
 
         function rodarVinhetaLocalIntercalada() {
             estaTocandoVinhetaAgora = true;
+            ignoreRelogioMestreTemporario = true; // Trava o relógio mestre para não interromper a vinheta
             
-            // Pega a vinheta da vez e faz o giro da fila (Varia perfeitamente: 1 -> 2 -> 3 -> 1...)
             let vinhetaNome = VINHETAS[indiceProximaVinheta % VINHETAS.length];
             indiceProximaVinheta++;
 
@@ -500,7 +509,8 @@
                 updateLockScreen("CHAMADA INSTITUCIONAL", "RADIO EXNA FM", "logo-quadrada.png");
             }).catch(() => {
                 estaTocandoVinhetaAgora = false;
-                sincronizarEPlayComGradeGlobal();
+                ignoreRelogioMestreTemporario = false;
+                sincronizarEPlayComGradeGlobal(false);
             });
         }
 
@@ -512,8 +522,9 @@
             if (player.paused) {
                 estaPausadoManualmente = false;
                 estaTocandoVinhetaAgora = false;
+                ignoreRelogioMestreTemporario = false;
                 icon.className = "fas fa-spinner fa-spin";
-                sincronizarEPlayComGradeGlobal();
+                sincronizarEPlayComGradeGlobal(true); // Retorna sincronizando com a hora atual exata do planeta
             } else {
                 estaPausadoManualmente = true;
                 player.pause();
@@ -524,43 +535,48 @@
             }
         }
 
-        // CONTROLADOR DE FIM DE ÁUDIO (Background seguro)
+        // MOTOR DE BACKGROUND NATIVO BLINDADO: Avança as faixas perfeitamente com a tela travada no bolso!
         player.onended = () => {
             if (estaPausadoManualmente) return;
 
             if (estaTocandoVinhetaAgora) {
-                // Terminou a vinheta? Desliga a trava e joga de volta pra música do relógio mundial na hora! (Garante tocar apenas UMA vez)
+                // A vinheta tocou uma única vez e acabou. Libera as travas e joga para a PRÓXIMA música sequencial!
                 estaTocandoVinhetaAgora = false;
-                console.log("Vinheta finalizada com sucesso. Voltando para o ao vivo...");
-                sincronizarEPlayComGradeGlobal();
+                ignoreRelogioMestreTemporario = false;
+                console.log("Vinheta finalizada. Pulando para a próxima faixa da grade...");
+                
+                indiceMusicaAtual++; // Avança de bloco de forma nativa
+                sincronizarEPlayComGradeGlobal(false);
             } else {
                 contadorMusicasTocadas++;
-                console.log(`Músicas tocadas consecutivamente: ${contadorMusicasTocadas}`);
+                console.log(`Músicas reproduzidas sequencialmente: ${contadorMusicasTocadas}`);
 
                 if (contadorMusicasTocadas >= 2) {
-                    contadorMusicasTocadas = 0; // Zera o contador das 2 músicas
-                    rodarVinhetaLocalIntercalada(); // Dispara a chamada variada única
+                    contadorMusicasTocadas = 0;
+                    rodarVinhetaLocalIntercalada(); // Dispara a vinheta variada sem repetir e sem loop
                 } else {
-                    sincronizarEPlayComGradeGlobal();
+                    indiceMusicaAtual++; // Avança de bloco de forma nativa
+                    sincronizarEPlayComGradeGlobal(false); // Executa a música seguinte do bolso de forma fluida
                 }
             }
         };
 
-        // RELÓGIO MESTRE MUNDIAL (Sincroniza a programação a cada 4 segundos)
+        // RELÓGIO DE ALINHAMENTO GERAL (Vigia se o usuário deu F5 ou se houve desvio bruto)
         setInterval(() => {
-            // Se estiver tocando a vinheta, o relógio mundial fica congelado e bloqueado!
-            if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0 && !estaTocandoVinhetaAgora) {
+            // Se estiver tocando vinheta ou se a música estiver rodando lisa de forma contínua, o relógio mundial NÃO interfere!
+            if (!estaPausadoManualmente && gradeSincronizadaGlobal.length > 0 && !estaTocandoVinhetaAgora && !ignoreRelogioMestreTemporario) {
                 const checkEstado = obterPontoDaGradeAoVivo();
                 if (checkEstado) {
                     const faixaEsperada = gradeSincronizadaGlobal[checkEstado.indice];
                     const urlEsperada = `https://www.googleapis.com/drive/v3/files/${faixaEsperada.id}?alt=media&key=${API_KEY}`;
                     
-                    if (player.src !== urlEsperada && !player.src.endsWith(urlEsperada)) {
-                        sincronizarEPlayComGradeGlobal();
+                    // O relógio só intervém se a música física mudar de bloco na matriz do servidor do Drive de forma abrupta
+                    if (player.src !== urlEsperada && !player.src.endsWith(urlEsperada) && player.paused) {
+                        sincronizarEPlayComGradeGlobal(true);
                     }
                 }
             }
-        }, 4000);
+        }, 5000);
 
         function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
