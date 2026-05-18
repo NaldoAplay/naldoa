@@ -34,6 +34,7 @@
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
+            position: relative;
         }
 
         main {
@@ -149,7 +150,7 @@
         .info-area p {
             font-size: 1.1rem;
             color: var(--neon-aqua);
-            margin: 6px 0 20px;
+            margin: 6px 0 25px;
             font-weight: 600;
         }
 
@@ -179,6 +180,46 @@
             background: #fff;
             color: #000;
             box-shadow: 0 0 30px #fff;
+        }
+
+        /* ESTILO DO BOTÃO FLUTUANTE BONITINHO NO CANTO INFERIOR */
+        .pwa-float-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--neon-aqua);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+        }
+
+        .pwa-float-btn.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .pwa-float-btn:hover {
+            color: white;
+            background: linear-gradient(45deg, var(--primary-purple), var(--neon-pink));
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+            transform: scale(1.1) translateY(-3px);
+            border-color: transparent;
         }
 
         footer {
@@ -217,6 +258,7 @@
         @media (max-width: 480px) {
             .glass-player { padding: 30px 20px; margin: 10px; }
             .cover-area { width: 190px; height: 190px; }
+            .pwa-float-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -244,10 +286,6 @@
             <div class="info-area">
                 <h1 id="track-title">SINTONIZANDO...</h1>
                 <p id="artist-name">DJ NaldoA</p>
-                
-                <button id="download-btn" onclick="baixarMusicaAtual()" style="background: transparent; border: none; color: var(--neon-aqua); cursor: pointer; font-size: 1.1rem; margin-top: -10px; margin-bottom: 5px; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; font-weight: bold; letter-spacing: 1px;">
-                    <i class="fas fa-download"></i> BAIXAR MÚSICA
-                </button>
             </div>
 
             <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
@@ -257,6 +295,10 @@
             <p id="status-text" style="margin-top:20px; font-size: 0.8rem; color: #45a29e; font-weight: bold; letter-spacing: 1px;"></p>
         </div>
     </main>
+
+    <button id="pwa-install-btn" class="pwa-float-btn" title="Baixar App da Rádio">
+        <i class="fas fa-download"></i>
+    </button>
 
     <footer>
         <div class="social-links">
@@ -287,6 +329,7 @@
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
         let blocoTempoFixo = 200; 
+        let deferredPrompt; // Armazena o gatilho nativo de instalação do App
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -406,7 +449,6 @@
             player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
             player.currentTime = segundoDePartida;
 
-            // CARREGADINHA ATIVA: Spinner ativo até o navegador decodificar o stream
             icon.className = "fas fa-spinner fa-spin";
 
             player.play().then(() => {
@@ -452,16 +494,6 @@
             rodarTransmissaoAoVivo(false); 
         };
 
-        // Download da Música do Segundo Atual do Streaming
-        function baixarMusicaAtual() {
-            if (gradeSincronizadaGlobal.length === 0) return;
-            const faixaAtual = gradeSincronizadaGlobal[indiceMusicaAtual];
-            if (faixaAtual && faixaAtual.id) {
-                const urlDownload = `https://www.googleapis.com/drive/v3/files/${faixaAtual.id}?alt=media&key=${API_KEY}`;
-                window.open(urlDownload, '_blank');
-            }
-        }
-
         function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -478,7 +510,38 @@
             }
         }
 
-        // Ativa o registro do PWA para disponibilizar a instalação do App
+        // LÓGICA DO CAPTURADOR DO APLICATIVO INSTALÁVEL (PWA)
+        const pwaBtn = document.getElementById('pwa-install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Impede o navegador de mostrar a caixinha padrão feia imediatamente
+            e.preventDefault();
+            // Guarda o evento para ser disparado quando o usuário clicar no seu botão
+            deferredPrompt = e;
+            // Torna o seu botão flutuante bonitinho visível na tela no canto inferior
+            pwaBtn.classList.add('visible');
+        });
+
+        pwaBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Abre a tela de instalação nativa customizada
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Instalação do usuário: ${outcome}`);
+                // Reseta o prompt para não duplicar chamadas
+                deferredPrompt = null;
+                // Esconde o botão flutuante após a instalação concluída
+                pwaBtn.classList.remove('visible');
+            }
+        });
+
+        // Some com o botão caso o aplicativo já tenha sido instalado no aparelho
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('Rádio EXNA FM instalada como App com sucesso!');
+            pwaBtn.classList.remove('visible');
+        });
+
+        // Ativa o registro do PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
