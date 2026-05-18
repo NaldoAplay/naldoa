@@ -279,7 +279,7 @@
         let gradeOriginal = [];
         let gradeSincronizadaGlobal = [];
         let indiceMusicaAtual = 0;
-        let blocoTempoFixo = 200; // Segundos fixos por música para manter a sincronia matemática global impecável
+        let blocoTempoFixo = 200; 
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -321,7 +321,6 @@
                         };
                     });
                     
-                    // Cria uma grade mestre embaralhada estacional estável (baseada no dia do ano) com regra anti-repetição
                     gradeSincronizadaGlobal = gerarGradeAntiRepeticaoEstavel();
 
                     txtTitle.innerText = "RADIO EXNA FM";
@@ -336,7 +335,7 @@
             }
         }
 
-        // EMBARALHAMENTO SEGURO GLOBAL BASEADO EM SEMENTE TEMPORAL (Muda a ordem a cada 24 horas)
+        // AUTO-DJ MELHORADO: EMBARALHAMENTO SEGURO COM BLOQUEIO DE REPETIÇÃO DE ARTISTA/BANDA CONSECUTIVOS
         function gerarGradeAntiRepeticaoEstavel() {
             let pool = [...gradeOriginal];
             let resultado = [];
@@ -350,15 +349,16 @@
                 return x - Math.floor(x);
             }
 
-            // Embaralha o pool inicial baseado na semente do dia (igual para qualquer usuário do planeta)
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(randomSemente() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
             }
 
-            // Organiza para evitar artistas iguais seguidos
             while(pool.length > 0) {
+                // Força a variação procurando um artista diferente do último que entrou na grade
                 let indexValido = pool.findIndex(m => m.artist.toLowerCase() !== ultimoArtista.toLowerCase());
+                
+                // Se restar apenas músicas da mesma banda, aceita o primeiro elemento para não travar
                 if(indexValido === -1) indexValido = 0;
 
                 let selecionada = pool.splice(indexValido, 1)[0];
@@ -369,7 +369,6 @@
             return resultado;
         }
 
-        // MAPEIA O RELÓGIO MUNDIAL PARA DESCOBRIR A MÚSICA DO MINUTO EXATO
         function obterEstadoLinhaDoTempoGlobal() {
             let duracaoTotalGrade = gradeSincronizadaGlobal.length * blocoTempoFixo;
             let timestampSegundos = Math.floor(Date.now() / 1000);
@@ -391,12 +390,10 @@
             let segundoDePartida = 0;
 
             if (pularParaSincroniaGlobal) {
-                // Sincroniza matematicamente com o relógio do mundo (F5 ou retorno do Pause)
                 const estadoGlobal = obterEstadoLinhaDoTempoGlobal();
                 indiceMusicaAtual = estadoGlobal.indice;
                 segundoDePartida = estadoGlobal.seek;
             } else {
-                // Virada contínua normal em background (onended)
                 if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) {
                     indiceMusicaAtual = 0;
                 }
@@ -406,25 +403,34 @@
             player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
             player.currentTime = segundoDePartida;
 
+            // CARREGADINHA ATIVA: Mostra o spinner rodando no botão enquanto puxa o arquivo
+            icon.className = "fas fa-spinner fa-spin";
+
             player.play().then(() => {
+                // Altera o ícone para STOP apenas quando o player começar a cuspir o som de verdade
                 icon.className = "fas fa-stop";
                 btn.classList.add('active');
                 card.classList.add('playing');
                 
-                txtTitle.innerText = faixa.name;
+                txtTitle.innerText = ConvertName(faixa.name);
                 document.getElementById('artist-name').innerText = faixa.artist;
                 txtCover.src = faixa.capaUrl;
                 txtStatus.innerText = "Transmissão Digital em Tempo Real";
                 
                 updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             }).catch(() => {
+                icon.className = "fas fa-play";
                 txtStatus.innerText = "Sinal instável. Toque no Play.";
             });
         }
 
+        // Pequena função auxiliar para limpar os nomes das tracks na tela
+        function ConvertName(str) {
+            return str.replace(/_/g, " ").toUpperCase();
+        }
+
         function toggleRadio() {
             if (player.paused) {
-                // Sempre que der o play, busca o ponto real do relógio mundial para parecer rádio FM viva
                 rodarTransmissaoAoVivo(true);
             } else {
                 player.pause();
@@ -439,11 +445,10 @@
             }
         }
 
-        // GATILHO DE FLUXO CONTÍNUO (Funciona com tela bloqueada)
         player.onended = () => {
             console.log("Faixa finalizada. Puxando próxima música da grade...");
-            indiceMusicaAtual++; // Pula para o próximo índice sequencial organizado
-            rodarTransmissaoAoVivo(false); // Carrega a próxima da fila direto sem resetar a agulha mundial
+            indiceMusicaAtual++; 
+            rodarTransmissaoAoVivo(false); 
         };
 
         function updateLockScreen(title, artist, capaUrl) {
