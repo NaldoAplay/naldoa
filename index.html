@@ -231,7 +231,7 @@
             </div>
 
             <div class="live-indicator">
-                <i class="fas fa-signal"></i> TRANSMISSÃO CONTÍNUA 24H
+                <i class="fas fa-broadcast-tower"></i> TRANSMISSÃO AO VIVO SINCRO
             </div>
 
             <div class="cover-area">
@@ -239,7 +239,7 @@
             </div>
 
             <div class="info-area">
-                <h1 id="track-title">CONECTANDO...</h1>
+                <h1 id="track-title">SINTONIZANDO...</h1>
                 <p id="artist-name">DJ NaldoA</p>
             </div>
 
@@ -276,13 +276,11 @@
         const txtCover = document.getElementById('track-cover');
         const txtStatus = document.getElementById('status-text');
 
-        let musicas = [];
-        let imagens = [];
-        let gradeProgramacao = [];
-        let indiceMusicaAtual = 0;
+        let gradeMusicas = [];
+        let estaPausadoManualmente = true;
 
         txtTitle.innerText = "SINTONIA ONLINE";
-        txtStatus.innerText = "Buscando transmissão...";
+        txtStatus.innerText = "Conectando à torre...";
 
         async function fetchDriveData() {
             const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
@@ -291,117 +289,118 @@
                 const data = await response.json();
                 
                 if(data.files && data.files.length > 0) {
-                    musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
-                    imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
+                    let arquivosAudio = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
+                    let arquivosImagem = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
 
-                    if (musicas.length === 0) {
-                        txtTitle.innerText = "EXNA FM";
-                        txtStatus.innerText = "Playlist sem arquivos mp3.";
+                    if (arquivosAudio.length === 0) {
+                        txtTitle.innerText = "RADIO EXNA FM";
+                        txtStatus.innerText = "Grade de áudio vazia.";
                         return;
                     }
 
-                    // Associa as capas
-                    gradeProgramacao = musicas.map(m => {
-                        const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
-                        const capaCorrespondente = imagens.find(img => img.name.startsWith(nomeSemExtensao));
+                    // Monta a grade estável com duração padrão fixa para sincronia global perfeita
+                    gradeMusicas = arquivosAudio.map(m => {
+                        const nomeLimpo = m.name.replace(/\.[^/.]+$/, "");
+                        const imagemCorrespondente = arquivosImagem.find(img => img.name.startsWith(nomeLimpo));
                         
                         return {
                             id: m.id,
-                            name: nomeSemExtensao,
-                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
+                            name: nomeLimpo,
+                            duracao: 200, // Cada música ganha um bloco de tempo exato na linha do tempo global
+                            capa: imagemCorrespondente ? `https://www.googleapis.com/drive/v3/files/${imagemCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
                         };
                     });
                     
-                    // Sincroniza um embaralhamento fixo baseado no ciclo do dia para fingir a grade viva ao abrir
-                    gradeProgramacao = embaralharGradeEstavel(gradeProgramacao);
-
-                    txtTitle.innerText = "RADIO EXNA FM";
+                    txtTitle.innerText = "EXNA FM";
                     btn.disabled = false;
                     icon.className = "fas fa-play";
-                    txtStatus.innerText = "Estação sintonizada e pronta";
+                    txtStatus.innerText = "Sinal digital 100%";
                 } else {
-                    txtTitle.innerText = "EXNA FM";
-                    txtStatus.innerText = "Pasta do Drive indisponível.";
+                    txtStatus.innerText = "Impossível ler a torre de streaming.";
                 }
             } catch (e) {
-                txtTitle.innerText = "EXNA FM";
-                txtStatus.innerText = "Erro ao ler dados da nuvem.";
+                txtStatus.innerText = "Erro de conexão de rede.";
             }
         }
 
-        function embaralharGradeEstavel(lista) {
-            let resultado = [...lista];
-            let tempoAtual = Math.floor(Date.now() / 1000);
-            let semente = Math.floor(tempoAtual / 86400); // Muda a ordem de forma estável uma vez por dia
+        // CÁLCULO DA MATRIZ DO AO VIVO: Garante que todo mundo escute a mesma coisa no mesmo segundo do dia
+        function obterEstadoGradeAoVivo() {
+            let duracaoTotalGrade = gradeMusicas.reduce((acc, m) => acc + m.duracao, 0);
+            let timestampSegundos = Math.floor(Date.now() / 1000);
             
-            function random() {
-                let x = Math.sin(semente++) * 10000;
-                return x - Math.floor(x);
+            // Ponto atual dentro do loop infinito do dia
+            let tempoGeralNaGrade = timestampSegundos % duracaoTotalGrade;
+            
+            let tempoAcumulado = 0;
+            for (let i = 0; i < gradeMusicas.length; i++) {
+                let m = gradeMusicas[i];
+                if (tempoGeralNaGrade < tempoAcumulado + m.duracao) {
+                    return {
+                        musica: m,
+                        segundoExato: tempoGeralNaGrade - tempoAcumulado,
+                        proximoIndice: (i + 1) % gradeMusicas.length
+                    };
+                }
+                tempoAcumulado += m.duracao;
             }
-
-            for (let i = resultado.length - 1; i > 0; i--) {
-                const j = Math.floor(random() * (i + 1));
-                [resultado[i], resultado[j]] = [resultado[j], resultado[i]];
-            }
-            return resultado;
+            return { musica: gradeMusicas[0], segundoExato: 0, proximoIndice: 1 };
         }
 
-        // FUNÇÃO DE EXECUÇÃO DA MÚSICA ATUAL DA PROGRAMAÇÃO
-        function tocarMusicaDaGrade(indice, pularSegundos = 0) {
-            if (gradeProgramacao.length === 0) return;
-            
-            // Garante o loop infinito dentro do array da lista
-            if (indice >= gradeProgramacao.length) indice = 0;
-            if (indice < 0) indice = gradeProgramacao.length - 1;
-            
-            indiceMusicaAtual = indice;
-            const faixa = gradeProgramacao[indiceMusicaAtual];
+        function sincronizarEPlay() {
+            if (gradeMusicas.length === 0 || estaPausadoManualmente) return;
 
-            player.src = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
-            player.currentTime = pularSegundos;
+            const estadoAtual = obterEstadoGradeAoVivo();
+            const fonteUrl = `https://www.googleapis.com/drive/v3/files/${estadoAtual.musica.id}?alt=media&key=${API_KEY}`;
 
-            player.play().then(() => {
-                icon.className = "fas fa-stop";
-                btn.classList.add('active');
-                card.classList.add('playing');
+            // Só altera o áudio se a música mudou na linha do tempo global
+            if (player.src !== fonteUrl) {
+                player.src = fonteUrl;
+                player.currentTime = estadoAtual.segundoExato;
                 
-                // Atualiza tela principal com dados da faixa real
-                txtTitle.innerText = faixa.name;
-                txtCover.src = f = faixa.capaUrl;
-                txtStatus.innerText = "Transmitindo ao vivo";
-                
-                // Atualiza a tela de bloqueio com os dados reais
-                updateLockScreen(faixa.name, faixa.capaUrl);
-            }).catch(() => {
-                txtStatus.innerText = "Sintonia interrompida. Toque no Play.";
-            });
+                player.play().then(() => {
+                    txtTitle.innerText = estadoAtual.musica.name;
+                    txtCover.src = estadoAtual.musica.capa;
+                    txtStatus.innerText = "Sintonizado ao Vivo";
+                    updateLockScreen(estadoAtual.musica.name, estadoAtual.musica.capa);
+                }).catch(() => {
+                    // Previne travamento caso o navegador bloqueie o autoplay
+                });
+            }
         }
 
         function toggleRadio() {
             if (player.paused) {
-                // Ao dar o play pela primeira vez, calcula um ponto de partida pseudo-live
-                let pontoPartidaIndice = Math.floor(Math.random() * gradeProgramacao.length);
-                tocarMusicaDaGrade(pontoPartidaIndice, 0);
+                estaPausadoManualmente = false;
+                icon.className = "fas fa-stop";
+                btn.classList.add('active');
+                card.classList.add('playing');
+                sincronizarEPlay();
             } else {
+                estaPausadoManualmente = true;
                 player.pause();
-                player.src = "";
+                player.src = ""; // Corta o fluxo de dados para simular o desligamento do rádio
                 icon.className = "fas fa-play";
                 btn.classList.remove('active');
                 card.classList.remove('playing');
                 txtTitle.innerText = "RADIO EXNA FM";
                 txtCover.src = "logo-quadrada.png";
-                txtStatus.innerText = "Estação online";
+                txtStatus.innerText = "Estação em stand-by";
             }
         }
 
-        // SOLUÇÃO DO TRAVAMENTO: Evento disparado nativamente pelo navegador assim que o arquivo acaba
-        player.onended = () => {
-            console.log("Música encerrada. Emendando próxima faixa automaticamente...");
-            let próximoIndice = indiceMusicaAtual + 1;
-            tocarMusicaDaGrade(próximoIndice, 0); // Dispara a próxima sem silenciar ou parar a rádio
-        };
+        // MOTOR DA RÁDIO: De 3 em 3 segundos ele checa o relógio mundial e ajusta a música e a capa sozinho
+        setInterval(() => {
+            if (!estaPausadoManualmente) {
+                const estado = obterEstadoGradeAoVivo();
+                const urlEsperada = `https://www.googleapis.com/drive/v3/files/${estado.musica.id}?alt=media&key=${API_KEY}`;
+                
+                // Se o tempo mundial pulou para a próxima música, o site acompanha sozinho sem silenciar!
+                if (player.src !== urlEsperada) {
+                    sincronizarEPlay();
+                }
+            }
+        }, 3000);
 
-        // Gerenciador da Tela de Bloqueio do Aparelho
         function updateLockScreen(title, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -413,12 +412,8 @@
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
                     ]
                 });
-                
-                // Permite controlar o fluxo de play/pause direto pelo painel de notificações/bloqueio
                 navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
                 navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
-                navigator.mediaSession.setActionHandler('nexttrack', () => { tocarMusicaDaGrade(indiceMusicaAtual + 1, 0); });
-                navigator.mediaSession.setActionHandler('previoustrack', () => { tocarMusicaDaGrade(indiceMusicaAtual - 1, 0); });
             }
         }
 
