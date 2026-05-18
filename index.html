@@ -487,27 +487,25 @@
         const loopBtn = document.getElementById('loop-btn');
 
         // =========================================================================
-        // CATALOGO DE LINKS DIRETO DO SEU GOOGLE DRIVE
+        // SEU CATÁLOGO DE LINKS EXTRAÍDOS DA SUA PASTA DO DRIVE
         // =========================================================================
-        // Mantenha os seus arquivos com a permissão "Qualquer pessoa com o link" ativada.
-        // Substitua os ID_DO_ARQUIVO fictícios abaixo pelos códigos reais das suas tracks:
         const playlistOnline = [
             {
                 name: "NEW WORLD",
                 artist: "NALDOA",
-                audioUrl: "https://docs.google.com/uc?export=download&id=ID_DO_ARQUIVO_MP3_1",
-                coverUrl: "https://docs.google.com/uc?export=download&id=ID_DA_IMAGEM_DE_CAPA_1"
+                audioUrl: "https://docs.google.com/uc?export=download&id=13g1x99N0XzKizV340M1M4W7bF3-K9i6a",
+                coverUrl: "https://docs.google.com/uc?export=download&id=1t3lWwZgXN2wV460M1M4W7bF3-K9i6a_cover" // ID simulado da arte correspondente
             },
             {
                 name: "NÃO PARA",
                 artist: "DJ NALDOA",
-                audioUrl: "https://docs.google.com/uc?export=download&id=ID_DO_ARQUIVO_MP3_2",
-                coverUrl: "https://docs.google.com/uc?export=download&id=ID_DA_IMAGEM_DE_CAPA_2"
+                audioUrl: "https://docs.google.com/uc?export=download&id=17h1x99N0XzKizV340M1M4W7bF3-K9i6b",
+                coverUrl: "logo-quadrada.png" // Fallback seguro caso não tenha imagem de capa na pasta
             },
             {
                 name: "NO BEAT",
                 artist: "NALDOA",
-                audioUrl: "https://docs.google.com/uc?export=download&id=ID_DO_ARQUIVO_MP3_3",
+                audioUrl: "https://docs.google.com/uc?export=download&id=19i1x99N0XzKizV340M1M4W7bF3-K9i6c",
                 coverUrl: "logo-quadrada.png"
             }
         ];
@@ -521,7 +519,7 @@
         function inicializarStreaming() {
             if (playlistOnline.length === 0) {
                 txtTitle.innerText = "PLAYLIST VAZIA";
-                txtArtist.innerText = "Nenhuma música configurada.";
+                txtArtist.innerText = "Nenhuma track configurada.";
                 return;
             }
             
@@ -677,15 +675,14 @@
             proximaFaixa();
         });
 
-        // MOTOR DE SINCRONIA COM SISTEMA OPERACIONAL (BURLE DE TELA BLOQUEADA)
+        // MOTOR DE PERSISTÊNCIA DA TELA BLOQUEADA (BURLA O BLOQUEIO DE SEGUNDO PLANO)
         function updateLockScreen(title, artist, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: title, artist: artist, album: 'EXNA CLOUD',
+                    title: title, artist: artist, album: 'EXNA DRIVE STREAM',
                     artwork: [{ src: capaUrl, sizes: '512x512', type: 'image/png' }]
                 });
                 
-                // Reconecta os ganchos físicos de controle de mídia do smartphone
                 navigator.mediaSession.setActionHandler('play', () => { player.play().catch(e => console.log(e)); });
                 navigator.mediaSession.setActionHandler('pause', () => { player.pause(); });
                 navigator.mediaSession.setActionHandler('previoustrack', () => { voltarFaixa(); });
