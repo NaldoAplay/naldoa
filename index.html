@@ -290,7 +290,7 @@
 
             <div class="info-area">
                 <h1 id="track-title">SINTONIZANDO...</h1>
-                <p id="artist-name">EXNA FM</p>
+                <p id="artist-name">DJ NaldoA</p>
             </div>
 
             <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
@@ -307,16 +307,16 @@
 
     <footer>
         <div class="social-links">
-            <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
-            <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
-            <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.instagram.com/naldoaoficial?igsh=d3FkMDM5a2xtaWE%3D&utm_source=qr" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/@djnaldoaoficial?si=W56XFO0qNFh7zi1s" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.tiktok.com/@djnaldoaoficial?_r=1&_t=ZS-914Y71XEeby" target="_blank"><i class="fab fa-tiktok"></i></a>
         </div>
         <div class="copyright">
-            EXNA FM © 2026 | Todos os Direitos Reservados
+            EXNA FM © 2026 | NaldoA | Todos os Direitos Reservados
         </div>
     </footer>
 
-    <audio id="audio-core" crossorigin="anonymous" preload="auto"></audio>
+    <audio id="audio-core" crossorigin="anonymous" preload="auto" audio-bitrate="320" high-fidelity="true"></audio>
 
     <script>
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
@@ -348,35 +348,27 @@
                 const data = await response.json();
                 
                 if(data.files && data.files.length > 0) {
-                    // Aceita apenas MP3 para áudio e PNG para imagens
-                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3')).sort((a,b) => a.name.localeCompare(b.name));
-                    let imagens = data.files.filter(f => f.name.toLowerCase().endsWith('.png'));
-                    
-                    console.log(`Encontrados: ${musicas.length} MP3, ${imagens.length} PNG`);
+                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
+                    let imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
 
                     if (musicas.length === 0) {
                         txtTitle.innerText = "EXNA FM";
-                        txtStatus.innerText = "Nenhuma música MP3 disponível.";
+                        txtStatus.innerText = "Nenhuma música disponível.";
                         return;
                     }
 
                     gradeOriginal = musicas.map(m => {
-                        const nomeSemExtensao = m.name.replace(/\.mp3$/i, "");
+                        const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         
-                        let artistaDetectado = "EXNA FM";
+                        let artistaDetectado = "EXNA FM - AO VIVO";
                         let tituloDetectado = nomeSemExtensao;
                         if(nomeSemExtensao.includes(" - ")) {
                             let partes = nomeSemExtensao.split(" - ");
                             artistaDetectado = partes[0].trim();
-                            tituloDetectado = partes.slice(1).join(" - ").trim();
+                            tituloDetectado = partes[1].trim();
                         }
 
-                        // Busca imagem PNG com o MESMO NOME (case insensitive)
-                        const capaCorrespondente = imagens.find(img => 
-                            img.name.replace(/\.png$/i, "").toLowerCase() === nomeSemExtensao.toLowerCase()
-                        );
-                        
-                        console.log(`${m.name} -> capa: ${capaCorrespondente ? capaCorrespondente.name : 'padrão'}`);
+                        const capaCorrespondente = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
                         
                         return {
                             id: m.id,
@@ -399,8 +391,8 @@
                     txtStatus.innerText = "Pasta vazia.";
                 }
             } catch (e) {
-                console.error(e);
                 txtStatus.innerText = "Falha ao conectar com o servidor.";
+                console.error(e);
             }
         }
 
@@ -471,14 +463,19 @@
             if (player.src !== urlFonte) {
                 player.src = urlFonte;
             }
-            player.currentTime = tempoDeCorte;
+            
+            if (player.currentTime !== tempoDeCorte) {
+                player.currentTime = tempoDeCorte;
+            }
 
+            // Atualizar interface visual
             txtTitle.innerText = ConvertName(faixa.name);
             txtArtist.innerText = faixa.artist;
             txtCover.src = faixa.capaUrl;
             txtStatus.innerText = "Sintonizando transmissão ao vivo...";
 
-            updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
+            // Atualizar tela bloqueada
+            updateLockScreen(ConvertName(faixa.name), faixa.artist, faixa.capaUrl);
 
             icon.className = "fas fa-spinner fa-spin";
 
@@ -522,6 +519,7 @@
                 btn.classList.remove('active');
                 card.classList.remove('playing');
                 txtStatus.innerText = "Transmissão em espera";
+                estaPausadoManualmente = true;
             }
         }
 
@@ -553,6 +551,8 @@
                 });
                 navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
                 navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
+                navigator.mediaSession.setActionHandler('previoustrack', () => {});
+                navigator.mediaSession.setActionHandler('nexttrack', () => {});
             }
         }
 
@@ -566,13 +566,15 @@
         pwaBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                deferredPrompt = null;
-                pwaBtn.classList.remove('visible');
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                    pwaBtn.classList.remove('visible');
+                });
             }
         });
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
+            navigator.serviceWorker.register('sw.js').catch(console.log);
         }
 
         fetchDriveData();
