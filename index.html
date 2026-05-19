@@ -26,7 +26,6 @@
             color: #f0f0ff;
         }
 
-        /* Player principal - efeito vidro + neon */
         .neon-player {
             max-width: 480px;
             width: 100%;
@@ -44,7 +43,6 @@
             box-shadow: 0 0 28px rgba(102, 252, 241, 0.4), 0 0 0 1px #66fcf1 inset;
         }
 
-        /* header */
         .radio-brand {
             display: flex;
             align-items: center;
@@ -99,7 +97,6 @@
             100% { box-shadow: 0 0 0 0 #ff005500; opacity: 0.9; }
         }
 
-        /* capa com efeito holográfico */
         .cover-art-container {
             position: relative;
             margin: 20px 0 25px;
@@ -130,7 +127,6 @@
             box-shadow: 0 0 0 3px #66fcf1, 0 25px 40px -12px black;
         }
 
-        /* info da música */
         .track-info {
             text-align: center;
             margin: 12px 0 28px;
@@ -157,7 +153,6 @@
             letter-spacing: -0.2px;
         }
 
-        /* botão principal */
         .play-wrapper {
             display: flex;
             justify-content: center;
@@ -203,7 +198,6 @@
             color: #bbe1ff;
         }
 
-        /* rodapé com redes */
         .social-footer {
             margin-top: 32px;
             display: flex;
@@ -226,7 +220,6 @@
             color: #6b6b8b;
         }
 
-        /* botão PWA */
         .install-btn {
             position: fixed;
             bottom: 22px;
@@ -239,7 +232,7 @@
             color: #66fcf1;
             font-size: 1.25rem;
             gap: 8px;
-            display: flex;
+            display: none;
             align-items: center;
             font-weight: 600;
             cursor: pointer;
@@ -249,6 +242,7 @@
             z-index: 1000;
         }
         .install-btn.visible {
+            display: flex;
             transform: scale(1);
         }
         .install-btn i {
@@ -279,7 +273,6 @@
             </div>
         </div>
 
-        <!-- capa com efeito dinâmico -->
         <div class="cover-art-container">
             <div class="cover-glow">
                 <img id="dynamicCover" src="logo-quadrada.png" alt="capa da música">
@@ -288,7 +281,7 @@
 
         <div class="track-info">
             <div class="track-title" id="trackTitle">Sintonizando...</div>
-            <div class="track-artist" id="trackArtist">DJ NaldoA</div>
+            <div class="track-artist" id="trackArtist">EXNA FM</div>
         </div>
 
         <div class="play-wrapper">
@@ -306,23 +299,23 @@
             <a href="https://tiktok.com" target="_blank"><i class="fab fa-tiktok"></i></a>
         </div>
         <div class="copyright">
-            EXNA FM © 2026 | Transmissão em tempo real • NaldoA
+            EXNA FM © 2026 | Transmissão em tempo real
         </div>
     </div>
 </div>
 
-<button id="installPwaBtn" class="install-btn" style="display: flex;">
+<button id="installPwaBtn" class="install-btn">
     <i class="fas fa-download"></i> <span>APP</span>
 </button>
 
 <audio id="streamAudio" preload="auto" crossorigin="anonymous"></audio>
 
 <script>
-    // ------------------- CONFIGURAÇÃO DRIVE -------------------
+    // CONFIGURAÇÃO DO GOOGLE DRIVE
     const FOLDER_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J';
     const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs';
     
-    // elementos DOM
+    // Elementos DOM
     const audioEl = document.getElementById('streamAudio');
     const playBtn = document.getElementById('masterPlayBtn');
     const playIconSpan = document.getElementById('playIcon');
@@ -332,202 +325,238 @@
     const statusSpan = document.getElementById('liveStatusText');
     const containerDiv = document.getElementById('playerContainer');
     
-    // estado global
-    let musicLibrary = [];         // array bruto de musicas com id, nome, artista, capaUrl
-    let globalPlaylist = [];      // lista embaralhada sincronizada mundial
+    // Estado global
+    let musicLibrary = [];
+    let globalPlaylist = [];
     let currentSongIndex = 0;
-    let isUserPaused = true;       // começa pausado até carregar dados
-    let segmentDurationSec = 185;   // duração fixa por faixa na grade viva (3min5s)
+    let isUserPaused = true;
+    let segmentDurationSec = 180;
     let isPlayingFlag = false;
     let deferredPrompt = null;
     
-    // helper: busca arquivos na pasta do drive
+    // Buscar arquivos do Google Drive
     async function fetchDriveFiles() {
         const queryUrl = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
+        
         try {
-            const resp = await fetch(queryUrl);
-            const data = await resp.json();
+            statusSpan.innerText = "📀 Carregando músicas do Drive...";
+            const response = await fetch(queryUrl);
+            const data = await response.json();
+            
             if (!data.files || data.files.length === 0) {
-                statusSpan.innerText = "⚠️ Pasta vazia ou sem permissão";
+                statusSpan.innerText = "❌ Nenhum arquivo encontrado na pasta";
+                console.error("Pasta vazia ou ID inválido");
                 return false;
             }
-            const allFiles = data.files;
-            const audioFiles = allFiles.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio/mpeg'));
-            const imageFiles = allFiles.filter(f => f.mimeType.includes('image') || f.name.match(/\.(jpg|jpeg|png)$/i));
+            
+            console.log("Arquivos encontrados:", data.files.map(f => f.name));
+            
+            // Separar áudios (MP3) e imagens (PNG)
+            const audioFiles = data.files.filter(f => {
+                const name = f.name.toLowerCase();
+                return name.endsWith('.mp3');
+            });
+            
+            const imageFiles = data.files.filter(f => {
+                const name = f.name.toLowerCase();
+                return name.endsWith('.png');
+            });
             
             if (audioFiles.length === 0) {
-                statusSpan.innerText = "🎵 Nenhum MP3 encontrado na pasta";
+                statusSpan.innerText = "❌ Nenhum arquivo MP3 encontrado na pasta";
+                console.error("Sem arquivos de áudio");
                 return false;
             }
             
-            // montar biblioteca com capa associada
+            console.log(`Encontrados: ${audioFiles.length} áudios, ${imageFiles.length} imagens PNG`);
+            
+            // Montar biblioteca de músicas
             musicLibrary = audioFiles.map(audio => {
-                const fullName = audio.name.replace(/\.[^/.]+$/, ""); // sem extensão
+                // Remove extensão .mp3
+                const fullName = audio.name.replace(/\.mp3$/i, "");
                 let artist = "EXNA FM";
                 let title = fullName;
+                
+                // Tentar extrair artista e título do nome do arquivo (formato: Artista - Musica)
                 if (fullName.includes(" - ")) {
                     const parts = fullName.split(" - ");
                     artist = parts[0].trim();
                     title = parts.slice(1).join(" - ").trim();
-                } else {
-                    title = fullName;
-                    artist = "Rádio EXNA";
                 }
-                // busca capa correspondente: imagem que comece com o mesmo nome base (ignorando case)
-                let matchedCover = imageFiles.find(img => img.name.toLowerCase().startsWith(fullName.toLowerCase()));
-                let coverUrl = matchedCover 
-                    ? `https://www.googleapis.com/drive/v3/files/${matchedCover.id}?alt=media&key=${API_KEY}`
-                    : 'logo-quadrada.png';
+                
+                // Buscar imagem PNG correspondente (mesmo nome base)
+                let matchedCover = imageFiles.find(img => {
+                    const imgName = img.name.replace(/\.png$/i, "").toLowerCase();
+                    const songName = fullName.toLowerCase();
+                    return imgName === songName;
+                });
+                
+                let coverUrl = 'logo-quadrada.png';
+                if (matchedCover) {
+                    coverUrl = `https://www.googleapis.com/drive/v3/files/${matchedCover.id}?alt=media&key=${API_KEY}`;
+                    console.log(`Capa encontrada para ${fullName}: ${matchedCover.name}`);
+                } else {
+                    console.log(`Nenhuma capa PNG encontrada para: ${fullName}`);
+                }
                 
                 return {
                     id: audio.id,
                     title: title || fullName,
                     artist: artist,
-                    coverUrl: coverUrl
+                    coverUrl: coverUrl,
+                    url: `https://www.googleapis.com/drive/v3/files/${audio.id}?alt=media&key=${API_KEY}`
                 };
             });
             
             if (musicLibrary.length === 0) return false;
-            // gerar playlist global estável baseada no dia (semente diária)
-            buildGlobalSyncedPlaylist();
+            
+            // Gerar playlist global embaralhada
+            buildGlobalPlaylist();
             return true;
-        } catch (err) {
-            console.error("Drive error", err);
-            statusSpan.innerText = "❌ Erro ao acessar Drive";
+            
+        } catch (error) {
+            console.error("Erro ao acessar Google Drive:", error);
+            statusSpan.innerText = "❌ Erro ao conectar com Google Drive";
             return false;
         }
     }
     
-    // GERAÇÃO DA GRADE MUNDIAL (sincronizada para todos os ouvintes)
-    function buildGlobalSyncedPlaylist() {
+    // Gerar playlist global com semente diária (mesma para todos)
+    function buildGlobalPlaylist() {
         if (!musicLibrary.length) return;
-        // semente baseada na data UTC para manter mesma ordem em qualquer hora do dia
+        
+        // Semente baseada na data atual (todos os ouvintes sincronizam)
         const today = new Date();
-        const seed = today.getUTCFullYear() * 366 + today.getUTCMonth() * 31 + today.getUTCDate();
-        let rng = (seedVal) => {
-            let x = Math.sin(seedVal) * 10000;
-            return x - Math.floor(x);
-        };
+        const seed = today.getFullYear() * 366 + (today.getMonth() + 1) * 31 + today.getDate();
+        
         let shuffled = [...musicLibrary];
-        // embaralhamento deterministico profundo
+        // Embaralhamento determinístico
         for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(rng(seed + i) * (i + 1));
+            const j = Math.floor(Math.sin(seed + i) * 10000) % (i + 1);
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-        // evitar artistas consecutivos iguais (refinamento)
+        
+        // Evitar artistas repetidos consecutivamente
         let finalPlaylist = [];
-        let lastArtist = "";
         let tempPool = [...shuffled];
-        while(tempPool.length) {
-            let idx = tempPool.findIndex(song => song.artist !== lastArtist);
-            if(idx === -1) idx = 0;
-            let selected = tempPool.splice(idx,1)[0];
+        let lastArtist = "";
+        
+        while(tempPool.length > 0) {
+            let index = tempPool.findIndex(song => song.artist !== lastArtist);
+            if(index === -1) index = 0;
+            let selected = tempPool.splice(index, 1)[0];
             finalPlaylist.push(selected);
             lastArtist = selected.artist;
         }
+        
         globalPlaylist = finalPlaylist;
+        console.log("Playlist gerada:", globalPlaylist.map(s => `${s.artist} - ${s.title}`));
     }
     
-    // recuperar posição atual na grade mundial (baseado no relógio universal)
+    // Obter posição atual na grade mundial (baseado no relógio)
     function getCurrentWorldSlot() {
         if (!globalPlaylist.length) return null;
+        
         const totalDurationSec = globalPlaylist.length * segmentDurationSec;
         const nowUnixSec = Math.floor(Date.now() / 1000);
         const cyclePosition = nowUnixSec % totalDurationSec;
         const currentSongIdx = Math.floor(cyclePosition / segmentDurationSec);
         const seekOffset = cyclePosition % segmentDurationSec;
+        
         return {
             index: currentSongIdx % globalPlaylist.length,
             seekTime: seekOffset
         };
     }
     
-    // carregar musica por índice (com ou sem força de seek)
+    // Atualizar interface com informações da música
+    function updateUI(song) {
+        if (!song) return;
+        
+        trackTitleSpan.innerText = song.title.toUpperCase();
+        trackArtistSpan.innerText = song.artist;
+        
+        if (song.coverUrl && song.coverUrl !== coverImg.src) {
+            coverImg.src = song.coverUrl;
+            coverImg.onerror = () => { 
+                console.log("Erro ao carregar capa, usando padrão");
+                coverImg.src = 'logo-quadrada.png'; 
+            };
+        }
+        
+        // Atualizar Media Session (tela bloqueada)
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title,
+                artist: song.artist,
+                album: 'EXNA FM • AO VIVO',
+                artwork: [
+                    { src: song.coverUrl !== 'logo-quadrada.png' ? song.coverUrl : 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
+                ]
+            });
+        }
+    }
+    
+    // Carregar música pelo índice
     async function loadSongByIndex(index, seekSeconds = 0, forcePlay = false) {
         if (!globalPlaylist.length) return false;
+        
         const safeIndex = index % globalPlaylist.length;
         const song = globalPlaylist[safeIndex];
         if (!song) return false;
         
-        // atualizar UI instantaneamente (capa, título, artista)
-        trackTitleSpan.innerText = song.title.toUpperCase();
-        trackArtistSpan.innerText = song.artist;
-        if (song.coverUrl && song.coverUrl !== coverImg.src) {
-            coverImg.src = song.coverUrl;
-            coverImg.onerror = () => { coverImg.src = 'logo-quadrada.png'; };
-        } else if (!song.coverUrl) {
-            coverImg.src = 'logo-quadrada.png';
-        }
+        // Atualizar UI primeiro (efeito ao vivo instantâneo)
+        updateUI(song);
         
-        // atualizar mídia da tela bloqueada imediatamente (efeito ao vivo)
-        updateMediaSession(song.title, song.artist, song.coverUrl);
-        
-        const audioUrl = `https://www.googleapis.com/drive/v3/files/${song.id}?alt=media&key=${API_KEY}`;
-        const needLoad = (audioEl.src !== audioUrl);
-        if (needLoad) {
-            audioEl.src = audioUrl;
+        // Carregar áudio se necessário
+        if (audioEl.src !== song.url) {
+            audioEl.src = song.url;
             audioEl.load();
         }
-        // definimos o tempo de seek (se for necessário)
-        if (seekSeconds > 0 && !isNaN(seekSeconds)) {
-            audioEl.currentTime = Math.min(seekSeconds, segmentDurationSec - 1);
-        } else {
-            audioEl.currentTime = 0;
+        
+        if (seekSeconds > 0 && seekSeconds < segmentDurationSec) {
+            audioEl.currentTime = seekSeconds;
         }
         
         currentSongIndex = safeIndex;
         
-        // se não estiver pausado manualmente e o play estiver ativo, tocar
         if (!isUserPaused || forcePlay) {
             try {
                 await audioEl.play();
                 isPlayingFlag = true;
                 updatePlayButtonUI(true);
                 containerDiv.classList.add('playing-active');
-                statusSpan.innerText = "🎙️ TRANSMISSÃO AO VIVO • DIGITAL";
+                statusSpan.innerText = "🎙️ TRANSMISSÃO AO VIVO";
             } catch (err) {
-                console.warn("autoplay bloqueado", err);
+                console.log("Autoplay bloqueado:", err);
                 isPlayingFlag = false;
                 updatePlayButtonUI(false);
-                containerDiv.classList.remove('playing-active');
-                statusSpan.innerText = "🔘 Toque no play para entrar no ar";
+                statusSpan.innerText = "🔘 Clique no play para ouvir";
             }
-        } else {
-            // se pausado, apenas atualiza info
-            isPlayingFlag = false;
-            updatePlayButtonUI(false);
-            containerDiv.classList.remove('playing-active');
-            if (audioEl.paused === false) audioEl.pause();
         }
+        
         return true;
     }
     
-    // sincronização global: segue o relógio universal
-    async function syncToLiveWorld(forcePlayback = false) {
-        if (globalPlaylist.length === 0) return;
+    // Sincronizar com tempo real
+    async function syncToLiveWorld() {
+        if (!globalPlaylist.length) return;
+        
         const slot = getCurrentWorldSlot();
         if (!slot) return;
-        const shouldPlay = (!isUserPaused) || forcePlayback;
-        // Carregar a música exata do momento e o ponto exato
-        await loadSongByIndex(slot.index, slot.seekTime, forcePlayback);
-        // garantir que, se deve tocar e está pausado, retoma
-        if (shouldPlay && audioEl.paused) {
-            try {
-                await audioEl.play();
-                isPlayingFlag = true;
-                updatePlayButtonUI(true);
-                containerDiv.classList.add('playing-active');
-                statusSpan.innerText = "🔊 AO VIVO • SINCRONIZADO";
-            } catch(e) { /* ignora */ }
-        } else if (!shouldPlay && !audioEl.paused) {
-            audioEl.pause();
-            isPlayingFlag = false;
-            updatePlayButtonUI(false);
-            containerDiv.classList.remove('playing-active');
+        
+        const needSync = (slot.index !== currentSongIndex || Math.abs(audioEl.currentTime - slot.seekTime) > 3);
+        
+        if (needSync && !isUserPaused) {
+            await loadSongByIndex(slot.index, slot.seekTime);
+        } else if (needSync && isUserPaused) {
+            // Apenas atualizar informações visuais (prévia)
+            const song = globalPlaylist[slot.index];
+            if (song) updateUI(song);
         }
     }
     
-    // atualizar botão e ícone
+    // Atualizar botão play/pause
     function updatePlayButtonUI(isPlaying) {
         if (isPlaying) {
             playIconSpan.className = "fas fa-stop";
@@ -538,23 +567,21 @@
         }
     }
     
-    // toggle manual do usuário (play/pause ao vivo)
+    // Alternar reprodução
     async function toggleLiveRadio() {
         if (!globalPlaylist.length) {
-            statusSpan.innerText = "⏳ Carregando programação...";
+            statusSpan.innerText = "⏳ Carregando playlist...";
             return;
         }
+        
         if (audioEl.paused) {
-            // usuário quer dar PLAY, reseta flag pause e força sincronia imediata
             isUserPaused = false;
-            statusSpan.innerText = "🔄 entrando no ar...";
             const slot = getCurrentWorldSlot();
             if (slot) {
                 await loadSongByIndex(slot.index, slot.seekTime, true);
             } else {
-                await syncToLiveWorld(true);
+                await loadSongByIndex(0, 0, true);
             }
-            // garantir play
             try {
                 await audioEl.play();
                 isPlayingFlag = true;
@@ -562,141 +589,80 @@
                 containerDiv.classList.add('playing-active');
                 statusSpan.innerText = "📡 AO VIVO • EM TEMPO REAL";
             } catch(e) {
-                statusSpan.innerText = "⚠️ toque novamente se necessário";
+                statusSpan.innerText = "⚠️ Toque novamente";
             }
         } else {
-            // pausar rádio
             audioEl.pause();
             isUserPaused = true;
             isPlayingFlag = false;
             updatePlayButtonUI(false);
             containerDiv.classList.remove('playing-active');
-            statusSpan.innerText = "⏸️ Transmissão pausada • toque play para voltar";
+            statusSpan.innerText = "⏸️ Pausado • Toque play para voltar";
         }
     }
     
-    // MediaSession para tela bloqueada (efeito ao vivo essencial)
-    function updateMediaSession(title, artist, artworkUrl) {
-        if ('mediaSession' in navigator) {
-            let artworkArray = [];
-            if (artworkUrl && artworkUrl !== 'logo-quadrada.png') {
-                artworkArray.push({ src: artworkUrl, sizes: '512x512', type: 'image/png' });
-            }
-            artworkArray.push({ src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' });
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: title,
-                artist: artist,
-                album: 'EXNA FM • AO VIVO',
-                artwork: artworkArray
-            });
-            // handlers para controle remoto
-            navigator.mediaSession.setActionHandler('play', () => {
-                if (audioEl.paused) toggleLiveRadio();
-            });
-            navigator.mediaSession.setActionHandler('pause', () => {
-                if (!audioEl.paused) toggleLiveRadio();
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', () => { /* opcional */ });
-            navigator.mediaSession.setActionHandler('nexttrack', () => {});
-        }
-    }
-    
-    // Quando a música termina, avança para o próximo SLOT (de acordo com o relógio mundial)
+    // Próxima música automática
     audioEl.addEventListener('ended', async () => {
         if (!isUserPaused && globalPlaylist.length) {
-            // avança no mundo: recalculamos o slot atual, mas a grade é contínua,
-            // o ended pode ocorrer um pouco antes, então forçamos sincronia novamente
-            // para pular para a próxima faixa da linha do tempo.
-            const nextSlot = getCurrentWorldSlot();
-            if (nextSlot) {
-                await loadSongByIndex(nextSlot.index, nextSlot.seekTime, true);
-                if (!isUserPaused) {
-                    try { await audioEl.play(); } catch(e) {}
-                }
-            } else {
-                syncToLiveWorld(true);
-            }
-        } else if (!globalPlaylist.length) {
-            // sem playlist
-        }
-    });
-    
-    // Detectar erros de streaming, avançar sincronia
-    audioEl.addEventListener('error', async () => {
-        console.warn("erro no áudio");
-        if (!isUserPaused && globalPlaylist.length) {
-            const newSlot = getCurrentWorldSlot();
-            if (newSlot) await loadSongByIndex(newSlot.index, newSlot.seekTime, true);
-            else syncToLiveWorld(true);
-        }
-    });
-    
-    // relógio ao vivo: a cada 2 segundos verifica se estamos alinhados com a grade universal
-    let lastSyncCheck = 0;
-    setInterval(async () => {
-        if (!globalPlaylist.length) return;
-        if (!isUserPaused) {
-            const currentWorld = getCurrentWorldSlot();
-            if (currentWorld && (currentWorld.index !== currentSongIndex || Math.abs(audioEl.currentTime - currentWorld.seekTime) > 2.5)) {
-                // dessincronizou, recarregar faixa e tempo correto
-                await loadSongByIndex(currentWorld.index, currentWorld.seekTime, true);
+            const slot = getCurrentWorldSlot();
+            if (slot) {
+                await loadSongByIndex(slot.index, slot.seekTime, true);
                 if (!isUserPaused && audioEl.paused) {
                     try { await audioEl.play(); } catch(e) {}
                 }
             }
         }
-        // Se está pausado, atualiza info visuais mesmo assim para mostrar a música certa?
-        if (globalPlaylist.length && (audioEl.paused || true)) {
-            const slot = getCurrentWorldSlot();
-            if (slot && globalPlaylist[slot.index]) {
-                const track = globalPlaylist[slot.index];
-                if (track.title !== trackTitleSpan.innerText) {
-                    trackTitleSpan.innerText = track.title.toUpperCase();
-                    trackArtistSpan.innerText = track.artist;
-                    if (track.coverUrl) coverImg.src = track.coverUrl;
-                    updateMediaSession(track.title, track.artist, track.coverUrl);
-                }
-            }
-        }
-    }, 2700);
+    });
     
-    // inicia tudo: carregar músicas, ativar evento do play, PWA
+    // Tratar erros
+    audioEl.addEventListener('error', () => {
+        console.log("Erro no áudio, sincronizando com a grade...");
+        if (!isUserPaused && globalPlaylist.length) {
+            const slot = getCurrentWorldSlot();
+            if (slot) loadSongByIndex(slot.index, slot.seekTime, true);
+        }
+    });
+    
+    // Sincronização periódica (a cada 3 segundos)
+    setInterval(() => {
+        syncToLiveWorld();
+    }, 3000);
+    
+    // Inicializar
     async function initRadio() {
         playBtn.disabled = true;
         const success = await fetchDriveFiles();
+        
         if (success && globalPlaylist.length) {
             playBtn.disabled = false;
             statusSpan.innerText = "📻 SINAL ESTÁVEL • PRONTO";
-            // pré-sincroniza informação visual com a grade
-            const initialSlot = getCurrentWorldSlot();
-            if (initialSlot && globalPlaylist[initialSlot.index]) {
-                const song = globalPlaylist[initialSlot.index];
-                trackTitleSpan.innerText = song.title.toUpperCase();
-                trackArtistSpan.innerText = song.artist;
-                coverImg.src = song.coverUrl || 'logo-quadrada.png';
-                updateMediaSession(song.title, song.artist, song.coverUrl);
+            
+            const slot = getCurrentWorldSlot();
+            if (slot && globalPlaylist[slot.index]) {
+                updateUI(globalPlaylist[slot.index]);
             }
-            // sem auto-play até usuário interagir (respeito navegador)
+            
             isUserPaused = true;
             updatePlayButtonUI(false);
             containerDiv.classList.remove('playing-active');
-            statusSpan.innerText = "🎧 Toque no botão e ouça ao vivo";
+            statusSpan.innerText = "🎧 Toque no botão para ouvir ao vivo";
         } else {
-            statusSpan.innerText = "⚠️ Falha ao carregar programação";
+            statusSpan.innerText = "⚠️ Verifique a pasta do Drive (MP3 + PNG)";
             playBtn.disabled = true;
         }
     }
     
-    // eventos de clique
+    // Eventos
     playBtn.addEventListener('click', toggleLiveRadio);
     
-    // PWA install
+    // PWA Install
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
         const installBtnEl = document.getElementById('installPwaBtn');
         installBtnEl.classList.add('visible');
     });
+    
     document.getElementById('installPwaBtn').addEventListener('click', async () => {
         if (deferredPrompt) {
             deferredPrompt.prompt();
@@ -707,9 +673,10 @@
     
     // Service Worker
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(e => console.log("sw err", e));
+        navigator.serviceWorker.register('sw.js').catch(e => console.log("SW error:", e));
     }
     
+    // Iniciar
     initRadio();
 </script>
 </body>
