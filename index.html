@@ -367,18 +367,46 @@
 
         let gradeOriginal = [];
         let gradeStream = [];
-        let DURACAO_MUSICA_STREAM = 180; // 3 minutos
         let deferredPrompt;
         let isPlaying = false;
         let cacheCapas = new Map();
         let carregandoStream = false;
-        let ultimoTimestamp = 0;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando ao stream global...";
 
         function mostrarLoading(mostrar) {
             loadingCover.style.display = mostrar ? 'flex' : 'none';
+        }
+
+        // Função para obter a duração REAL da música
+        function obterDuracaoReal(url) {
+            return new Promise((resolve) => {
+                const audioTemp = new Audio();
+                audioTemp.preload = 'metadata';
+                audioTemp.onloadedmetadata = () => {
+                    const duracao = audioTemp.duration;
+                    audioTemp.src = '';
+                    resolve(duracao);
+                };
+                audioTemp.onerror = () => {
+                    resolve(180); // Fallback 3 minutos
+                };
+                audioTemp.src = url;
+            });
+        }
+
+        async function carregarDuracaoReal(musica) {
+            const url = `https://www.googleapis.com/drive/v3/files/${musica.id}?alt=media&key=${API_KEY}`;
+            try {
+                const duracao = await obterDuracaoReal(url);
+                musica.duracao = duracao;
+                console.log(`📏 "${musica.name}" - ${Math.floor(duracao/60)}min ${Math.floor(duracao%60)}s`);
+                return duracao;
+            } catch (e) {
+                musica.duracao = 180;
+                return 180;
+            }
         }
 
         async function buscarCapaNoITunes(musicaNome, artistaNome) {
@@ -423,7 +451,9 @@
                         return;
                     }
 
-                    gradeOriginal = musicas.map(m => {
+                    // Carrega todas as músicas com suas durações reais
+                    gradeOriginal = [];
+                    for (const m of musicas) {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         
                         let artistaDetectado = "EXNA FM";
@@ -436,20 +466,20 @@
 
                         const capaCorrespondente = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
                         
-                        return {
+                        const musica = {
                             id: m.id,
                             name: tituloDetectado,
                             artist: artistaDetectado,
-                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : null
+                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : null,
+                            duracao: 180 // temporário
                         };
-                    });
+                        
+                        await carregarDuracaoReal(musica);
+                        gradeOriginal.push(musica);
+                    }
                     
                     gerarGradeStreamGlobal();
-                    
-                    // Configura evento de fim da música
                     configurarEventoFimMusica();
-                    
-                    // Inicia o stream
                     await carregarStreamAtual();
                     
                     // Tenta dar play automático
@@ -505,20 +535,36 @@
             }
 
             gradeStream = resultado;
+            
+            let duracaoTotal = gradeStream.reduce((acc, m) => acc + m.duracao, 0);
             console.log('📻 Stream Global gerado com', gradeStream.length, 'músicas');
+            console.log('⏱️ Duração total:', Math.floor(duracaoTotal/60), 'minutos');
         }
 
+        // POSIÇÃO BASEADA NAS DURAÇÕES REAIS
         function obterPosicaoStream() {
-            let totalDuracao = gradeStream.length * DURACAO_MUSICA_STREAM;
             let timestamp = Math.floor(Date.now() / 1000);
-            let posicao = timestamp % totalDuracao;
-            let musicaIndex = Math.floor(posicao / DURACAO_MUSICA_STREAM);
-            let segundos = posicao % DURACAO_MUSICA_STREAM;
+            let duracaoTotal = gradeStream.reduce((acc, m) => acc + m.duracao, 0);
+            let posicaoGlobal = timestamp % duracaoTotal;
+            let acumulado = 0;
+            
+            for (let i = 0; i < gradeStream.length; i++) {
+                let duracaoMusica = gradeStream[i].duracao;
+                if (posicaoGlobal >= acumulado && posicaoGlobal < acumulado + duracaoMusica) {
+                    return {
+                        index: i,
+                        seek: posicaoGlobal - acumulado,
+                        track: gradeStream[i],
+                        timestamp: timestamp
+                    };
+                }
+                acumulado += duracaoMusica;
+            }
             
             return {
-                index: musicaIndex,
-                seek: segundos,
-                track: gradeStream[musicaIndex],
+                index: 0,
+                seek: 0,
+                track: gradeStream[0],
                 timestamp: timestamp
             };
         }
@@ -549,7 +595,9 @@
             
             const minutos = Math.floor(stream.seek / 60);
             const segundos = Math.floor(stream.seek % 60);
-            timerInfo.innerHTML = `🎙️ LIVE | ${minutos}:${segundos.toString().padStart(2,'0')}/${DURACAO_MUSICA_STREAM/60}:00 | ${new Date().toLocaleTimeString('pt-BR')}`;
+            const duracaoMin = Math.floor(faixa.duracao / 60);
+            const duracaoSeg = Math.floor(faixa.duracao % 60);
+            timerInfo.innerHTML = `🎙️ LIVE | ${minutos}:${segundos.toString().padStart(2,'0')}/${duracaoMin}:${duracaoSeg.toString().padStart(2,'0')} | ${new Date().toLocaleTimeString('pt-BR')}`;
             
             carregandoStream = false;
         }
@@ -569,21 +617,19 @@
             }
         }
 
-        // FUNÇÃO CRUCIAL: Passa para a próxima música automaticamente
+        // CRUCIAL: Passa para a próxima música quando terminar
         function configurarEventoFimMusica() {
             player.onended = async () => {
                 console.log('🎵 Música terminou, carregando próxima do stream...');
                 
-                // Pega a próxima música baseada no stream
                 const stream = obterPosicaoStream();
                 let proximoIndex = (stream.index + 1) % gradeStream.length;
                 const proximaFaixa = gradeStream[proximoIndex];
-                let novaPosicao = 0;
                 
                 let urlMusica = `https://www.googleapis.com/drive/v3/files/${proximaFaixa.id}?alt=media&key=${API_KEY}`;
                 
                 player.src = urlMusica;
-                player.currentTime = novaPosicao;
+                player.currentTime = 0;
                 
                 txtTitle.innerText = proximaFaixa.name.toUpperCase();
                 document.getElementById('artist-name').innerHTML = `${proximaFaixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🌍 AO VIVO</span>`;
@@ -594,7 +640,9 @@
                 
                 updateLockScreen(proximaFaixa.name, `${proximaFaixa.artist} - AO VIVO`, proximaFaixa.capaUrl || 'logo-quadrada.png');
                 
-                timerInfo.innerHTML = `🎙️ LIVE | 0:00/${DURACAO_MUSICA_STREAM/60}:00 | ${new Date().toLocaleTimeString('pt-BR')}`;
+                const duracaoMin = Math.floor(proximaFaixa.duracao / 60);
+                const duracaoSeg = Math.floor(proximaFaixa.duracao % 60);
+                timerInfo.innerHTML = `🎙️ LIVE | 0:00/${duracaoMin}:${duracaoSeg.toString().padStart(2,'0')} | ${new Date().toLocaleTimeString('pt-BR')}`;
                 txtStatus.innerText = `🎵 Nova música no ar: ${proximaFaixa.name}`;
                 
                 if (isPlaying) {
@@ -620,7 +668,6 @@
             const faixa = stream.track;
             let urlMusica = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
             
-            // Se a música mudou, carrega a nova
             if (player.src !== urlMusica && !player.ended) {
                 console.log('🔄 Sincronizando com stream global');
                 player.src = urlMusica;
@@ -640,7 +687,9 @@
             
             const minutos = Math.floor(stream.seek / 60);
             const segundos = Math.floor(stream.seek % 60);
-            timerInfo.innerHTML = `🎙️ LIVE | ${minutos}:${segundos.toString().padStart(2,'0')}/${DURACAO_MUSICA_STREAM/60}:00 | ${new Date().toLocaleTimeString('pt-BR')}`;
+            const duracaoMin = Math.floor(faixa.duracao / 60);
+            const duracaoSeg = Math.floor(faixa.duracao % 60);
+            timerInfo.innerHTML = `🎙️ LIVE | ${minutos}:${segundos.toString().padStart(2,'0')}/${duracaoMin}:${duracaoSeg.toString().padStart(2,'0')} | ${new Date().toLocaleTimeString('pt-BR')}`;
         }
 
         function toggleRadio() {
