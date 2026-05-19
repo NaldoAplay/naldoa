@@ -2,8 +2,11 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>EXNA FM | Rádio Ao Vivo 24h</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#8a2be2">
+    <title>NaldoA Play - A sua rádio web!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -13,39 +16,73 @@
 
         body {
             min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #0a0f1e, #050a14);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(ellipse at 30% 40%, #0a0f1e, #03060c);
+            font-family: 'Rajdhani', sans-serif;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Vidro fosco premium */
+        /* Partículas de fundo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, rgba(255,215,0,0.15), transparent),
+                radial-gradient(3px 3px at 80% 70%, rgba(138,43,226,0.15), transparent),
+                radial-gradient(1px 1px at 40% 90%, rgba(255,0,85,0.1), transparent);
+            background-repeat: no-repeat;
+            background-size: 200px 200px, 300px 300px, 150px 150px;
+            pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); opacity: 0.5; }
+            50% { transform: translate(30px, 20px); opacity: 0.8; }
+            100% { transform: translate(0, 0); opacity: 0.5; }
+        }
+
+        /* Vidro fosco principal */
         .glass-radio {
             max-width: 550px;
             width: 100%;
-            background: rgba(18, 25, 45, 0.55);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border-radius: 56px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(255, 215, 0, 0.15);
+            background: rgba(10, 20, 30, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
             overflow: hidden;
-            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
 
-        .inner-content {
-            padding: 28px 24px 36px;
+        .glass-radio:hover {
+            border-color: rgba(255, 215, 0, 0.25);
+            box-shadow: 0 35px 55px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,215,0,0.1);
         }
 
-        /* Header com logo */
-        .station-brand {
+        .inner {
+            padding: 32px 28px 38px;
+        }
+
+        /* Header com logo e nome */
+        .station-header {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .logo-area {
@@ -54,189 +91,256 @@
             gap: 12px;
         }
 
-        .logo-icon {
-            font-size: 2.2rem;
-            filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
+        .logo-img {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+            animation: logoGlow 3s ease-in-out infinite;
         }
 
-        .station-name {
-            font-size: 1.9rem;
+        @keyframes logoGlow {
+            0% { box-shadow: 0 0 0 0 rgba(255,215,0,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(255,215,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,215,0,0); }
+        }
+
+        .station-title h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
             font-weight: 800;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #FFE68F, #FFB347);
+            background: linear-gradient(135deg, #FFE68F, #FFA500, #FFD700);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            line-height: 1.2;
+        }
+
+        .station-title p {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .live-badge {
-            background: rgba(231, 76, 60, 0.9);
+            background: rgba(231, 76, 60, 0.85);
             backdrop-filter: blur(4px);
-            padding: 5px 12px;
-            border-radius: 100px;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 0.7rem;
             font-weight: 700;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 8px rgba(231,76,60,0.5);
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .live-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background: #ff5e5e;
             border-radius: 50%;
-            animation: pulseLive 1.4s infinite;
+            animation: livePulse 1.2s infinite;
+            box-shadow: 0 0 5px #ff0000;
         }
 
-        @keyframes pulseLive {
-            0% { opacity: 1; transform: scale(1); background: #ff5e5e; }
-            100% { opacity: 0.3; transform: scale(1.3); background: #ff0000; }
+        @keyframes livePulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0.2; }
         }
 
-        /* Capa estilo album */
-        .artwork-frame {
-            background: rgba(0,0,0,0.3);
-            border-radius: 32px;
-            padding: 12px;
-            margin: 15px 0 12px;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05), 0 12px 25px -8px black;
+        /* Container do slideshow com efeito de blur atrás */
+        .slideshow-section {
+            margin: 15px 0 20px;
+            position: relative;
         }
 
-        .album-art {
+        .blur-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: cover;
-            border-radius: 28px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.5);
-            display: block;
-            background: #11161f;
-            transition: transform 0.2s ease;
+            height: 100%;
+            filter: blur(30px);
+            opacity: 0.5;
+            border-radius: 40px;
+            z-index: 0;
+            transition: all 0.5s ease;
+            background-size: cover;
+            background-position: center;
         }
 
-        /* Info da faixa */
+        .image-frame {
+            position: relative;
+            z-index: 2;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto;
+            border-radius: 35px;
+            overflow: hidden;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .playing .image-frame {
+            animation: frameGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes frameGlow {
+            0% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,215,0,0.2); }
+            50% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,215,0,0.6); }
+            100% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,215,0,0.2); }
+        }
+
+        .slideshow-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .playing .slideshow-img {
+            animation: imagePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes imagePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* Legenda da imagem */
+        .image-caption {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 1px;
+        }
+
+        /* Informações da música */
         .track-info {
             text-align: center;
-            margin: 18px 0 12px;
+            margin: 15px 0 15px;
         }
 
-        .track-name {
-            font-size: 1.55rem;
+        .track-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #ffffff;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            letter-spacing: -0.3px;
-            word-break: break-word;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
         .track-artist {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #FFDA88;
-            margin-top: 6px;
-            opacity: 0.9;
+            font-size: 0.85rem;
+            color: #FFD966;
+            margin-top: 5px;
+            font-weight: 600;
         }
 
-        /* Controles redondos e suaves */
+        /* Controles */
         .controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 28px;
-            margin: 16px 0 20px;
+            gap: 30px;
+            margin: 20px 0;
         }
 
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(5px);
-            border: none;
-            width: 62px;
-            height: 62px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
-            font-size: 1.8rem;
-            cursor: pointer;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
             color: #FFE5B4;
-            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-        }
-
-        .ctrl-btn:active {
-            transform: scale(0.95);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            backdrop-filter: blur(4px);
         }
 
         .ctrl-btn:hover {
-            background: #FFD966;
-            color: #1e2a36;
-            transform: scale(1.02);
-            box-shadow: 0 0 12px rgba(255,200,80,0.6);
+            background: rgba(255,215,0,0.2);
+            border-color: rgba(255,215,0,0.5);
+            transform: scale(1.05);
         }
 
         #playPauseBtn {
-            background: linear-gradient(145deg, #FFD966, #FFB347);
-            color: #1a252f;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(145deg, rgba(255,215,0,0.9), rgba(255,140,0,0.9));
+            color: #1a1f2e;
+            font-size: 1.7rem;
+            border: none;
+            box-shadow: 0 0 15px rgba(255,215,0,0.5);
+        }
+
+        #playPauseBtn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 25px rgba(255,215,0,0.8);
+        }
+
+        #playPauseBtn.playing {
+            background: white;
+            color: #ff3366;
         }
 
         /* Barra de progresso */
         .progress-section {
-            margin: 10px 0 8px;
+            margin: 15px 0 10px;
         }
 
         .progress-area {
-            background: rgba(45, 55, 72, 0.9);
+            background: rgba(45, 55, 72, 0.7);
             border-radius: 30px;
-            height: 6px;
+            height: 5px;
             cursor: pointer;
             overflow: hidden;
         }
 
         .progress-bar {
-            background: linear-gradient(90deg, #FFD966, #FFA500);
+            background: linear-gradient(90deg, #FFD700, #FFA500);
             width: 0%;
-            height: 6px;
+            height: 5px;
             border-radius: 30px;
         }
 
         .time-stamp {
             display: flex;
             justify-content: space-between;
-            font-size: 0.7rem;
-            color: #bbb;
+            font-size: 0.65rem;
+            color: #aaa;
             margin-top: 8px;
-            padding: 0 4px;
-            font-weight: 500;
         }
 
-        /* volume elegante */
+        /* Volume */
         .volume-row {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            margin: 16px 0 8px;
             background: rgba(0,0,0,0.25);
-            padding: 8px 20px;
-            border-radius: 80px;
+            padding: 6px 18px;
+            border-radius: 40px;
             width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 15px auto 0;
         }
 
-        .volume-icon {
-            font-size: 1rem;
-            color: #FFDB8A;
+        .volume-row i {
+            color: #FFD966;
         }
 
         input[type="range"] {
-            width: 130px;
+            width: 110px;
             height: 3px;
             -webkit-appearance: none;
             background: #FFD966;
             border-radius: 5px;
-            outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
@@ -246,56 +350,100 @@
             background: #FFD966;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 6px gold;
         }
 
-        .footer-credits {
+        /* Redes sociais */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 0.5px solid rgba(255,215,0,0.15);
+        }
+
+        .social-links a {
+            color: rgba(255,255,255,0.5);
+            font-size: 1.3rem;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #FFD966;
+            transform: translateY(-3px);
+        }
+
+        .status-text {
             text-align: center;
-            font-size: 0.65rem;
-            color: #aaa;
-            margin-top: 28px;
-            border-top: 0.5px solid rgba(255,215,0,0.2);
-            padding-top: 18px;
-            letter-spacing: 0.5px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 12px;
         }
 
-        @media (max-width: 500px) {
-            .inner-content { padding: 20px 18px 28px; }
-            .station-name { font-size: 1.6rem; }
-            .ctrl-btn { width: 55px; height: 55px; font-size: 1.5rem; }
-            .track-name { font-size: 1.25rem; }
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.2);
+            margin-top: 20px;
+        }
+
+        @media (max-width: 550px) {
+            .inner { padding: 25px 20px 30px; }
+            .station-title h1 { font-size: 1.1rem; }
+            .logo-img { width: 45px; height: 45px; }
+            .image-frame { width: 210px; height: 210px; }
+            #playPauseBtn { width: 65px; height: 65px; font-size: 1.5rem; }
+            .ctrl-btn { width: 48px; height: 48px; font-size: 1.1rem; }
+        }
+
+        @media (max-width: 400px) {
+            .station-header { flex-direction: column; text-align: center; }
+            .logo-area { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-<div class="glass-radio">
-    <div class="inner-content">
-        <div class="station-brand">
+<div class="glass-radio" id="radioContainer">
+    <div class="inner">
+        <!-- Header com logo -->
+        <div class="station-header">
             <div class="logo-area">
-                <span class="logo-icon">🎙️📻</span>
-                <span class="station-name">EXNA FM</span>
+                <img src="logo.png" class="logo-img" alt="NaldoA Play" onerror="this.src='https://via.placeholder.com/55?text=NP'">
+                <div class="station-title">
+                    <h1>NALDOA PLAY</h1>
+                    <p>A SUA RÁDIO WEB!</p>
+                </div>
             </div>
             <div class="live-badge">
-                <span class="live-dot"></span> AO VIVO
+                <span class="live-dot"></span>
+                <span>AO VIVO</span>
             </div>
         </div>
 
-        <div class="artwork-frame">
-            <img id="albumArt" class="album-art" src="https://via.placeholder.com/500x500?text=EXNA+FM" alt="Capa da música">
+        <!-- Slideshow de imagens -->
+        <div class="slideshow-section">
+            <div class="blur-backdrop" id="blurBackdrop"></div>
+            <div class="image-frame" id="imageFrame">
+                <img id="slideshowImg" class="slideshow-img" src="img/IMG_4484.jpg" alt="Imagem">
+            </div>
+            <div class="image-caption" id="imageCaption">Momento NaldoA Play</div>
         </div>
 
+        <!-- Informações da música -->
         <div class="track-info">
-            <div class="track-name" id="musicTitle">EXNA FM</div>
-            <div class="track-artist" id="musicArtist">Carregando playlist...</div>
+            <div class="track-title" id="trackTitle">SINTONIZANDO...</div>
+            <div class="track-artist" id="trackArtist">NALDOA PLAY</div>
         </div>
 
+        <!-- Controles -->
         <div class="controls">
-            <button class="ctrl-btn" id="prevBtn" aria-label="Anterior">⏮️</button>
-            <button class="ctrl-btn" id="playPauseBtn" aria-label="Play/Pause">▶️</button>
-            <button class="ctrl-btn" id="nextBtn" aria-label="Próxima">⏭️</button>
+            <button class="ctrl-btn" id="prevBtn"><i class="fas fa-backward-step"></i></button>
+            <button class="ctrl-btn" id="playPauseBtn"><i class="fas fa-play" id="playIcon"></i></button>
+            <button class="ctrl-btn" id="nextBtn"><i class="fas fa-forward-step"></i></button>
         </div>
 
+        <!-- Barra de progresso -->
         <div class="progress-section">
             <div class="progress-area" id="progressArea">
                 <div class="progress-bar" id="progressBar"></div>
@@ -306,143 +454,283 @@
             </div>
         </div>
 
+        <!-- Volume -->
         <div class="volume-row">
-            <span class="volume-icon">🔊</span>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.75">
+            <i class="fas fa-volume-up"></i>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
         </div>
 
-        <div class="footer-credits">
-            🎧 EXNA FM · Autodj 24h · Toca aleatório com capas
+        <!-- Redes sociais -->
+        <div class="social-links">
+            <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://twitter.com/" target="_blank"><i class="fab fa-twitter"></i></a>
         </div>
+
+        <div class="status-text" id="statusMsg">🔊 Pronto para tocar</div>
+        <footer>NaldoA Play © 2026 | 24 horas no ar</footer>
     </div>
 </div>
 
 <script>
     // ============================================================
-    // TODOS OS LINKS CORRETOS - EXTRAÍDOS DOS SEUS ARQUIVOS
-    // MÚSICAS + CAPAS .png pareadas pelo nome
+    // NALDOA PLAY - STREAM + SLIDESHOW DE IMAGENS
     // ============================================================
     
-    const musicFiles = [
-        { nome: "4 Non Blondes – What's Up?.mp3", id: "18VIagKXQt8RBL93Ni17pm54OlU1bPDCj", capaId: "1X-e_zkj5DXHOWbRuhyia4JZMmlZIRLEe" },
-        { nome: "Adele – Send My Love (To Your New Lover).mp3", id: "1WJDPOg_op3nx6ZQDM-LbMOUuLxj-T5y4", capaId: "1fwSedPrXu2ZNh-sF4SxM3GmdReV8EbGM" },
-        { nome: "Adele – Set Fire to the Rain.mp3", id: "1oAlae50wMiZk_VGlUSiyqL0Pkn4rzmR4", capaId: "1f1iADiE_yhPec5IcD_-CE3M9xSFBxIZC" },
-        { nome: "Air Supply – Lonely Is the Night.mp3", id: "1M4cipfK3hVMB9S7WLYitX6JOMpR32G9H", capaId: "1M66i-sWeXI7NOtxmU8NdI0F2_bEnWpYz" },
-        { nome: "Air Supply – Making Love Out of Nothing at All.mp3", id: "1vWlkIkeI0YAEj6LN4NVaGX4Yhp12A1iU", capaId: "1vGIsJ-JXlMQpjisjLEs914awqidYmgK4" },
-        { nome: "Alan Jackson – I'll Try.mp3", id: "1K_OALmcZ7phhrtx3gmZE84uUNeW7uNpM", capaId: "1K9rLBaYbxog4R8AeyxyDHD99dhTHY3FW" },
-        { nome: "Alan Walker – Faded.mp3", id: "10LbJnezjLTYHh41J3o06MuTh_thXNYS3", capaId: "10HWU-_8uwHH67Ft8gUTptioVjGDPBw2t" },
-        { nome: "Alphaville – Forever Young.mp3", id: "1EmFKISLhMfW7JbKCkOQ2kzUAPlH3j3UC", capaId: "1EmFKISLhMfW7JbKCkOQ2kzUAPlH3j3UC" },
-        { nome: "Ariana Grande – no tears left to cry.mp3", id: "1M0QMZhK-XQ2Z23Qb2GwqI-2Nm6YmHSTo", capaId: "1M0QMZhK-XQ2Z23Qb2GwqI-2Nm6YmHSTo" },
-        { nome: "Ariana Grande – Side To Side.mp3", id: "1Mp74wddrN12pqMyXiiGofnLL5NiXrX0-", capaId: "1Mp74wddrN12pqMyXiiGofnLL5NiXrX0-" },
-        { nome: "Berlin – Take My Breath Away.mp3", id: "1p67ow-PjJt8whX23WviqXRIDj02xxS0J", capaId: "1p67ow-PjJt8whX23WviqXRIDj02xxS0J" },
-        { nome: "Bon Jovi – Always.mp3", id: "1RuUrx7JiVYTH0fywtAEAEstrzZFvo8O8", capaId: "1RuUrx7JiVYTH0fywtAEAEstrzZFvo8O8" },
-        { nome: "Bryan Adams – (Everything I Do) I Do It For You.mp3", id: "1V6atOPUT2bHAhRXng3Mf4dZC45ghgLSP", capaId: "1V6atOPUT2bHAhRXng3Mf4dZC45ghgLSP" },
-        { nome: "Calvin Harris – Blame (feat. John Newman).mp3", id: "1zZWbZaA9rM52iuJJ4FmdAPxNCt4F-leX", capaId: "1zZWbZaA9rM52iuJJ4FmdAPxNCt4F-leX" },
-        { nome: "Calvin Harris – How Deep Is Your Love.mp3", id: "1xJUAhqUvA0s0R4F8Jzex-KnJxumU3yVQ", capaId: "1xJUAhqUvA0s0R4F8Jzex-KnJxumU3yVQ" },
-        { nome: "Calvin Harris – Outside (feat. Ellie Goulding).mp3", id: "1wBpBokuPknyln9FQtGhBFZWr1JfYhUL1", capaId: "1wBpBokuPknyln9FQtGhBFZWr1JfYhUL1" },
-        { nome: "Calvin Harris – Summer.mp3", id: "1s5GrDKZxMtlAVib5QesPgCM-UzHvVGU1", capaId: "1s5GrDKZxMtlAVib5QesPgCM-UzHvVGU1" },
-        { nome: "Calvin Harris, Rihanna – This Is What You Came For.mp3", id: "1yOSHqoYITx-xO_OZV2opfv9gQiqtQluN", capaId: "1yOSHqoYITx-xO_OZV2opfv9gQiqtQluN" },
-        { nome: "Céline Dion – All By Myself.mp3", id: "1vm3wIrq-WfTOWxdYY0Z5uHlJMGnezHXt", capaId: "1vm3wIrq-WfTOWxdYY0Z5uHlJMGnezHXt" },
-        { nome: "Céline Dion – The Power of Love.mp3", id: "1tDffHqYH5IUddPQr5Pd2fBJ2mrPerdGM", capaId: "1tDffHqYH5IUddPQr5Pd2fBJ2mrPerdGM" },
-        { nome: "Chris Isaak – Wicked Game.mp3", id: "1tWipo0hMvzPsfGAVSjAnPh4wetMtTPGD", capaId: "1tWipo0hMvzPsfGAVSjAnPh4wetMtTPGD" },
-        { nome: "Coldplay – Something Just Like This.mp3", id: "1xGmY_hULa8el3Pqk_stDL6Xq4VfWSxK4", capaId: "1xGmY_hULa8el3Pqk_stDL6Xq4VfWSxK4" }
-    ];
-
-    // Montar playlist legível
-    const playlist = musicFiles.map(m => ({
-        titulo: m.nome.replace(/\.mp3$/i, '').replace(/^[^–]+–\s*/, '').trim(),
-        artista: m.nome.split('–')[0].trim(),
-        audioId: m.id,
-        capaId: m.capaId || m.id
-    }));
-
-    // helpers
-    function getDriveUrl(id) { return `https://drive.google.com/uc?export=download&id=${id}`; }
-
-    let currentIndex = 0;
-    let isPlaying = false;
+    const STREAM_URL = "https://stream.zeno.fm/xx785t45mf9uv";
+    
+    // ========== CONFIGURAÇÃO DAS IMAGENS ==========
+    // Gera automaticamente os nomes das imagens de IMG_4484.jpg até IMG_4596.jpg
+    const imagens = [];
+    for (let i = 4484; i <= 4596; i++) {
+        imagens.push(`img/IMG_${i}.jpg`);
+    }
+    
+    let currentImageIndex = 0;
+    let slideshowInterval = null;
+    
+    // Elementos
     const audio = new Audio();
-
-    // DOM elements
-    const albumArt = document.getElementById('albumArt');
-    const musicTitle = document.getElementById('musicTitle');
-    const musicArtist = document.getElementById('musicArtist');
+    audio.src = STREAM_URL;
+    audio.crossOrigin = "anonymous";
+    audio.preload = "auto";
+    
+    let isPlaying = false;
+    
+    // Elementos DOM
     const playBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    const trackTitle = document.getElementById('trackTitle');
+    const trackArtist = document.getElementById('trackArtist');
+    const slideshowImg = document.getElementById('slideshowImg');
+    const blurBackdrop = document.getElementById('blurBackdrop');
+    const imageCaption = document.getElementById('imageCaption');
     const progressBar = document.getElementById('progressBar');
     const progressArea = document.getElementById('progressArea');
     const currentTimeSpan = document.getElementById('currentTime');
     const durationSpan = document.getElementById('durationTime');
     const volumeSlider = document.getElementById('volumeSlider');
-
-    function loadTrack(index) {
-        const track = playlist[index];
-        if (!track) return;
-        const audioUrl = getDriveUrl(track.audioId);
-        const coverUrl = track.capaId ? getDriveUrl(track.capaId) : "https://via.placeholder.com/500x500?text=EXNA+FM";
-        audio.src = audioUrl;
-        albumArt.src = coverUrl;
-        musicTitle.innerText = track.titulo;
-        musicArtist.innerText = track.artista;
-        progressBar.style.width = '0%';
-        currentTimeSpan.innerText = '0:00';
-        if (isPlaying) audio.play().catch(e => console.log("interação necessária"));
-    }
-
-    function randomNext() {
-        let newIndex = Math.floor(Math.random() * playlist.length);
-        while (playlist.length > 1 && newIndex === currentIndex) {
-            newIndex = Math.floor(Math.random() * playlist.length);
+    const statusMsg = document.getElementById('statusMsg');
+    const radioContainer = document.getElementById('radioContainer');
+    const imageFrame = document.getElementById('imageFrame');
+    
+    // ========== FUNÇÕES DO SLIDESHOW ==========
+    
+    function updateImage(index) {
+        const imgPath = imagens[index];
+        slideshowImg.src = imgPath;
+        blurBackdrop.style.backgroundImage = `url(${imgPath})`;
+        blurBackdrop.style.backgroundSize = 'cover';
+        blurBackdrop.style.backgroundPosition = 'center';
+        
+        // Extrair número da imagem para legenda
+        const match = imgPath.match(/IMG_(\d+)\.jpg/);
+        if (match) {
+            imageCaption.textContent = `Momento #${match[1]}`;
+        } else {
+            imageCaption.textContent = `Momento NaldoA Play`;
         }
-        currentIndex = newIndex;
-        loadTrack(currentIndex);
-        if (isPlaying) audio.play();
     }
-
+    
+    function nextImage() {
+        currentImageIndex = (currentImageIndex + 1) % imagens.length;
+        updateImage(currentImageIndex);
+    }
+    
+    function prevImage() {
+        currentImageIndex = (currentImageIndex - 1 + imagens.length) % imagens.length;
+        updateImage(currentImageIndex);
+    }
+    
+    function startSlideshow() {
+        if (slideshowInterval) clearInterval(slideshowInterval);
+        slideshowInterval = setInterval(() => {
+            nextImage();
+        }, 8000); // Troca a cada 8 segundos
+    }
+    
+    function stopSlideshow() {
+        if (slideshowInterval) {
+            clearInterval(slideshowInterval);
+            slideshowInterval = null;
+        }
+    }
+    
+    // ========== FUNÇÕES DO PLAYER ==========
+    
+    // Playlist de demonstração para metadados da música
+    const playlistDemo = [
+        { title: "BATIDÃO EXPLOSIVO", artist: "DJ NALDOA" },
+        { title: "ELETRO HITS 2025", artist: "NALDOA PLAY" },
+        { title: "SÓ AS TOP", artist: "RÁDIO NALDOA" },
+        { title: "PISTA QUENTE", artist: "DJ NALDOA" },
+        { title: "FUNK MANDELADO", artist: "NALDOA SELECT" },
+        { title: "PAGODE DO NALDOA", artist: "SAMBA AO VIVO" },
+        { title: "SERTANEJO TOP", artist: "NALDOA PLAY" },
+        { title: "ROCK IN RIO", artist: "NALDOA" }
+    ];
+    
+    let currentMusicIndex = 0;
+    let musicIntervalId = null;
+    
+    function rotateTrackInfo() {
+        const track = playlistDemo[currentMusicIndex % playlistDemo.length];
+        trackTitle.textContent = track.title;
+        trackArtist.textContent = track.artist;
+        currentMusicIndex++;
+        
+        // Atualizar Media Session
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.title,
+                artist: track.artist,
+                album: 'NaldoA Play',
+                artwork: [{ src: slideshowImg.src, sizes: '512x512' }]
+            });
+        }
+    }
+    
+    function startMusicRotation() {
+        if (musicIntervalId) clearInterval(musicIntervalId);
+        musicIntervalId = setInterval(() => {
+            if (isPlaying) rotateTrackInfo();
+        }, 30000);
+    }
+    
+    function stopMusicRotation() {
+        if (musicIntervalId) clearInterval(musicIntervalId);
+    }
+    
+    // Controle de áudio
     function togglePlay() {
         if (isPlaying) {
             audio.pause();
-            playBtn.innerHTML = '▶️';
+            isPlaying = false;
+            playIcon.className = "fas fa-play";
+            playBtn.classList.remove('playing');
+            radioContainer.classList.remove('playing');
+            statusMsg.textContent = "⏸️ Pausado";
+            stopSlideshow();
+            stopMusicRotation();
         } else {
-            audio.play().catch(() => {
-                alert('🔊 EXNA FM: clique novamente para iniciar a rádio');
+            audio.play().then(() => {
+                isPlaying = true;
+                playIcon.className = "fas fa-stop";
+                playBtn.classList.add('playing');
+                radioContainer.classList.add('playing');
+                statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+                startSlideshow();
+                startMusicRotation();
+                rotateTrackInfo();
+            }).catch((err) => {
+                console.log(err);
+                statusMsg.textContent = "🔊 Clique novamente para ouvir";
             });
-            playBtn.innerHTML = '⏸️';
-        }
-        isPlaying = !isPlaying;
-    }
-
-    function updateProgress() {
-        if (audio.duration) {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = percent + '%';
-            const curM = Math.floor(audio.currentTime / 60);
-            const curS = Math.floor(audio.currentTime % 60);
-            const durM = Math.floor(audio.duration / 60);
-            const durS = Math.floor(audio.duration % 60);
-            currentTimeSpan.innerText = `${curM}:${curS < 10 ? '0'+curS : curS}`;
-            durationSpan.innerText = `${durM}:${durS < 10 ? '0'+durS : durS}`;
         }
     }
-
-    // Eventos
-    audio.addEventListener('timeupdate', updateProgress);
-    audio.addEventListener('ended', () => randomNext());
-    playBtn.addEventListener('click', togglePlay);
-    nextBtn.addEventListener('click', () => { randomNext(); if(!isPlaying) togglePlay(); });
-    prevBtn.addEventListener('click', () => { randomNext(); if(!isPlaying) togglePlay(); });
-    progressArea.addEventListener('click', (e) => {
-        const width = progressArea.clientWidth;
-        const clickX = e.offsetX;
-        if (audio.duration) audio.currentTime = (clickX / width) * audio.duration;
+    
+    function nextTrackSimulate() {
+        if (!isPlaying) return;
+        rotateTrackInfo();
+        statusMsg.textContent = "🎵 Próxima faixa";
+        setTimeout(() => {
+            if (isPlaying) statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+        }, 2000);
+    }
+    
+    function prevTrackSimulate() {
+        if (!isPlaying) return;
+        currentMusicIndex = (currentMusicIndex - 2 + playlistDemo.length) % playlistDemo.length;
+        rotateTrackInfo();
+        statusMsg.textContent = "🎵 Voltar faixa";
+        setTimeout(() => {
+            if (isPlaying) statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+        }, 2000);
+    }
+    
+    // Barra de progresso decorativa
+    let progressInterval = null;
+    
+    function startProgressAnimation() {
+        if (progressInterval) clearInterval(progressInterval);
+        let fakeProgress = 0;
+        progressInterval = setInterval(() => {
+            if (isPlaying) {
+                fakeProgress = (fakeProgress + 0.5) % 100;
+                progressBar.style.width = fakeProgress + '%';
+                const fakeSeconds = Math.floor((fakeProgress / 100) * 180);
+                const mins = Math.floor(fakeSeconds / 60);
+                const secs = fakeSeconds % 60;
+                currentTimeSpan.textContent = `${mins}:${secs < 10 ? '0'+secs : secs}`;
+                durationSpan.textContent = "3:00";
+            }
+        }, 500);
+    }
+    
+    function stopProgressAnimation() {
+        if (progressInterval) clearInterval(progressInterval);
+        progressBar.style.width = '0%';
+        currentTimeSpan.textContent = "0:00";
+    }
+    
+    // Volume
+    volumeSlider.addEventListener('input', (e) => {
+        audio.volume = e.target.value;
     });
-    volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
-    audio.volume = volumeSlider.value;
-
-    // Inicia aleatório
-    currentIndex = Math.floor(Math.random() * playlist.length);
-    loadTrack(currentIndex);
+    audio.volume = 0.8;
+    
+    // Eventos do áudio
+    audio.addEventListener('playing', () => {
+        startProgressAnimation();
+        statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+    });
+    
+    audio.addEventListener('pause', () => {
+        stopProgressAnimation();
+    });
+    
+    audio.addEventListener('error', () => {
+        statusMsg.textContent = "⚠️ Reconectando...";
+        setTimeout(() => {
+            if (isPlaying) audio.play().catch(() => {});
+        }, 3000);
+    });
+    
+    // Botões
+    playBtn.addEventListener('click', togglePlay);
+    nextBtn.addEventListener('click', nextTrackSimulate);
+    prevBtn.addEventListener('click', prevTrackSimulate);
+    
+    // Navegação manual das imagens (quando pausado)
+    nextBtn.addEventListener('dblclick', () => {
+        if (!isPlaying) nextImage();
+    });
+    prevBtn.addEventListener('dblclick', () => {
+        if (!isPlaying) prevImage();
+    });
+    
+    // Inicializar primeira imagem
+    updateImage(0);
+    
+    // Carregar stream
+    audio.load();
+    statusMsg.textContent = "🔊 Clique no play para ouvir";
+    
+    // Media Session
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', () => togglePlay());
+        navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+        navigator.mediaSession.setActionHandler('nexttrack', () => nextTrackSimulate());
+        navigator.mediaSession.setActionHandler('previoustrack', () => prevTrackSimulate());
+    }
+    
+    // Fallback para imagens que não carregam
+    slideshowImg.onerror = function() {
+        this.src = 'https://via.placeholder.com/300x300?text=NALDOA+PLAY';
+    };
 </script>
 </body>
 </html>
