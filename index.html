@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>EXNA MUSIC - Google Drive Player</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
             --glass-border: rgba(255, 255, 255, 0.08);
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--dark-bg);
@@ -282,7 +282,7 @@
             width: 100%;
             max-width: 320px;
             height: 100vh;
-            background: rgba(5, 6, 8, 0.94);
+            background: rgba(5, 6, 8, 0.95);
             backdrop-filter: blur(25px);
             border-left: 1px solid var(--glass-border);
             box-shadow: -10px 0 30px rgba(0,0,0,0.8);
@@ -344,7 +344,7 @@
         .playlist-item:hover { background: rgba(255, 255, 255, 0.04); }
         
         .playlist-item.current-track {
-            background: rgba(102, 252, 241, 0.1);
+            background: rgba(102, 252, 241, 0.15);
             border: 1px solid rgba(102, 252, 241, 0.3);
             color: var(--neon-aqua);
         }
@@ -388,6 +388,8 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        button { touch-action: manipulation; }
     </style>
 </head>
 <body>
@@ -396,11 +398,11 @@
 
     <div class="playlist-sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3><i class="fas fa-list-ul"></i> EXNA PLAYLIST</h3>
-            <button class="close-sidebar-btn" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-list-ul"></i> MINHA PLAYLIST</h3>
+            <button class="close-sidebar-btn" onclick="fecharSidebar()"><i class="fas fa-times"></i></button>
         </div>
         <div class="playlist-scroll-area" id="playlist-box">
-            <div style="text-align: center; color: #444; padding: 20px;">Carregando músicas...</div>
+            <div style="text-align: center; color: #444; padding: 20px;">Carregando...</div>
         </div>
     </div>
 
@@ -415,13 +417,13 @@
                         <p>Google Drive Player</p>
                     </div>
                 </div>
-                <button class="hamburger-btn" onclick="toggleSidebar()">
+                <button class="hamburger-btn" onclick="abrirSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
 
-            <button class="sync-btn" onclick="carregarDoGoogleDrive()">
-                <i class="fab fa-google-drive"></i> CARREGAR DO GOOGLE DRIVE
+            <button class="sync-btn" onclick="sincronizarGoogleDrive()">
+                <i class="fab fa-google-drive"></i> SINCRONIZAR COM DRIVE
             </button>
 
             <div class="cover-area">
@@ -430,7 +432,7 @@
 
             <div class="info-area">
                 <h1 id="track-title">EXNA MUSIC</h1>
-                <p id="artist-name">Clique em Carregar</p>
+                <p id="artist-name">Sincronize para começar</p>
             </div>
 
             <div class="progress-container">
@@ -441,11 +443,11 @@
 
             <div class="controls-row">
                 <button class="nav-btn" id="shuffle-btn" onclick="toggleShuffle()"><i class="fas fa-random"></i></button>
-                <button class="nav-btn" onclick="voltarFaixa()"><i class="fas fa-step-backward"></i></button>
-                <button class="play-btn" id="master-play" onclick="togglePlayer()" disabled>
+                <button class="nav-btn" onclick="musicaAnterior()"><i class="fas fa-step-backward"></i></button>
+                <button class="play-btn" id="master-play" onclick="togglePlayPause()" disabled>
                     <i class="fas fa-play" id="btn-icon"></i>
                 </button>
-                <button class="nav-btn" onclick="proximaFaixa()"><i class="fas fa-step-forward"></i></button>
+                <button class="nav-btn" onclick="proximaMusica()"><i class="fas fa-step-forward"></i></button>
                 <button class="nav-btn" id="loop-btn" onclick="toggleLoop()"><i class="fas fa-redo"></i></button>
             </div>
 
@@ -455,7 +457,7 @@
                 <i class="fas fa-volume-up"></i>
             </div>
             
-            <p id="status-text" style="margin-top:20px; font-size: 0.75rem; color: #45a29e;">Aguardando...</p>
+            <p id="status-text" style="margin-top:20px; font-size: 0.75rem; color: #45a29e;">Aguardando sincronização</p>
         </div>
     </main>
 
@@ -471,80 +473,136 @@
     <audio id="audio-core" crossorigin="anonymous" preload="auto"></audio>
 
     <script>
+        // ==================== CONFIGURAÇÕES ====================
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
         const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
+        const DB_NAME = 'ExnaMusicDB';
+        const DB_VERSION = 2;
 
+        // ==================== ELEMENTOS ====================
         const player = document.getElementById('audio-core');
-        const btn = document.getElementById('master-play');
-        const icon = document.getElementById('btn-icon');
-        const card = document.getElementById('main-player');
-        const txtTitle = document.getElementById('track-title');
-        const txtArtist = document.getElementById('artist-name');
-        const txtCover = document.getElementById('track-cover');
+        const btnPlay = document.getElementById('master-play');
+        const iconPlay = document.getElementById('btn-icon');
+        const cardPlayer = document.getElementById('main-player');
+        const txtTitulo = document.getElementById('track-title');
+        const txtArtista = document.getElementById('artist-name');
+        const imgCapa = document.getElementById('track-cover');
         const bgGlow = document.getElementById('bg-glow');
         const txtStatus = document.getElementById('status-text');
         const playlistBox = document.getElementById('playlist-box');
-        const sidebar = document.getElementById('sidebar');
-        
         const progressBar = document.getElementById('progress');
-        const timeCurrent = document.getElementById('time-current');
-        const timeDuration = document.getElementById('time-duration');
+        const tempoAtualSpan = document.getElementById('time-current');
+        const tempoTotalSpan = document.getElementById('time-duration');
         
-        const shuffleBtn = document.getElementById('shuffle-btn');
-        const loopBtn = document.getElementById('loop-btn');
-
-        let playlist = [];
-        let ordemExecucao = [];
-        let indiceAtual = 0;
-        let isShuffle = false;
-        let isLoop = false;
+        // ==================== VARIÁVEIS ====================
+        let playlist = [];           // Array de músicas {id, nome, artista, capaUrl, url}
+        let ordemExecucao = [];      // Ordem das músicas (índices da playlist)
+        let indiceAtual = 0;         // Índice dentro da ordemExecucao
+        let modoShuffle = false;
+        let modoLoop = false;
         let cacheCapas = new Map();
-
-        function toggleSidebar() { sidebar.classList.toggle('open'); }
-
-        // Busca capa em MÚLTIPLAS fontes
+        let db = null;
+        let sincronizando = false;
+        
+        // ==================== FUNÇÕES DE BANCO DE DADOS ====================
+        function abrirBancoDados() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('playlist')) {
+                        const store = db.createObjectStore('playlist', { keyPath: 'id' });
+                        store.createIndex('nome', 'nome');
+                    }
+                    if (!db.objectStoreNames.contains('estado')) {
+                        db.createObjectStore('estado', { keyPath: 'chave' });
+                    }
+                };
+                
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+                
+                request.onerror = (e) => reject(e);
+            });
+        }
+        
+        async function salvarPlaylistNoBanco() {
+            if (!db || !playlist.length) return;
+            const tx = db.transaction(['playlist'], 'readwrite');
+            const store = tx.objectStore('playlist');
+            store.clear();
+            playlist.forEach(musica => store.put(musica));
+        }
+        
+        async function carregarPlaylistDoBanco() {
+            if (!db) return [];
+            return new Promise((resolve) => {
+                const tx = db.transaction(['playlist'], 'readonly');
+                const store = tx.objectStore('playlist');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => resolve([]);
+            });
+        }
+        
+        async function salvarEstado(tempo = null) {
+            if (!db) return;
+            const tx = db.transaction(['estado'], 'readwrite');
+            const store = tx.objectStore('estado');
+            
+            const estado = {
+                chave: 'player_state',
+                indiceAtual: indiceAtual,
+                tempo: tempo !== null ? tempo : player.currentTime,
+                volume: player.volume,
+                shuffle: modoShuffle,
+                loop: modoLoop,
+                ordemExecucao: ordemExecucao,
+                playlistIds: playlist.map(m => m.id)
+            };
+            store.put(estado);
+        }
+        
+        async function carregarEstado() {
+            if (!db) return null;
+            return new Promise((resolve) => {
+                const tx = db.transaction(['estado'], 'readonly');
+                const store = tx.objectStore('estado');
+                const request = store.get('player_state');
+                request.onsuccess = () => resolve(request.result || null);
+                request.onerror = () => resolve(null);
+            });
+        }
+        
+        // ==================== BUSCAR CAPAS ONLINE ====================
         async function buscarCapaOnline(musicaNome, artistaNome) {
             const chave = `${artistaNome}|${musicaNome}`.toLowerCase();
             if (cacheCapas.has(chave)) return cacheCapas.get(chave);
             
-            txtStatus.innerText = `Buscando capa: ${musicaNome}...`;
-            
-            // Tenta iTunes primeiro
             const query = encodeURIComponent(`${artistaNome} ${musicaNome}`);
-            const urls = [
-                `https://itunes.apple.com/search?term=${query}&limit=1&entity=song`,
-                `https://api.deezer.com/search?q=${query}&limit=1`
-            ];
             
-            for (const url of urls) {
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    // iTunes
-                    if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
-                        const capa = data.results[0].artworkUrl100.replace('100x100', '600x600');
-                        cacheCapas.set(chave, capa);
-                        return capa;
-                    }
-                    
-                    // Deezer
-                    if (data.data && data.data.length > 0 && data.data[0].album && data.data[0].album.cover_big) {
-                        const capa = data.data[0].album.cover_big;
-                        cacheCapas.set(chave, capa);
-                        return capa;
-                    }
-                } catch(e) {}
-            }
-            
-            // Fallback: Last.fm
+            // Tenta iTunes
             try {
-                const lastFmKey = "d56fd2541f4c0da5f46e1ef24e5c1fa7";
-                const lastUrl = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${lastFmKey}&artist=${encodeURIComponent(artistaNome)}&track=${encodeURIComponent(musicaNome)}&format=json`;
-                const response = await fetch(lastUrl);
-                const data = await response.json();
-                if (data.track && data.track.album && data.track.album.image && data.track.album.image[3]) {
-                    const capa = data.track.album.image[3]['#text'];
+                const res = await fetch(`https://itunes.apple.com/search?term=${query}&limit=1&entity=song`);
+                const data = await res.json();
+                if (data.results && data.results[0]) {
+                    const capa = data.results[0].artworkUrl100?.replace('100x100', '600x600');
+                    if (capa) {
+                        cacheCapas.set(chave, capa);
+                        return capa;
+                    }
+                }
+            } catch(e) {}
+            
+            // Tenta Deezer
+            try {
+                const res = await fetch(`https://api.deezer.com/search?q=${query}&limit=1`);
+                const data = await res.json();
+                if (data.data && data.data[0] && data.data[0].album) {
+                    const capa = data.data[0].album.cover_big;
                     if (capa) {
                         cacheCapas.set(chave, capa);
                         return capa;
@@ -555,40 +613,55 @@
             cacheCapas.set(chave, null);
             return null;
         }
-
-        async function carregarDoGoogleDrive() {
-            txtStatus.innerHTML = '<span class="loading"></span> Carregando músicas...';
+        
+        // ==================== SINCRONIZAR COM GOOGLE DRIVE ====================
+        async function sincronizarGoogleDrive() {
+            if (sincronizando) return;
+            sincronizando = true;
+            txtStatus.innerHTML = '<span class="loading"></span> Sincronizando com Google Drive...';
+            
             const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
             
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if(data.files && data.files.length > 0) {
-                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3'));
-                    let imagens = data.files.filter(f => f.mimeType.includes('image'));
-
-                    if (musicas.length === 0) {
-                        txtStatus.innerText = "Nenhuma música encontrada!";
-                        return;
-                    }
-
-                    playlist = [];
-                    
-                    for (let i = 0; i < musicas.length; i++) {
-                        const m = musicas[i];
+                if (!data.files || data.files.length === 0) {
+                    txtStatus.innerText = "Nenhum arquivo encontrado!";
+                    sincronizando = false;
+                    return;
+                }
+                
+                const musicasDrive = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3'));
+                const imagensDrive = data.files.filter(f => f.mimeType.includes('image'));
+                
+                if (musicasDrive.length === 0) {
+                    txtStatus.innerText = "Nenhum MP3 encontrado!";
+                    sincronizando = false;
+                    return;
+                }
+                
+                // Carregar playlist atual do banco para verificar novidades
+                const playlistAtual = await carregarPlaylistDoBanco();
+                const idsExistentes = new Set(playlistAtual.map(m => m.id));
+                
+                // Adicionar apenas músicas novas
+                const novasMusicas = [];
+                
+                for (const m of musicasDrive) {
+                    if (!idsExistentes.has(m.id)) {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         let artista = "EXNA MUSIC";
                         let titulo = nomeSemExtensao;
                         
-                        if(nomeSemExtensao.includes(" - ")) {
-                            let partes = nomeSemExtensao.split(" - ");
+                        if (nomeSemExtensao.includes(" - ")) {
+                            const partes = nomeSemExtensao.split(" - ");
                             artista = partes[0].trim();
                             titulo = partes[1].trim();
                         }
-
+                        
                         // Tenta capa local
-                        const capaLocal = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
+                        const capaLocal = imagensDrive.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
                         let capaUrl = capaLocal ? `https://www.googleapis.com/drive/v3/files/${capaLocal.id}?alt=media&key=${API_KEY}` : null;
                         
                         // Busca capa online se não tiver local
@@ -596,214 +669,314 @@
                             capaUrl = await buscarCapaOnline(titulo, artista);
                         }
                         
-                        playlist.push({
+                        novasMusicas.push({
                             id: m.id,
-                            name: titulo,
-                            artist: artista,
+                            nome: titulo,
+                            artista: artista,
                             capaUrl: capaUrl || 'logo-quadrada.png',
                             url: `https://www.googleapis.com/drive/v3/files/${m.id}?alt=media&key=${API_KEY}`
                         });
-                        
-                        txtStatus.innerText = `Carregando: ${i+1}/${musicas.length}`;
                     }
-                    
-                    // Embaralhar playlist
-                    for (let i = playlist.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
+                }
+                
+                if (novasMusicas.length > 0) {
+                    playlist = [...playlistAtual, ...novasMusicas];
+                    await salvarPlaylistNoBanco();
+                    txtStatus.innerText = `✅ ${novasMusicas.length} nova(s) música(s) adicionada(s)!`;
+                } else {
+                    playlist = playlistAtual;
+                    txtStatus.innerText = `📁 ${playlist.length} músicas sincronizadas`;
+                }
+                
+                // Se não tinha nenhuma música, inicializa
+                if (playlist.length > 0 && ordemExecucao.length === 0) {
+                    ordemExecucao = playlist.map((_, i) => i);
+                    if (modoShuffle) {
+                        for (let i = ordemExecucao.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [ordemExecucao[i], ordemExecucao[j]] = [ordemExecucao[j], ordemExecucao[i]];
+                        }
                     }
-                    
+                }
+                
+                btnPlay.disabled = false;
+                renderizarPlaylist();
+                await carregarEstadoSalvo();
+                
+            } catch (e) {
+                console.error(e);
+                txtStatus.innerText = "Erro ao sincronizar!";
+            } finally {
+                sincronizando = false;
+            }
+        }
+        
+        // ==================== CARREGAR ESTADO SALVO ====================
+        async function carregarEstadoSalvo() {
+            const estado = await carregarEstado();
+            
+            // Restaurar ordem e índice
+            if (estado && estado.playlistIds && estado.ordemExecucao) {
+                const idsAtuais = playlist.map(m => m.id);
+                const valido = estado.playlistIds.every(id => idsAtuais.includes(id));
+                
+                if (valido && estado.ordemExecucao.length === playlist.length) {
+                    ordemExecucao = estado.ordemExecucao;
+                    indiceAtual = estado.indiceAtual;
+                    if (indiceAtual >= ordemExecucao.length) indiceAtual = 0;
+                } else {
                     ordemExecucao = playlist.map((_, i) => i);
                     indiceAtual = 0;
-                    
-                    btn.disabled = false;
-                    txtStatus.innerText = `${playlist.length} músicas carregadas!`;
-                    
-                    carregarFaixa(0);
-                    renderizarPlaylist();
-                    
-                    // Toca automaticamente
-                    setTimeout(() => {
-                        player.play().catch(e => console.log("Play automático:", e));
-                    }, 500);
-                    
-                } else {
-                    txtStatus.innerText = "Pasta vazia!";
                 }
-            } catch (e) {
-                txtStatus.innerText = "Erro ao conectar!";
-                console.error(e);
+            } else if (playlist.length > 0) {
+                ordemExecucao = playlist.map((_, i) => i);
+                indiceAtual = 0;
             }
-        }
-
-        function renderizarPlaylist() {
-            playlistBox.innerHTML = "";
-            if(playlist.length === 0) {
-                playlistBox.innerHTML = '<div style="text-align: center; color: #444; padding: 20px;">Nenhuma música carregada.</div>';
-                return;
+            
+            // Restaurar modos
+            if (estado) {
+                modoShuffle = estado.shuffle || false;
+                modoLoop = estado.loop || false;
+                document.getElementById('shuffle-btn').classList.toggle('active', modoShuffle);
+                document.getElementById('loop-btn').classList.toggle('active', modoLoop);
+                player.loop = modoLoop;
+                if (estado.volume !== undefined) {
+                    player.volume = estado.volume;
+                    document.getElementById('volume').value = estado.volume * 100;
+                }
             }
-
-            ordemExecucao.forEach((idReal, idx) => {
-                const faixa = playlist[idReal];
-                const item = document.createElement('div');
-                item.className = `playlist-item ${idx === indiceAtual ? 'current-track' : ''}`;
-                item.onclick = () => pularParaMusica(idx);
-                item.innerHTML = `
-                    <img src="${faixa.capaUrl}" class="list-thumb" onerror="this.src='logo-quadrada.png'">
-                    <div class="track-meta-box">
-                        ${faixa.name.toUpperCase()}
-                        <span>${faixa.artist}</span>
-                    </div>
-                `;
-                playlistBox.appendChild(item);
-            });
+            
+            // Carregar primeira música
+            if (playlist.length > 0 && ordemExecucao.length > 0) {
+                carregarMusica(indiceAtual);
+                
+                // Restaurar tempo
+                if (estado && estado.tempo !== undefined && !isNaN(estado.tempo)) {
+                    const restaurarTempo = () => {
+                        if (player.duration && !isNaN(player.duration) && estado.tempo < player.duration) {
+                            player.currentTime = estado.tempo;
+                            atualizarBarraProgresso();
+                        }
+                        player.removeEventListener('loadedmetadata', restaurarTempo);
+                        player.removeEventListener('canplay', restaurarTempo);
+                    };
+                    player.addEventListener('loadedmetadata', restaurarTempo);
+                    player.addEventListener('canplay', restaurarTempo);
+                }
+            }
+            
+            renderizarPlaylist();
         }
-
-        function pularParaMusica(index) {
-            carregarFaixa(index);
-            player.play().catch(() => {});
-        }
-
-        function carregarFaixa(index) {
-            if (playlist.length === 0) return;
-            if (index >= playlist.length) index = 0;
-            if (index < 0) index = playlist.length - 1;
+        
+        // ==================== FUNÇÕES DO PLAYER ====================
+        function carregarMusica(index) {
+            if (playlist.length === 0 || ordemExecucao.length === 0) return;
+            
+            if (index >= ordemExecucao.length) index = 0;
+            if (index < 0) index = ordemExecucao.length - 1;
             indiceAtual = index;
             
-            const faixa = playlist[ordemExecucao[indiceAtual]];
+            const idReal = ordemExecucao[indiceAtual];
+            const musica = playlist[idReal];
+            if (!musica) return;
             
+            const wasPlaying = !player.paused;
             player.pause();
-            player.src = faixa.url;
+            player.src = musica.url;
             player.load();
             
-            txtTitle.innerText = faixa.name.toUpperCase();
-            txtArtist.innerText = faixa.artist;
-            txtCover.src = faixa.capaUrl;
-            bgGlow.style.backgroundImage = `url('${faixa.capaUrl}')`;
+            txtTitulo.innerText = musica.nome.toUpperCase();
+            txtArtista.innerText = musica.artista;
+            imgCapa.src = musica.capaUrl;
+            bgGlow.style.backgroundImage = `url('${musica.capaUrl}')`;
             
-            updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
+            atualizarTelaBloqueada(musica.nome, musica.artista, musica.capaUrl);
             renderizarPlaylist();
             
-            // Tenta tocar
-            setTimeout(() => {
-                if (!player.paused) return;
-                player.play().catch(e => console.log("Erro ao tocar:", e));
-            }, 200);
+            if (wasPlaying) {
+                setTimeout(() => player.play().catch(() => {}), 200);
+            }
+            
+            salvarEstado();
         }
-
-        function togglePlayer() {
+        
+        function atualizarBarraProgresso() {
+            if (player.duration && !isNaN(player.duration)) {
+                const pct = (player.currentTime / player.duration) * 100;
+                progressBar.value = pct;
+                tempoAtualSpan.innerText = formatarTempo(player.currentTime);
+                tempoTotalSpan.innerText = formatarTempo(player.duration);
+            } else if (player.currentTime > 0) {
+                tempoAtualSpan.innerText = formatarTempo(player.currentTime);
+            }
+        }
+        
+        function formatarTempo(segundos) {
+            if (isNaN(segundos)) return "0:00";
+            const min = Math.floor(segundos / 60);
+            const sec = Math.floor(segundos % 60);
+            return `${min}:${sec < 10 ? '0' + sec : sec}`;
+        }
+        
+        function togglePlayPause() {
             if (player.paused) {
-                player.play().catch(e => {
-                    console.log("Erro ao tocar:", e);
-                    txtStatus.innerText = "Clique novamente para tocar";
-                });
+                player.play().catch(() => {});
             } else {
                 player.pause();
             }
         }
-
-        function proximaFaixa() {
+        
+        function proximaMusica() {
             if (playlist.length === 0) return;
-            carregarFaixa(indiceAtual + 1);
+            carregarMusica(indiceAtual + 1);
+            player.play().catch(() => {});
         }
-
-        function voltarFaixa() {
+        
+        function musicaAnterior() {
             if (playlist.length === 0) return;
-            carregarFaixa(indiceAtual - 1);
+            if (player.currentTime > 3) {
+                player.currentTime = 0;
+            } else {
+                carregarMusica(indiceAtual - 1);
+                player.play().catch(() => {});
+            }
         }
-
+        
         function toggleShuffle() {
-            isShuffle = !isShuffle;
-            shuffleBtn.classList.toggle('active', isShuffle);
-            const atual = playlist[ordemExecucao[indiceAtual]];
-            if (isShuffle) {
+            modoShuffle = !modoShuffle;
+            document.getElementById('shuffle-btn').classList.toggle('active', modoShuffle);
+            
+            const musicaAtual = playlist[ordemExecucao[indiceAtual]];
+            
+            if (modoShuffle) {
                 for (let i = ordemExecucao.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [ordemExecucao[i], ordemExecucao[j]] = [ordemExecucao[j], ordemExecucao[i]];
                 }
-                renderizarPlaylist();
-                indiceAtual = ordemExecucao.findIndex(i => playlist[i].id === atual.id);
             } else {
                 ordemExecucao = playlist.map((_, i) => i);
-                renderizarPlaylist();
-                indiceAtual = playlist.findIndex(m => m.id === atual.id);
             }
+            
+            indiceAtual = ordemExecucao.findIndex(i => playlist[i].id === musicaAtual.id);
+            if (indiceAtual === -1) indiceAtual = 0;
+            
+            renderizarPlaylist();
+            salvarEstado();
         }
-
+        
         function toggleLoop() {
-            isLoop = !isLoop;
-            loopBtn.classList.toggle('active', isLoop);
-            player.loop = isLoop;
+            modoLoop = !modoLoop;
+            document.getElementById('loop-btn').classList.toggle('active', modoLoop);
+            player.loop = modoLoop;
+            salvarEstado();
         }
-
-        function ajustarVolume(valor) { player.volume = valor / 100; }
-
-        // Eventos do player
+        
+        function ajustarVolume(valor) {
+            player.volume = valor / 100;
+            salvarEstado();
+        }
+        
+        // ==================== EVENTOS DO PLAYER ====================
         player.addEventListener('play', () => {
-            icon.className = "fas fa-stop";
-            btn.classList.add('active');
-            card.classList.add('playing');
+            iconPlay.className = "fas fa-stop";
+            btnPlay.classList.add('active');
+            cardPlayer.classList.add('playing');
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
-            txtStatus.innerText = "Tocando...";
+            txtStatus.innerText = "🎵 Tocando...";
         });
-
+        
         player.addEventListener('pause', () => {
-            icon.className = "fas fa-play";
-            btn.classList.remove('active');
-            card.classList.remove('playing');
+            iconPlay.className = "fas fa-play";
+            btnPlay.classList.remove('active');
+            cardPlayer.classList.remove('playing');
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
-            txtStatus.innerText = "Pausado";
+            txtStatus.innerText = "⏸️ Pausado";
+            salvarEstado(player.currentTime);
         });
-
+        
         player.addEventListener('ended', () => {
-            if (!isLoop) proximaFaixa();
+            if (!modoLoop) proximaMusica();
         });
-
+        
         player.addEventListener('timeupdate', () => {
-            if (isNaN(player.duration)) return;
-            const pct = (player.currentTime / player.duration) * 100;
-            progressBar.value = pct;
-            timeCurrent.innerText = formatarTempo(player.currentTime);
-            timeDuration.innerText = formatarTempo(player.duration);
+            atualizarBarraProgresso();
         });
-
-        player.addEventListener('error', (e) => {
-            console.log("Erro no áudio:", e);
+        
+        player.addEventListener('error', () => {
             txtStatus.innerText = "Erro na música, pulando...";
-            setTimeout(() => proximaFaixa(), 1000);
+            setTimeout(() => proximaMusica(), 1000);
         });
-
+        
         progressBar.addEventListener('input', () => {
-            if (isNaN(player.duration)) return;
-            player.currentTime = (progressBar.value / 100) * player.duration;
+            if (player.duration && !isNaN(player.duration)) {
+                player.currentTime = (progressBar.value / 100) * player.duration;
+                salvarEstado(player.currentTime);
+            }
         });
-
-        function formatarTempo(segs) {
-            if (isNaN(segs)) return "0:00";
-            let min = Math.floor(segs / 60);
-            let sec = Math.floor(segs % 60);
-            return min + ":" + (sec < 10 ? "0" + sec : sec);
+        
+        // Salvar estado ao sair
+        window.addEventListener('beforeunload', () => {
+            salvarEstado(player.currentTime);
+        });
+        
+        // ==================== INTERFACE DA PLAYLIST ====================
+        function renderizarPlaylist() {
+            if (!playlistBox) return;
+            playlistBox.innerHTML = "";
+            
+            if (playlist.length === 0) {
+                playlistBox.innerHTML = '<div style="text-align: center; color: #444; padding: 20px;">Nenhuma música carregada</div>';
+                return;
+            }
+            
+            ordemExecucao.forEach((idReal, idx) => {
+                const musica = playlist[idReal];
+                const div = document.createElement('div');
+                div.className = `playlist-item ${idx === indiceAtual ? 'current-track' : ''}`;
+                div.onclick = () => {
+                    carregarMusica(idx);
+                    player.play().catch(() => {});
+                    fecharSidebar();
+                };
+                div.innerHTML = `
+                    <img src="${musica.capaUrl}" class="list-thumb" onerror="this.src='logo-quadrada.png'">
+                    <div class="track-meta-box">
+                        ${musica.nome.toUpperCase()}
+                        <span>${musica.artista}</span>
+                    </div>
+                `;
+                playlistBox.appendChild(div);
+            });
         }
-
-        function updateLockScreen(title, artist, capaUrl) {
+        
+        function abrirSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+        }
+        
+        function fecharSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+        }
+        
+        // ==================== TELA BLOQUEADA ====================
+        function atualizarTelaBloqueada(titulo, artista, capaUrl) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: title,
-                    artist: artist,
+                    title: titulo,
+                    artist: artista,
                     album: 'EXNA MUSIC',
                     artwork: [{ src: capaUrl, sizes: '512x512', type: 'image/png' }]
                 });
                 navigator.mediaSession.setActionHandler('play', () => player.play());
                 navigator.mediaSession.setActionHandler('pause', () => player.pause());
-                navigator.mediaSession.setActionHandler('previoustrack', () => voltarFaixa());
-                navigator.mediaSession.setActionHandler('nexttrack', () => proximaFaixa());
+                navigator.mediaSession.setActionHandler('previoustrack', () => musicaAnterior());
+                navigator.mediaSession.setActionHandler('nexttrack', () => proximaMusica());
             }
         }
-
-        // PWA Install
+        
+        // ==================== INSTALAÇÃO PWA ====================
         let deferredPrompt;
         const pwaBtn = document.createElement('button');
-        pwaBtn.style.cssText = "position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#ff0055;color:#fff;border:none;cursor:pointer;display:none;z-index:999";
+        pwaBtn.style.cssText = "position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#ff0055;color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:999;font-size:1.3rem;box-shadow:0 0 15px #ff0055;";
         pwaBtn.innerHTML = '<i class="fas fa-download"></i>';
         document.body.appendChild(pwaBtn);
         
@@ -811,8 +984,6 @@
             e.preventDefault();
             deferredPrompt = e;
             pwaBtn.style.display = 'flex';
-            pwaBtn.style.alignItems = 'center';
-            pwaBtn.style.justifyContent = 'center';
         });
         
         pwaBtn.addEventListener('click', async () => {
@@ -822,10 +993,22 @@
                 pwaBtn.style.display = 'none';
             }
         });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker error:', err));
-        }
+        
+        // ==================== INICIALIZAÇÃO ====================
+        (async function init() {
+            await abrirBancoDados();
+            const playlistSalva = await carregarPlaylistDoBanco();
+            if (playlistSalva.length > 0) {
+                playlist = playlistSalva;
+                ordemExecucao = playlist.map((_, i) => i);
+                btnPlay.disabled = false;
+                renderizarPlaylist();
+                await carregarEstadoSalvo();
+                txtStatus.innerText = `${playlist.length} músicas carregadas`;
+            } else {
+                txtStatus.innerText = "Clique em SINCRONIZAR para começar";
+            }
+        })();
     </script>
 </body>
 </html>
