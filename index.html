@@ -1,716 +1,470 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RADIO EXNA FM</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-
-<link rel="manifest" href="manifest.json">
-
-<link rel="apple-touch-icon" href="logo-quadrada.png">
-
-<style>
-
-:root{
-    --primary-purple:#8a2be2;
-    --neon-aqua:#66fcf1;
-    --neon-pink:#ff0055;
-    --dark-bg:#050608;
-    --glass:rgba(255,255,255,0.04);
-    --glass-border:rgba(255,255,255,0.08);
-}
-
-*{
-    box-sizing:border-box;
-}
-
-body{
-    background-color:var(--dark-bg);
-
-    background-image:
-    radial-gradient(circle at 15% 15%, rgba(138,43,226,0.18) 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(255,0,85,0.15) 0%, transparent 45%);
-
-    color:#fff;
-
-    font-family:'Rajdhani',sans-serif;
-
-    margin:0;
-
-    min-height:100vh;
-
-    display:flex;
-
-    flex-direction:column;
-
-    overflow-x:hidden;
-}
-
-main{
-    flex:1;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    padding:20px;
-}
-
-.glass-player{
-
-    background:var(--glass);
-
-    backdrop-filter:blur(20px);
-
-    -webkit-backdrop-filter:blur(20px);
-
-    border:1px solid var(--glass-border);
-
-    border-radius:30px;
-
-    width:100%;
-
-    max-width:380px;
-
-    padding:35px 25px;
-
-    text-align:center;
-
-    box-shadow:
-    0 30px 60px rgba(0,0,0,0.6),
-    inset 0 0 20px rgba(255,255,255,0.02);
-}
-
-.radio-header{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:12px;
-
-    margin-bottom:25px;
-
-    border-bottom:1px solid rgba(255,255,255,0.05);
-
-    padding-bottom:15px;
-}
-
-.radio-top-logo{
-
-    width:45px;
-
-    height:45px;
-
-    object-fit:contain;
-
-    filter:drop-shadow(0 0 8px var(--neon-aqua));
-}
-
-.radio-brand-text h2{
-
-    font-family:'Orbitron',sans-serif;
-
-    font-size:1.3rem;
-
-    margin:0;
-}
-
-.radio-brand-text h2 span{
-    color:var(--neon-aqua);
-}
-
-.radio-brand-text p{
-
-    margin:0;
-
-    font-size:0.75rem;
-
-    color:var(--neon-pink);
-
-    text-transform:uppercase;
-
-    letter-spacing:2px;
-
-    font-weight:bold;
-}
-
-.live-indicator{
-
-    background:var(--neon-pink);
-
-    padding:4px 10px;
-
-    border-radius:50px;
-
-    font-size:0.65rem;
-
-    font-weight:700;
-
-    letter-spacing:1px;
-
-    display:inline-flex;
-
-    align-items:center;
-
-    gap:6px;
-
-    box-shadow:0 0 15px var(--neon-pink);
-
-    margin-bottom:20px;
-}
-
-.cover-area{
-
-    width:220px;
-
-    height:220px;
-
-    margin:0 auto 25px;
-
-    border-radius:20px;
-
-    overflow:hidden;
-
-    border:2px solid rgba(255,255,255,0.05);
-
-    box-shadow:0 10px 25px rgba(0,0,0,0.5);
-
-    transition:all 0.5s ease;
-}
-
-.playing .cover-area{
-
-    border-color:var(--neon-aqua);
-
-    box-shadow:0 0 30px rgba(102,252,241,0.25);
-
-    transform:scale(1.02);
-}
-
-.cover-img{
-
-    width:100%;
-
-    height:100%;
-
-    object-fit:cover;
-
-    background:#111;
-}
-
-.info-area h1{
-
-    font-family:'Orbitron',sans-serif;
-
-    font-size:1.2rem;
-
-    margin:0;
-
-    white-space:nowrap;
-
-    overflow:hidden;
-
-    text-overflow:ellipsis;
-}
-
-.info-area p{
-
-    font-size:1rem;
-
-    color:var(--neon-aqua);
-
-    margin:6px 0 25px;
-}
-
-.controls{
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    gap:18px;
-}
-
-.control-small{
-
-    width:60px;
-
-    height:60px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:rgba(255,255,255,0.08);
-
-    color:#fff;
-
-    font-size:1.2rem;
-
-    cursor:pointer;
-
-    transition:0.3s ease;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-}
-
-.play-btn{
-
-    width:80px;
-
-    height:80px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:linear-gradient(45deg,var(--primary-purple),var(--neon-pink));
-
-    color:#fff;
-
-    font-size:1.8rem;
-
-    cursor:pointer;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    box-shadow:0 0 25px rgba(138,43,226,0.4);
-}
-
-.play-btn.active{
-
-    background:#fff;
-
-    color:#000;
-}
-
-footer{
-
-    padding:25px;
-
-    text-align:center;
-
-    background:rgba(0,0,0,0.4);
-
-    border-top:1px solid var(--glass-border);
-}
-
-.social-links{
-
-    margin-bottom:12px;
-
-    display:flex;
-
-    justify-content:center;
-
-    gap:22px;
-}
-
-.social-links a{
-
-    color:var(--neon-aqua);
-
-    font-size:1.4rem;
-}
-
-.copyright{
-
-    font-size:0.75rem;
-
-    color:#666;
-}
-
-@media(max-width:480px){
-
-    .glass-player{
-        padding:30px 20px;
-        margin:10px;
-    }
-
-    .cover-area{
-        width:190px;
-        height:190px;
-    }
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXNA FM - A Rádio que toca todas!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #050608;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        /* Container Principal estilo App Responsivo */
+        .app-container {
+            max-width: 480px;
+            height: 100vh;
+            margin: 0 auto;
+            position: relative;
+            background-color: #0d0e12;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.8s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+        }
+        /* Efeito de Vidro Fosco / Blur no Fundo */
+        .blur-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 11, 14, 0.82);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            z-index: 1;
+        }
+        /* Conteúdo do Player */
+        .content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            padding: 30px 24px;
+            text-align: center;
+        }
+        
+        /* LOGO DA RÁDIO NO TOPO (Estilizado em CSS Neon) */
+        header {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .radio-logo {
+            background: linear-gradient(135deg, #00e5ff, #0086ff);
+            padding: 10px 25px;
+            border-radius: 14px;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 4px;
+        }
+        .radio-title {
+            font-size: 32px;
+            font-weight: 950;
+            letter-spacing: 2px;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            font-style: italic;
+        }
+        .radio-slogan {
+            font-size: 11px;
+            color: #00e5ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 6px;
+            font-weight: 700;
+        }
+        .live-badge {
+            background: #ff1744;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 12px;
+            letter-spacing: 1.5px;
+            box-shadow: 0 0 15px rgba(255, 23, 68, 0.6);
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .player-display {
+            margin: auto 0;
+        }
+        /* Contentor da Capa da Música */
+        .artwork-container {
+            width: 270px;
+            height: 270px;
+            margin: 0 auto 25px auto;
+            border-radius: 28px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: #17181e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .artwork {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .track-info {
+            padding: 0 15px;
+        }
+        .track-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .track-artist {
+            font-size: 16px;
+            color: #b3b3b3;
+            margin-bottom: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .time-status {
+            font-size: 13px;
+            color: #00e5ff;
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+            border: 1px solid rgba(0, 229, 255, 0.25);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        /* Botão Play */
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(255,255,255,0.2);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .play-btn:hover {
+            transform: scale(1.05);
+            background: #00e5ff;
+        }
+        .play-btn:active {
+            transform: scale(0.95);
+        }
+        .play-btn svg {
+            width: 32px;
+            height: 32px;
+            fill: #0d0e12;
+        }
+        
+        /* NOVO RODAPÉ SOLICITADO */
+        .footer-brand {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .error-msg {
+            color: #ff5252;
+            font-size: 12px;
+            margin-top: 12px;
+            display: none;
+            background: rgba(255,82,82,0.15);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(213, 82, 82, 0.3);
+        }
+    </style>
 </head>
-
 <body>
 
-<main>
-
-<div class="glass-player" id="main-player">
-
-<div class="radio-header">
-
-<img src="logo-quadrada.png" class="radio-top-logo">
-
-<div class="radio-brand-text">
-
-<h2>EXNA <span>FM</span></h2>
-
-<p>A Rádio que toca todas!</p>
-
-</div>
-
-</div>
-
-<div class="live-indicator">
-
-<i class="fas fa-broadcast-tower"></i>
-
-TRANSMISSÃO EM TEMPO REAL
-
-</div>
-
-<div class="cover-area">
-
-<img src="logo-quadrada.png" id="track-cover" class="cover-img">
-
-</div>
-
-<div class="info-area">
-
-<h1 id="track-title">SINTONIZANDO...</h1>
-
-<p id="artist-name">EXNA FM</p>
-
-</div>
-
-<div class="controls">
-
-<button class="control-small" onclick="prevTrack()">
-
-<i class="fas fa-backward"></i>
-
-</button>
-
-<button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
-
-<i class="fas fa-spinner fa-spin" id="btn-icon"></i>
-
-</button>
-
-<button class="control-small" onclick="nextTrack()">
-
-<i class="fas fa-forward"></i>
-
-</button>
-
-</div>
-
-<p id="status-text" style="margin-top:20px; font-size:0.8rem; color:#45a29e; font-weight:bold;"></p>
-
-</div>
-
-</main>
-
-<footer>
-
-<div class="social-links">
-
-<a href="https://instagram.com/" target="_blank">
-<i class="fab fa-instagram"></i>
-</a>
-
-<a href="https://youtube.com/" target="_blank">
-<i class="fab fa-youtube"></i>
-</a>
-
-<a href="https://tiktok.com/" target="_blank">
-<i class="fab fa-tiktok"></i>
-</a>
-
-</div>
-
-<div class="copyright">
-
-EXNA FM © 2026 | Todos os Direitos Reservados
-
-</div>
-
-</footer>
-
-<audio id="audio-core" crossorigin="anonymous" preload="auto"></audio>
-
-<script>
-
-const PASTA_ID='1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J';
-
-const API_KEY='AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs';
-
-const player=document.getElementById('audio-core');
-
-const btn=document.getElementById('master-play');
-
-const icon=document.getElementById('btn-icon');
-
-const card=document.getElementById('main-player');
-
-const txtTitle=document.getElementById('track-title');
-
-const txtArtist=document.getElementById('artist-name');
-
-const txtCover=document.getElementById('track-cover');
-
-const txtStatus=document.getElementById('status-text');
-
-let musicas=[];
-
-let indiceMusicaAtual=0;
-
-let estaPausado=true;
-
-async function carregarMusicas(){
-
-    txtStatus.innerText='Carregando músicas...';
-
-    try{
-
-        const url=`https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
-
-        const response=await fetch(url);
-
-        const data=await response.json();
-
-        const arquivos=data.files || [];
-
-        const audios=arquivos.filter(f =>
-            f.name.toLowerCase().endsWith('.mp3')
-        );
-
-        const imagens=arquivos.filter(f =>
-            f.mimeType.includes('image')
-        );
-
-        musicas=audios.map(audio=>{
-
-            const nomeSemExtensao=audio.name.replace(/\.[^/.]+$/,"");
-
-            let artista='EXNA FM';
-
-            let titulo=nomeSemExtensao;
-
-            if(nomeSemExtensao.includes(' - ')){
-
-                const partes=nomeSemExtensao.split(' - ');
-
-                artista=partes[0];
-
-                titulo=partes[1];
+    <div class="app-container" id="appBg">
+        <div class="blur-overlay"></div>
+        
+        <div class="content">
+            <header>
+                <div class="radio-logo">
+                    <div class="radio-title">EXNA FM</div>
+                </div>
+                <div class="radio-slogan">A Rádio que toca todas!</div>
+                <div class="live-badge">AO VIVO</div>
+            </header>
+
+            <div class="player-display">
+                <div class="artwork-container">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%23333'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z'/></svg>" class="artwork" id="trackArt" alt="Capa">
+                </div>
+
+                <div class="track-info">
+                    <div class="track-title" id="trackTitle">Sincronizando Auto DJ...</div>
+                    <div class="track-artist" id="trackArtist">Conectando ao Drive</div>
+                    <div class="time-status" id="timeStatus">00:00:00</div>
+                    <div class="error-msg" id="errorConsole"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="play-btn" id="playButton" onclick="togglePlay()">
+                    <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <div class="footer-brand">&copy; 2026 EXNA FM | Todos os direitos reservados</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = "AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs";
+        const FOLDER_ID = "1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J";
+        
+        const trackTitleEl = document.getElementById('trackTitle');
+        const trackArtistEl = document.getElementById('trackArtist');
+        const timeStatusEl = document.getElementById('timeStatus');
+        const trackArtEl = document.getElementById('trackArt');
+        const appBgEl = document.getElementById('appBg');
+        const playIcon = document.getElementById('playIcon');
+        const errorConsole = document.getElementById('errorConsole');
+
+        let audioFiles = [];
+        let imageFiles = [];
+        let timeline = [];
+        let totalTimelineDuration = 0;
+        
+        let currentAudio = null;
+        let isPlaying = false;
+        let liveTimer = null;
+
+        const SVG_PLAY = '<path d="M8 5v14l11-7z"/>';
+        const SVG_PAUSE = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+        async function loadDriveLibrary() {
+            try {
+                // Força busca limpa sem cache para listar todos os arquivos atualizados
+                const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&maxResults=1000&key=${API_KEY}&t=${Date.now()}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Erro de comunicação com o Google Drive.");
+                
+                const data = await response.json();
+                if (!data.files || data.files.length === 0) throw new Error("Nenhum arquivo encontrado na pasta especificada.");
+
+                audioFiles = [];
+                imageFiles = [];
+
+                data.files.forEach(file => {
+                    const mime = file.mimeType ? file.mimeType.toLowerCase() : '';
+                    const name = file.name ? file.name.toLowerCase() : '';
+                    
+                    if (mime.includes('audio') || name.endsWith('.mp3') || name.endsWith('.m4a') || name.endsWith('.wav') || name.endsWith('.aac')) {
+                        audioFiles.push(file);
+                    } else if (mime.includes('image') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp')) {
+                        imageFiles.push(file);
+                    }
+                });
+
+                if (audioFiles.length === 0) throw new Error("Não foram encontrados arquivos de áudio válidos na pasta.");
+                
+                // Mapeia e limpa o título das músicas
+                audioFiles = audioFiles.map(file => {
+                    const cleanName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    const parts = cleanName.split(' - ');
+                    return {
+                        id: file.id,
+                        name: file.name,
+                        title: parts[1] ? parts[1].trim() : cleanName.trim(),
+                        artist: parts[0] ? parts[0].trim() : "EXNA FM",
+                        duration: 180 // Duração base de contingência
+                    };
+                });
+
+                buildContinuousTimeline();
+                startLiveEngine();
+
+            } catch (err) {
+                showError(err.message);
             }
-
-            const capaEncontrada=imagens.find(img =>
-                img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase())
-            );
-
-            return{
-
-                title:titulo,
-
-                artist:artista,
-
-                audioUrl:
-                `https://www.googleapis.com/drive/v3/files/${audio.id}?alt=media&key=${API_KEY}`,
-
-                coverUrl:
-                capaEncontrada
-                ?
-                `https://www.googleapis.com/drive/v3/files/${capaEncontrada.id}?alt=media&key=${API_KEY}`
-                :
-                'logo-quadrada.png'
-            };
-
-        });
-
-        btn.disabled=false;
-
-        icon.className='fas fa-play';
-
-        txtStatus.innerText='Rádio pronta';
-
-    }catch(e){
-
-        console.log(e);
-
-        txtStatus.innerText='Erro ao carregar músicas';
-
-    }
-}
-
-function carregarFaixa(index){
-
-    const faixa=musicas[index];
-
-    if(!faixa) return;
-
-    player.src=faixa.audioUrl;
-
-    txtTitle.innerText=`${faixa.artist} - ${faixa.title}`;
-
-    txtArtist.innerText='EXNA FM';
-
-    txtCover.src=faixa.coverUrl;
-
-    atualizarTelaBloqueada(
-        `${faixa.artist} - ${faixa.title}`,
-        'EXNA FM',
-        faixa.coverUrl
-    );
-}
-
-function toggleRadio(){
-
-    if(musicas.length===0) return;
-
-    if(player.paused){
-
-        estaPausado=false;
-
-        if(!player.src){
-
-            carregarFaixa(indiceMusicaAtual);
         }
 
-        player.play();
+        function buildContinuousTimeline() {
+            let pool = [...audioFiles];
+            let orderedList = [];
+            let lastArtist = "";
+            let lastTitle = "";
 
-        icon.className='fas fa-stop';
+            // Embaralhamento randômico inicial
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
 
-        btn.classList.add('active');
+            // Aplicação rigorosa das regras anti-repetição consecutiva de banda e nome
+            while (pool.length > 0) {
+                let validIndex = -1;
 
-        card.classList.add('playing');
-
-        txtStatus.innerText='Tocando agora';
-
-    }else{
-
-        estaPausado=true;
-
-        player.pause();
-
-        icon.className='fas fa-play';
-
-        btn.classList.remove('active');
-
-        card.classList.remove('playing');
-
-        txtStatus.innerText='Pausado';
-    }
-}
-
-function nextTrack(){
-
-    if(musicas.length===0) return;
-
-    indiceMusicaAtual++;
-
-    if(indiceMusicaAtual >= musicas.length){
-
-        indiceMusicaAtual=0;
-    }
-
-    carregarFaixa(indiceMusicaAtual);
-
-    player.play();
-}
-
-function prevTrack(){
-
-    if(musicas.length===0) return;
-
-    indiceMusicaAtual--;
-
-    if(indiceMusicaAtual < 0){
-
-        indiceMusicaAtual=musicas.length-1;
-    }
-
-    carregarFaixa(indiceMusicaAtual);
-
-    player.play();
-}
-
-player.onended=()=>{
-
-    if(!estaPausado){
-
-        nextTrack();
-    }
-};
-
-function atualizarTelaBloqueada(title,artist,cover){
-
-    if('mediaSession' in navigator){
-
-        navigator.mediaSession.metadata=new MediaMetadata({
-
-            title:title,
-
-            artist:artist,
-
-            album:'RADIO EXNA FM',
-
-            artwork:[
-                {
-                    src:cover,
-                    sizes:'512x512',
-                    type:'image/png'
+                for (let i = 0; i < pool.length; i++) {
+                    if (pool[i].artist.toLowerCase() !== lastArtist.toLowerCase() && 
+                        pool[i].title.toLowerCase() !== lastTitle.toLowerCase()) {
+                        validIndex = i;
+                        break;
+                    }
                 }
-            ]
-        });
 
-        navigator.mediaSession.setActionHandler('play',()=>{
-            player.play();
-        });
+                if (validIndex === -1) validIndex = 0;
 
-        navigator.mediaSession.setActionHandler('pause',()=>{
-            player.pause();
-        });
+                let track = pool.splice(validIndex, 1)[0];
+                orderedList.push(track);
+                
+                lastArtist = track.artist;
+                lastTitle = track.title;
+            }
 
-        navigator.mediaSession.setActionHandler('nexttrack',()=>{
-            nextTrack();
-        });
+            timeline = [];
+            let accumulatedTime = 0;
+            
+            orderedList.forEach(track => {
+                timeline.push({
+                    ...track,
+                    startTime: accumulatedTime,
+                    endTime: accumulatedTime + track.duration
+                });
+                accumulatedTime += track.duration;
+            });
 
-        navigator.mediaSession.setActionHandler('previoustrack',()=>{
-            prevTrack();
-        });
-    }
-}
+            totalTimelineDuration = accumulatedTime;
+        }
 
-if('serviceWorker' in navigator){
+        function startLiveEngine() {
+            syncPlayerStatus();
+            if (liveTimer) clearInterval(liveTimer);
+            liveTimer = setInterval(syncPlayerStatus, 1000);
+        }
 
-    navigator.serviceWorker.register('sw.js');
-}
+        function syncPlayerStatus() {
+            if (totalTimelineDuration === 0) return;
 
-carregarMusicas();
+            const currentUnixSeconds = Math.floor(Date.now() / 1000);
+            const positionInLoop = currentUnixSeconds % totalTimelineDuration;
 
-</script>
+            const currentTrack = timeline.find(t => positionInLoop >= t.startTime && positionInLoop < t.endTime);
 
+            if (currentTrack) {
+                const trackOffset = positionInLoop - currentTrack.startTime;
+                
+                const now = new Date();
+                timeStatusEl.innerText = now.toTimeString().split(' ')[0] + " - AO VIVO";
+
+                if (trackTitleEl.innerText !== currentTrack.title) {
+                    trackTitleEl.innerText = currentTrack.title;
+                    trackArtistEl.innerText = currentTrack.artist;
+                    applyArtwork(currentTrack.title, currentTrack.artist);
+                    
+                    if (isPlaying) {
+                        streamAudioTrack(currentTrack.id, trackOffset);
+                    }
+                }
+            }
+        }
+
+        function applyArtwork(title, artist) {
+            const matchedImg = imageFiles.find(img => {
+                const name = img.name.toLowerCase();
+                return name.includes(title.toLowerCase()) || name.includes(artist.toLowerCase());
+            });
+
+            let imgUrl = "";
+            if (matchedImg) {
+                imgUrl = `https://www.googleapis.com/drive/v3/files/${matchedImg.id}?alt=media&key=${API_KEY}`;
+            } else {
+                imgUrl = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 24 24'><rect width='100%25' height='100%25' fill='%2317181e'/><path d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z' fill='%2300e5ff' opacity='0.35' transform='scale(0.8) translate(3,3)'/></svg>`;
+            }
+
+            trackArtEl.src = imgUrl;
+            appBgEl.style.backgroundImage = `url('${imgUrl}')`;
+        }
+
+        function streamAudioTrack(fileId, startSeconds) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            const streamUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
+            currentAudio = new Audio(streamUrl);
+            currentAudio.currentTime = startSeconds;
+            
+            if (isPlaying) {
+                currentAudio.play().catch(err => {
+                    console.log("Aguardando ação inicial de play do usuário.");
+                    isPlaying = false;
+                    playIcon.innerHTML = SVG_PLAY;
+                });
+            }
+        }
+
+        function togglePlay() {
+            if (!isPlaying) {
+                isPlaying = true;
+                playIcon.innerHTML = SVG_PAUSE;
+                
+                const currentUnixSeconds = Math.floor(Date.now() / 1000);
+                const positionInLoop = currentUnixSeconds % totalTimelineDuration;
+                const currentTrack = timeline.find(t => positionInLoop >= t.startTime && positionInLoop < t.endTime);
+                
+                if (currentTrack) {
+                    streamAudioTrack(currentTrack.id, positionInLoop - currentTrack.startTime);
+                    if (currentAudio) currentAudio.play().catch(() => {});
+                }
+            } else {
+                isPlaying = false;
+                playIcon.innerHTML = SVG_PLAY;
+                if (currentAudio) {
+                    currentAudio.pause();
+                }
+            }
+        }
+
+        function showError(msg) {
+            errorConsole.innerText = msg;
+            errorConsole.style.display = 'block';
+            trackTitleEl.innerText = "Erro ao Carregar";
+            trackArtistEl.innerText = "Verifique os arquivos do Drive";
+        }
+
+        window.onload = loadDriveLibrary;
+    </script>
 </body>
-
 </html>
