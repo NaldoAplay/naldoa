@@ -377,6 +377,17 @@
         .social-links a { color: var(--neon-aqua); font-size: 1.3rem; transition: 0.3s; text-decoration: none; }
         .social-links a:hover { color: var(--neon-pink); }
         .copyright { font-size: 0.7rem; color: #555; text-transform: uppercase; }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -491,31 +502,62 @@
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
 
-        async function buscarCapaNoITunes(musicaNome, artistaNome) {
+        // Busca capa em MÚLTIPLAS fontes
+        async function buscarCapaOnline(musicaNome, artistaNome) {
             const chave = `${artistaNome}|${musicaNome}`.toLowerCase();
             if (cacheCapas.has(chave)) return cacheCapas.get(chave);
             
-            const query = encodeURIComponent(`${artistaNome} ${musicaNome}`);
-            const url = `https://itunes.apple.com/search?term=${query}&limit=1&entity=song`;
+            txtStatus.innerText = `Buscando capa: ${musicaNome}...`;
             
+            // Tenta iTunes primeiro
+            const query = encodeURIComponent(`${artistaNome} ${musicaNome}`);
+            const urls = [
+                `https://itunes.apple.com/search?term=${query}&limit=1&entity=song`,
+                `https://api.deezer.com/search?q=${query}&limit=1`
+            ];
+            
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    // iTunes
+                    if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
+                        const capa = data.results[0].artworkUrl100.replace('100x100', '600x600');
+                        cacheCapas.set(chave, capa);
+                        return capa;
+                    }
+                    
+                    // Deezer
+                    if (data.data && data.data.length > 0 && data.data[0].album && data.data[0].album.cover_big) {
+                        const capa = data.data[0].album.cover_big;
+                        cacheCapas.set(chave, capa);
+                        return capa;
+                    }
+                } catch(e) {}
+            }
+            
+            // Fallback: Last.fm
             try {
-                const response = await fetch(url);
+                const lastFmKey = "d56fd2541f4c0da5f46e1ef24e5c1fa7";
+                const lastUrl = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${lastFmKey}&artist=${encodeURIComponent(artistaNome)}&track=${encodeURIComponent(musicaNome)}&format=json`;
+                const response = await fetch(lastUrl);
                 const data = await response.json();
-                if (data.results && data.results.length > 0) {
-                    const capa = data.results[0].artworkUrl100?.replace('100x100', '600x600');
+                if (data.track && data.track.album && data.track.album.image && data.track.album.image[3]) {
+                    const capa = data.track.album.image[3]['#text'];
                     if (capa) {
                         cacheCapas.set(chave, capa);
                         return capa;
                     }
                 }
-                return null;
-            } catch (error) {
-                return null;
-            }
+            } catch(e) {}
+            
+            cacheCapas.set(chave, null);
+            return null;
         }
 
         async function carregarDoGoogleDrive() {
-            txtStatus.innerText = "Carregando músicas do Google Drive...";
+            txtStatus.innerHTML = '<span class="loading"></span> Carregando músicas...';
             const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
             
             try {
@@ -527,13 +569,14 @@
                     let imagens = data.files.filter(f => f.mimeType.includes('image'));
 
                     if (musicas.length === 0) {
-                        txtStatus.innerText = "Nenhuma música encontrada na pasta!";
+                        txtStatus.innerText = "Nenhuma música encontrada!";
                         return;
                     }
 
                     playlist = [];
                     
-                    for (const m of musicas) {
+                    for (let i = 0; i < musicas.length; i++) {
+                        const m = musicas[i];
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         let artista = "EXNA MUSIC";
                         let titulo = nomeSemExtensao;
@@ -544,12 +587,13 @@
                             titulo = partes[1].trim();
                         }
 
+                        // Tenta capa local
                         const capaLocal = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
                         let capaUrl = capaLocal ? `https://www.googleapis.com/drive/v3/files/${capaLocal.id}?alt=media&key=${API_KEY}` : null;
                         
-                        // Busca capa no iTunes se não tiver local
+                        // Busca capa online se não tiver local
                         if (!capaUrl) {
-                            capaUrl = await buscarCapaNoITunes(titulo, artista);
+                            capaUrl = await buscarCapaOnline(titulo, artista);
                         }
                         
                         playlist.push({
@@ -559,6 +603,8 @@
                             capaUrl: capaUrl || 'logo-quadrada.png',
                             url: `https://www.googleapis.com/drive/v3/files/${m.id}?alt=media&key=${API_KEY}`
                         });
+                        
+                        txtStatus.innerText = `Carregando: ${i+1}/${musicas.length}`;
                     }
                     
                     // Embaralhar playlist
@@ -577,13 +623,15 @@
                     renderizarPlaylist();
                     
                     // Toca automaticamente
-                    player.play().catch(() => {});
+                    setTimeout(() => {
+                        player.play().catch(e => console.log("Play automático:", e));
+                    }, 500);
                     
                 } else {
                     txtStatus.innerText = "Pasta vazia!";
                 }
             } catch (e) {
-                txtStatus.innerText = "Erro ao conectar com Google Drive!";
+                txtStatus.innerText = "Erro ao conectar!";
                 console.error(e);
             }
         }
@@ -624,6 +672,7 @@
             
             const faixa = playlist[ordemExecucao[indiceAtual]];
             
+            player.pause();
             player.src = faixa.url;
             player.load();
             
@@ -634,11 +683,20 @@
             
             updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
             renderizarPlaylist();
+            
+            // Tenta tocar
+            setTimeout(() => {
+                if (!player.paused) return;
+                player.play().catch(e => console.log("Erro ao tocar:", e));
+            }, 200);
         }
 
         function togglePlayer() {
             if (player.paused) {
-                player.play();
+                player.play().catch(e => {
+                    console.log("Erro ao tocar:", e);
+                    txtStatus.innerText = "Clique novamente para tocar";
+                });
             } else {
                 player.pause();
             }
@@ -647,29 +705,28 @@
         function proximaFaixa() {
             if (playlist.length === 0) return;
             carregarFaixa(indiceAtual + 1);
-            player.play().catch(() => {});
         }
 
         function voltarFaixa() {
             if (playlist.length === 0) return;
             carregarFaixa(indiceAtual - 1);
-            player.play().catch(() => {});
         }
 
         function toggleShuffle() {
             isShuffle = !isShuffle;
             shuffleBtn.classList.toggle('active', isShuffle);
+            const atual = playlist[ordemExecucao[indiceAtual]];
             if (isShuffle) {
-                // Embaralhar
                 for (let i = ordemExecucao.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [ordemExecucao[i], ordemExecucao[j]] = [ordemExecucao[j], ordemExecucao[i]];
                 }
                 renderizarPlaylist();
+                indiceAtual = ordemExecucao.findIndex(i => playlist[i].id === atual.id);
             } else {
-                // Voltar para ordem original
                 ordemExecucao = playlist.map((_, i) => i);
                 renderizarPlaylist();
+                indiceAtual = playlist.findIndex(m => m.id === atual.id);
             }
         }
 
@@ -687,6 +744,7 @@
             btn.classList.add('active');
             card.classList.add('playing');
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+            txtStatus.innerText = "Tocando...";
         });
 
         player.addEventListener('pause', () => {
@@ -694,6 +752,7 @@
             btn.classList.remove('active');
             card.classList.remove('playing');
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
+            txtStatus.innerText = "Pausado";
         });
 
         player.addEventListener('ended', () => {
@@ -708,12 +767,19 @@
             timeDuration.innerText = formatarTempo(player.duration);
         });
 
+        player.addEventListener('error', (e) => {
+            console.log("Erro no áudio:", e);
+            txtStatus.innerText = "Erro na música, pulando...";
+            setTimeout(() => proximaFaixa(), 1000);
+        });
+
         progressBar.addEventListener('input', () => {
             if (isNaN(player.duration)) return;
             player.currentTime = (progressBar.value / 100) * player.duration;
         });
 
         function formatarTempo(segs) {
+            if (isNaN(segs)) return "0:00";
             let min = Math.floor(segs / 60);
             let sec = Math.floor(segs % 60);
             return min + ":" + (sec < 10 ? "0" + sec : sec);
@@ -734,23 +800,28 @@
             }
         }
 
-        // PWA
+        // PWA Install
         let deferredPrompt;
-        const pwaBtn = document.getElementById('pwa-install-btn');
-        if (pwaBtn) {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                pwaBtn.classList.add('visible');
-            });
-            pwaBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt = null;
-                    pwaBtn.classList.remove('visible');
-                }
-            });
-        }
+        const pwaBtn = document.createElement('button');
+        pwaBtn.style.cssText = "position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#ff0055;color:#fff;border:none;cursor:pointer;display:none;z-index:999";
+        pwaBtn.innerHTML = '<i class="fas fa-download"></i>';
+        document.body.appendChild(pwaBtn);
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBtn.style.display = 'flex';
+            pwaBtn.style.alignItems = 'center';
+            pwaBtn.style.justifyContent = 'center';
+        });
+        
+        pwaBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                pwaBtn.style.display = 'none';
+            }
+        });
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker error:', err));
