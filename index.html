@@ -2,682 +2,580 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>EXNA FM • Rádio Ao Vivo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RADIO EXNA FM</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo-quadrada.png">
+            
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+        :root {
+            --primary-purple: #8a2be2;
+            --neon-aqua: #66fcf1;
+            --neon-pink: #ff0055;
+            --dark-bg: #050608;
+            --glass: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            background: radial-gradient(circle at 10% 20%, #0a0a1a, #010005);
+            background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(138, 43, 226, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(255, 0, 85, 0.15) 0%, transparent 45%);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
             min-height: 100vh;
-            font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            color: #f0f0ff;
         }
 
-        .neon-player {
-            max-width: 480px;
+        .glass-player {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
             width: 100%;
-            background: rgba(12, 12, 24, 0.65);
-            backdrop-filter: blur(24px);
-            border-radius: 56px;
-            border: 1px solid rgba(102, 252, 241, 0.25);
-            box-shadow: 0 30px 45px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(102, 252, 241, 0.1) inset, 0 0 18px rgba(102, 252, 241, 0.2);
-            padding: 28px 22px 38px;
-            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            max-width: 380px;
+            padding: 35px 25px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.02);
+            position: relative;
         }
 
-        .playing-active .neon-player {
-            border-color: #66fcf1;
-            box-shadow: 0 0 28px rgba(102, 252, 241, 0.4), 0 0 0 1px #66fcf1 inset;
-        }
-
-        .radio-brand {
+        .radio-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+        }
+
+        .radio-top-logo {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px var(--neon-aqua));
+        }
+
+        .radio-brand-text h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            margin: 0;
+            letter-spacing: 1px;
+            text-align: left;
+        }
+
+        .radio-brand-text h2 span { color: var(--neon-aqua); }
+
+        .radio-brand-text p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--neon-pink);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .live-indicator {
+            background: var(--neon-pink);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px var(--neon-pink);
+            animation: pulse 2s infinite;
             margin-bottom: 20px;
         }
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .logo-img {
-            width: 48px;
-            height: 48px;
-            background: #1a1a2e;
-            border-radius: 18px;
-            object-fit: cover;
-            box-shadow: 0 0 12px #66fcf180;
-        }
-        .brand-text h2 {
-            font-size: 1.7rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #fff, #66fcf1);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .brand-text p {
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: #ff66c0;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        .live-badge {
-            background: #ff0055cc;
-            backdrop-filter: blur(4px);
-            padding: 6px 14px;
-            border-radius: 80px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #ff66aa;
-            animation: livePulse 1.5s infinite;
-        }
-        @keyframes livePulse {
-            0% { box-shadow: 0 0 0 0 #ff0055aa; opacity: 0.9; }
-            70% { box-shadow: 0 0 0 10px #ff005500; opacity: 1; }
-            100% { box-shadow: 0 0 0 0 #ff005500; opacity: 0.9; }
+
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        .cover-area {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 25px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: all 0.5s ease;
         }
 
-        .cover-art-container {
-            position: relative;
-            margin: 20px 0 25px;
-            display: flex;
-            justify-content: center;
+        .playing .cover-area {
+            border-color: var(--neon-aqua);
+            box-shadow: 0 0 30px rgba(102, 252, 241, 0.25);
+            transform: scale(1.02);
         }
-        .cover-glow {
-            width: 250px;
-            height: 250px;
-            border-radius: 38px;
-            background: linear-gradient(145deg, #2c2c44, #13131f);
-            padding: 6px;
-            box-shadow: 0 20px 35px -8px black;
-            transition: transform 0.3s ease;
-        }
-        .cover-glow img {
+
+        .cover-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 32px;
-            display: block;
-            background: #0b0b14;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
-            transition: all 0.5s;
-        }
-        .playing-active .cover-glow {
-            transform: scale(1.02);
-            box-shadow: 0 0 0 3px #66fcf1, 0 25px 40px -12px black;
+            background-color: #111;
         }
 
-        .track-info {
-            text-align: center;
-            margin: 12px 0 28px;
-        }
-        .track-title {
-            font-size: 1.65rem;
-            font-weight: 800;
-            letter-spacing: -0.3px;
-            background: linear-gradient(to right, #ffffff, #bbf0ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .info-area h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            margin: 0;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding: 0 10px;
         }
-        .track-artist {
+
+        .info-area p {
             font-size: 1.1rem;
-            font-weight: 500;
-            color: #66fcf1;
-            margin-top: 8px;
-            text-shadow: 0 0 6px #66fcf180;
-            letter-spacing: -0.2px;
-        }
-
-        .play-wrapper {
-            display: flex;
-            justify-content: center;
-            margin: 12px 0 15px;
-        }
-        .play-circle {
-            background: radial-gradient(circle at 30% 20%, #a945ff, #6a1b9a);
-            width: 90px;
-            height: 90px;
-            border-radius: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            cursor: pointer;
-            transition: 0.25s ease;
-            box-shadow: 0 8px 25px #bc5aff70;
-        }
-        .play-circle i {
-            font-size: 2.4rem;
-            color: white;
-            filter: drop-shadow(0 2px 4px black);
-        }
-        .play-circle:active {
-            transform: scale(0.94);
-        }
-        .playing-active .play-circle {
-            background: radial-gradient(circle at 30% 20%, #66fcf1, #0f6b80);
-            box-shadow: 0 0 28px #66fcf1;
-        }
-
-        .status-message {
-            font-size: 0.75rem;
-            text-align: center;
-            font-weight: 500;
-            background: rgba(0,0,0,0.5);
-            display: inline-block;
-            width: auto;
-            margin: 12px auto 0;
-            padding: 4px 14px;
-            border-radius: 40px;
-            backdrop-filter: blur(4px);
-            color: #bbe1ff;
-        }
-
-        .social-footer {
-            margin-top: 32px;
-            display: flex;
-            justify-content: center;
-            gap: 35px;
-        }
-        .social-footer a {
-            color: #a0c0ff;
-            font-size: 1.6rem;
-            transition: all 0.2s;
-        }
-        .social-footer a:hover {
-            color: #66fcf1;
-            transform: translateY(-4px);
-        }
-        .copyright {
-            text-align: center;
-            font-size: 0.7rem;
-            margin-top: 30px;
-            color: #6b6b8b;
-        }
-
-        .install-btn {
-            position: fixed;
-            bottom: 22px;
-            right: 22px;
-            background: rgba(20, 20, 40, 0.8);
-            backdrop-filter: blur(12px);
-            border-radius: 50px;
-            border: 1px solid #66fcf1;
-            padding: 12px 16px;
-            color: #66fcf1;
-            font-size: 1.25rem;
-            gap: 8px;
-            display: none;
-            align-items: center;
+            color: var(--neon-aqua);
+            margin: 6px 0 25px;
             font-weight: 600;
-            cursor: pointer;
-            transform: scale(0);
-            transition: 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
-            box-shadow: 0 4px 12px black;
-            z-index: 1000;
-        }
-        .install-btn.visible {
-            display: flex;
-            transform: scale(1);
-        }
-        .install-btn i {
-            font-size: 1.2rem;
         }
 
-        @media (max-width: 520px) {
-            .neon-player { padding: 20px 16px 30px; }
-            .cover-glow { width: 210px; height: 210px; }
-            .track-title { font-size: 1.3rem; white-space: normal; word-break: break-word; }
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(45deg, var(--primary-purple), var(--neon-pink));
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 35px rgba(255, 0, 85, 0.5);
+        }
+
+        .play-btn.active {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 30px #fff;
+        }
+
+        .pwa-float-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--neon-aqua);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+        }
+
+        .pwa-float-btn.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .pwa-float-btn:hover {
+            color: white;
+            background: linear-gradient(45deg, var(--primary-purple), var(--neon-pink));
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+            transform: scale(1.1) translateY(-3px);
+            border-color: transparent;
+        }
+
+        footer {
+            padding: 25px;
+            text-align: center;
+            background: rgba(0,0,0,0.4);
+            border-top: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .social-links {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+        }
+
+        .social-links a {
+            color: var(--neon-aqua);
+            font-size: 1.4rem;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--neon-pink);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 480px) {
+            .glass-player { padding: 30px 20px; margin: 10px; }
+            .cover-area { width: 190px; height: 190px; }
+            .pwa-float-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 1.1rem; }
+        }
+        @media (max-height: 500px) {
+            body { background-image: none; background-color: transparent; min-height: auto; }
+            main { padding: 5px; }
+            .glass-player { max-width: 100%; border-radius: 20px; padding: 20px 15px; box-shadow: none; }
+            footer { display: none; }
         }
     </style>
 </head>
 <body>
 
-<div class="player-container" id="playerContainer">
-    <div class="neon-player">
-        <div class="radio-brand">
-            <div class="logo-area">
-                <img src="logo-quadrada.png" alt="logo" class="logo-img" id="staticLogo" onerror="this.src='https://placehold.co/400x400/1a1a2e/66fcf1?text=EXNA'">
-                <div class="brand-text">
-                    <h2>EXNA FM</h2>
-                    <p>⚡ AO VIVO ⚡</p>
+    <main>
+        <div class="glass-player" id="main-player">
+            
+            <div class="radio-header">
+                <img src="logo-quadrada.png" class="radio-top-logo" alt="EXNA Logo">
+                <div class="radio-brand-text">
+                    <h2>EXNA <span>FM</span></h2>
+                    <p>A Rádio que toca todas!</p>
                 </div>
             </div>
-            <div class="live-badge">
-                <i class="fas fa-circle" style="font-size: 0.6rem;"></i> LIVE
+
+            <div class="live-indicator">
+                <i class="fas fa-broadcast-tower"></i> TRANSMISSÃO EM TEMPO REAL
             </div>
-        </div>
 
-        <div class="cover-art-container">
-            <div class="cover-glow">
-                <img id="dynamicCover" src="logo-quadrada.png" alt="capa da música">
+            <div class="cover-area">
+                <img src="logo-quadrada.png" id="track-cover" class="cover-img" alt="Capa da Música">
             </div>
-        </div>
 
-        <div class="track-info">
-            <div class="track-title" id="trackTitle">Sintonizando...</div>
-            <div class="track-artist" id="trackArtist">EXNA FM</div>
-        </div>
+            <div class="info-area">
+                <h1 id="track-title">SINTONIZANDO...</h1>
+                <p id="artist-name">EXNA FM</p>
+            </div>
 
-        <div class="play-wrapper">
-            <button class="play-circle" id="masterPlayBtn" disabled>
-                <i id="playIcon" class="fas fa-spinner fa-pulse"></i>
+            <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
+                <i class="fas fa-spinner fa-spin" id="btn-icon"></i>
             </button>
+            
+            <p id="status-text" style="margin-top:20px; font-size: 0.8rem; color: #45a29e; font-weight: bold; letter-spacing: 1px;"></p>
         </div>
-        <div style="text-align: center;">
-            <span class="status-message" id="liveStatusText">📡 conectando à torre digital</span>
-        </div>
+    </main>
 
-        <div class="social-footer">
-            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-            <a href="https://youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
-            <a href="https://tiktok.com" target="_blank"><i class="fab fa-tiktok"></i></a>
+    <button id="pwa-install-btn" class="pwa-float-btn" title="Baixar App da Rádio">
+        <i class="fas fa-download"></i>
+    </button>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
         </div>
         <div class="copyright">
-            EXNA FM © 2026 | Transmissão em tempo real
+            EXNA FM © 2026 | Todos os Direitos Reservados
         </div>
-    </div>
-</div>
+    </footer>
 
-<button id="installPwaBtn" class="install-btn">
-    <i class="fas fa-download"></i> <span>APP</span>
-</button>
+    <audio id="audio-core" crossorigin="anonymous" preload="auto"></audio>
 
-<audio id="streamAudio" preload="auto" crossorigin="anonymous"></audio>
+    <script>
+        const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
+        const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
 
-<script>
-    // CONFIGURAÇÃO DO GOOGLE DRIVE
-    const FOLDER_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J';
-    const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs';
-    
-    // Elementos DOM
-    const audioEl = document.getElementById('streamAudio');
-    const playBtn = document.getElementById('masterPlayBtn');
-    const playIconSpan = document.getElementById('playIcon');
-    const trackTitleSpan = document.getElementById('trackTitle');
-    const trackArtistSpan = document.getElementById('trackArtist');
-    const coverImg = document.getElementById('dynamicCover');
-    const statusSpan = document.getElementById('liveStatusText');
-    const containerDiv = document.getElementById('playerContainer');
-    
-    // Estado global
-    let musicLibrary = [];
-    let globalPlaylist = [];
-    let currentSongIndex = 0;
-    let isUserPaused = true;
-    let segmentDurationSec = 180;
-    let isPlayingFlag = false;
-    let deferredPrompt = null;
-    
-    // Buscar arquivos do Google Drive
-    async function fetchDriveFiles() {
-        const queryUrl = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
-        
-        try {
-            statusSpan.innerText = "📀 Carregando músicas do Drive...";
-            const response = await fetch(queryUrl);
-            const data = await response.json();
-            
-            if (!data.files || data.files.length === 0) {
-                statusSpan.innerText = "❌ Nenhum arquivo encontrado na pasta";
-                console.error("Pasta vazia ou ID inválido");
-                return false;
-            }
-            
-            console.log("Arquivos encontrados:", data.files.map(f => f.name));
-            
-            // Separar áudios (MP3) e imagens (PNG)
-            const audioFiles = data.files.filter(f => {
-                const name = f.name.toLowerCase();
-                return name.endsWith('.mp3');
-            });
-            
-            const imageFiles = data.files.filter(f => {
-                const name = f.name.toLowerCase();
-                return name.endsWith('.png');
-            });
-            
-            if (audioFiles.length === 0) {
-                statusSpan.innerText = "❌ Nenhum arquivo MP3 encontrado na pasta";
-                console.error("Sem arquivos de áudio");
-                return false;
-            }
-            
-            console.log(`Encontrados: ${audioFiles.length} áudios, ${imageFiles.length} imagens PNG`);
-            
-            // Montar biblioteca de músicas
-            musicLibrary = audioFiles.map(audio => {
-                // Remove extensão .mp3
-                const fullName = audio.name.replace(/\.mp3$/i, "");
-                let artist = "EXNA FM";
-                let title = fullName;
+        const player = document.getElementById('audio-core');
+        const btn = document.getElementById('master-play');
+        const icon = document.getElementById('btn-icon');
+        const card = document.getElementById('main-player');
+        const txtTitle = document.getElementById('track-title');
+        const txtArtist = document.getElementById('artist-name');
+        const txtCover = document.getElementById('track-cover');
+        const txtStatus = document.getElementById('status-text');
+
+        let gradeOriginal = [];
+        let gradeSincronizadaGlobal = [];
+        let indiceMusicaAtual = 0;
+        let blocoTempoFixo = 180; 
+        let deferredPrompt;
+        let estaPausadoManualmente = true;
+
+        txtTitle.innerText = "SINTONIA ONLINE";
+        txtStatus.innerText = "Conectando à torre...";
+
+        async function fetchDriveData() {
+            const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
                 
-                // Tentar extrair artista e título do nome do arquivo (formato: Artista - Musica)
-                if (fullName.includes(" - ")) {
-                    const parts = fullName.split(" - ");
-                    artist = parts[0].trim();
-                    title = parts.slice(1).join(" - ").trim();
-                }
-                
-                // Buscar imagem PNG correspondente (mesmo nome base)
-                let matchedCover = imageFiles.find(img => {
-                    const imgName = img.name.replace(/\.png$/i, "").toLowerCase();
-                    const songName = fullName.toLowerCase();
-                    return imgName === songName;
-                });
-                
-                let coverUrl = 'logo-quadrada.png';
-                if (matchedCover) {
-                    coverUrl = `https://www.googleapis.com/drive/v3/files/${matchedCover.id}?alt=media&key=${API_KEY}`;
-                    console.log(`Capa encontrada para ${fullName}: ${matchedCover.name}`);
+                if(data.files && data.files.length > 0) {
+                    // Aceita apenas MP3 para áudio e PNG para imagens
+                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3')).sort((a,b) => a.name.localeCompare(b.name));
+                    let imagens = data.files.filter(f => f.name.toLowerCase().endsWith('.png'));
+                    
+                    console.log(`Encontrados: ${musicas.length} MP3, ${imagens.length} PNG`);
+
+                    if (musicas.length === 0) {
+                        txtTitle.innerText = "EXNA FM";
+                        txtStatus.innerText = "Nenhuma música MP3 disponível.";
+                        return;
+                    }
+
+                    gradeOriginal = musicas.map(m => {
+                        const nomeSemExtensao = m.name.replace(/\.mp3$/i, "");
+                        
+                        let artistaDetectado = "EXNA FM";
+                        let tituloDetectado = nomeSemExtensao;
+                        if(nomeSemExtensao.includes(" - ")) {
+                            let partes = nomeSemExtensao.split(" - ");
+                            artistaDetectado = partes[0].trim();
+                            tituloDetectado = partes.slice(1).join(" - ").trim();
+                        }
+
+                        // Busca imagem PNG com o MESMO NOME (case insensitive)
+                        const capaCorrespondente = imagens.find(img => 
+                            img.name.replace(/\.png$/i, "").toLowerCase() === nomeSemExtensao.toLowerCase()
+                        );
+                        
+                        console.log(`${m.name} -> capa: ${capaCorrespondente ? capaCorrespondente.name : 'padrão'}`);
+                        
+                        return {
+                            id: m.id,
+                            name: tituloDetectado,
+                            artist: artistaDetectado,
+                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
+                        };
+                    });
+                    
+                    gradeSincronizadaGlobal = gerarGradeMestreEstavel();
+
+                    btn.disabled = false;
+                    icon.className = "fas fa-play";
+                    txtStatus.innerText = "Sinal sintonizado";
+
+                    estaPausadoManualmente = false;
+                    sincronizarEPlayComGradeGlobal(true);
+
                 } else {
-                    console.log(`Nenhuma capa PNG encontrada para: ${fullName}`);
+                    txtStatus.innerText = "Pasta vazia.";
                 }
-                
-                return {
-                    id: audio.id,
-                    title: title || fullName,
-                    artist: artist,
-                    coverUrl: coverUrl,
-                    url: `https://www.googleapis.com/drive/v3/files/${audio.id}?alt=media&key=${API_KEY}`
-                };
-            });
-            
-            if (musicLibrary.length === 0) return false;
-            
-            // Gerar playlist global embaralhada
-            buildGlobalPlaylist();
-            return true;
-            
-        } catch (error) {
-            console.error("Erro ao acessar Google Drive:", error);
-            statusSpan.innerText = "❌ Erro ao conectar com Google Drive";
-            return false;
+            } catch (e) {
+                console.error(e);
+                txtStatus.innerText = "Falha ao conectar com o servidor.";
+            }
         }
-    }
-    
-    // Gerar playlist global com semente diária (mesma para todos)
-    function buildGlobalPlaylist() {
-        if (!musicLibrary.length) return;
-        
-        // Semente baseada na data atual (todos os ouvintes sincronizam)
-        const today = new Date();
-        const seed = today.getFullYear() * 366 + (today.getMonth() + 1) * 31 + today.getDate();
-        
-        let shuffled = [...musicLibrary];
-        // Embaralhamento determinístico
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.sin(seed + i) * 10000) % (i + 1);
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+
+        function gerarGradeMestreEstavel() {
+            let pool = [...gradeOriginal];
+            let resultado = [];
+            let ultimoArtista = "";
+
+            let dataAtual = new Date();
+            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
+
+            function randomSemente() {
+                let x = Math.sin(semente++) * 10000;
+                return x - Math.floor(x);
+            }
+
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(randomSemente() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            while(pool.length > 0) {
+                let indexValido = pool.findIndex(m => m.artist.toLowerCase() !== ultimoArtista.toLowerCase());
+                if(indexValido === -1) indexValido = 0;
+
+                let selecionada = pool.splice(indexValido, 1)[0];
+                resultado.push(selecionada);
+                ultimoArtista = selecionada.artist;
+            }
+
+            return resultado;
         }
-        
-        // Evitar artistas repetidos consecutivamente
-        let finalPlaylist = [];
-        let tempPool = [...shuffled];
-        let lastArtist = "";
-        
-        while(tempPool.length > 0) {
-            let index = tempPool.findIndex(song => song.artist !== lastArtist);
-            if(index === -1) index = 0;
-            let selected = tempPool.splice(index, 1)[0];
-            finalPlaylist.push(selected);
-            lastArtist = selected.artist;
-        }
-        
-        globalPlaylist = finalPlaylist;
-        console.log("Playlist gerada:", globalPlaylist.map(s => `${s.artist} - ${s.title}`));
-    }
-    
-    // Obter posição atual na grade mundial (baseado no relógio)
-    function getCurrentWorldSlot() {
-        if (!globalPlaylist.length) return null;
-        
-        const totalDurationSec = globalPlaylist.length * segmentDurationSec;
-        const nowUnixSec = Math.floor(Date.now() / 1000);
-        const cyclePosition = nowUnixSec % totalDurationSec;
-        const currentSongIdx = Math.floor(cyclePosition / segmentDurationSec);
-        const seekOffset = cyclePosition % segmentDurationSec;
-        
-        return {
-            index: currentSongIdx % globalPlaylist.length,
-            seekTime: seekOffset
-        };
-    }
-    
-    // Atualizar interface com informações da música
-    function updateUI(song) {
-        if (!song) return;
-        
-        trackTitleSpan.innerText = song.title.toUpperCase();
-        trackArtistSpan.innerText = song.artist;
-        
-        if (song.coverUrl && song.coverUrl !== coverImg.src) {
-            coverImg.src = song.coverUrl;
-            coverImg.onerror = () => { 
-                console.log("Erro ao carregar capa, usando padrão");
-                coverImg.src = 'logo-quadrada.png'; 
+
+        function obterPontoDaGradeAoVivo() {
+            if (gradeSincronizadaGlobal.length === 0) return null;
+            
+            let duracaoTotalGrade = gradeSincronizadaGlobal.length * blocoTempoFixo;
+            let timestampSegundos = Math.floor(Date.now() / 1000);
+            let tempoAtualNaLinhaGeral = timestampSegundos % duracaoTotalGrade;
+            
+            let indexCalculado = Math.floor(tempoAtualNaLinhaGeral / blocoTempoFixo);
+            let segundoExatoNaFaixa = tempoAtualNaLinhaGeral % blocoTempoFixo;
+
+            return {
+                indice: indexCalculado,
+                seek: segundoExatoNaFaixa
             };
         }
-        
-        // Atualizar Media Session (tela bloqueada)
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: song.title,
-                artist: song.artist,
-                album: 'EXNA FM • AO VIVO',
-                artwork: [
-                    { src: song.coverUrl !== 'logo-quadrada.png' ? song.coverUrl : 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
-                ]
+
+        function sincronizarEPlayComGradeGlobal(usarSincroniaHorarioMundial = false) {
+            if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
+
+            let tempoDeCorte = 0;
+
+            if (usarSincroniaHorarioMundial) {
+                const estadoAoVivo = obterPontoDaGradeAoVivo();
+                if (estadoAoVivo) {
+                    indiceMusicaAtual = estadoAoVivo.indice;
+                    tempoDeCorte = estadoAoVivo.seek;
+                }
+            } else {
+                if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) indiceMusicaAtual = 0;
+            }
+
+            const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
+            let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+
+            if (player.src !== urlFonte) {
+                player.src = urlFonte;
+            }
+            player.currentTime = tempoDeCorte;
+
+            txtTitle.innerText = ConvertName(faixa.name);
+            txtArtist.innerText = faixa.artist;
+            txtCover.src = faixa.capaUrl;
+            txtStatus.innerText = "Sintonizando transmissão ao vivo...";
+
+            updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
+
+            icon.className = "fas fa-spinner fa-spin";
+
+            player.play().then(() => {
+                icon.className = "fas fa-stop";
+                btn.classList.add('active');
+                card.classList.add('playing');
+                txtStatus.innerText = "Transmissão Digital em Tempo Real";
+            }).catch((err) => {
+                icon.className = "fas fa-play";
+                btn.classList.remove('active');
+                card.classList.remove('playing');
+                txtStatus.innerText = "Toque no Play para ouvir ao vivo.";
             });
         }
-    }
-    
-    // Carregar música pelo índice
-    async function loadSongByIndex(index, seekSeconds = 0, forcePlay = false) {
-        if (!globalPlaylist.length) return false;
-        
-        const safeIndex = index % globalPlaylist.length;
-        const song = globalPlaylist[safeIndex];
-        if (!song) return false;
-        
-        // Atualizar UI primeiro (efeito ao vivo instantâneo)
-        updateUI(song);
-        
-        // Carregar áudio se necessário
-        if (audioEl.src !== song.url) {
-            audioEl.src = song.url;
-            audioEl.load();
+
+        function ConvertName(str) {
+            return str.replace(/_/g, " ").toUpperCase();
         }
-        
-        if (seekSeconds > 0 && seekSeconds < segmentDurationSec) {
-            audioEl.currentTime = seekSeconds;
-        }
-        
-        currentSongIndex = safeIndex;
-        
-        if (!isUserPaused || forcePlay) {
-            try {
-                await audioEl.play();
-                isPlayingFlag = true;
-                updatePlayButtonUI(true);
-                containerDiv.classList.add('playing-active');
-                statusSpan.innerText = "🎙️ TRANSMISSÃO AO VIVO";
-            } catch (err) {
-                console.log("Autoplay bloqueado:", err);
-                isPlayingFlag = false;
-                updatePlayButtonUI(false);
-                statusSpan.innerText = "🔘 Clique no play para ouvir";
-            }
-        }
-        
-        return true;
-    }
-    
-    // Sincronizar com tempo real
-    async function syncToLiveWorld() {
-        if (!globalPlaylist.length) return;
-        
-        const slot = getCurrentWorldSlot();
-        if (!slot) return;
-        
-        const needSync = (slot.index !== currentSongIndex || Math.abs(audioEl.currentTime - slot.seekTime) > 3);
-        
-        if (needSync && !isUserPaused) {
-            await loadSongByIndex(slot.index, slot.seekTime);
-        } else if (needSync && isUserPaused) {
-            // Apenas atualizar informações visuais (prévia)
-            const song = globalPlaylist[slot.index];
-            if (song) updateUI(song);
-        }
-    }
-    
-    // Atualizar botão play/pause
-    function updatePlayButtonUI(isPlaying) {
-        if (isPlaying) {
-            playIconSpan.className = "fas fa-stop";
-            playBtn.classList.add('playing-active');
-        } else {
-            playIconSpan.className = "fas fa-play";
-            playBtn.classList.remove('playing-active');
-        }
-    }
-    
-    // Alternar reprodução
-    async function toggleLiveRadio() {
-        if (!globalPlaylist.length) {
-            statusSpan.innerText = "⏳ Carregando playlist...";
-            return;
-        }
-        
-        if (audioEl.paused) {
-            isUserPaused = false;
-            const slot = getCurrentWorldSlot();
-            if (slot) {
-                await loadSongByIndex(slot.index, slot.seekTime, true);
-            } else {
-                await loadSongByIndex(0, 0, true);
-            }
-            try {
-                await audioEl.play();
-                isPlayingFlag = true;
-                updatePlayButtonUI(true);
-                containerDiv.classList.add('playing-active');
-                statusSpan.innerText = "📡 AO VIVO • EM TEMPO REAL";
-            } catch(e) {
-                statusSpan.innerText = "⚠️ Toque novamente";
-            }
-        } else {
-            audioEl.pause();
-            isUserPaused = true;
-            isPlayingFlag = false;
-            updatePlayButtonUI(false);
-            containerDiv.classList.remove('playing-active');
-            statusSpan.innerText = "⏸️ Pausado • Toque play para voltar";
-        }
-    }
-    
-    // Próxima música automática
-    audioEl.addEventListener('ended', async () => {
-        if (!isUserPaused && globalPlaylist.length) {
-            const slot = getCurrentWorldSlot();
-            if (slot) {
-                await loadSongByIndex(slot.index, slot.seekTime, true);
-                if (!isUserPaused && audioEl.paused) {
-                    try { await audioEl.play(); } catch(e) {}
+
+        function toggleRadio() {
+            if (player.paused) {
+                estaPausadoManualmente = false;
+                icon.className = "fas fa-spinner fa-spin";
+                
+                if (player.src && player.src !== "") {
+                    player.play().then(() => {
+                        icon.className = "fas fa-stop";
+                        btn.classList.add('active');
+                        card.classList.add('playing');
+                        txtStatus.innerText = "Transmissão Digital em Tempo Real";
+                    }).catch(() => {
+                        sincronizarEPlayComGradeGlobal(true);
+                    });
+                } else {
+                    sincronizarEPlayComGradeGlobal(true);
                 }
+            } else {
+                player.pause();
+                icon.className = "fas fa-play";
+                btn.classList.remove('active');
+                card.classList.remove('playing');
+                txtStatus.innerText = "Transmissão em espera";
             }
         }
-    });
-    
-    // Tratar erros
-    audioEl.addEventListener('error', () => {
-        console.log("Erro no áudio, sincronizando com a grade...");
-        if (!isUserPaused && globalPlaylist.length) {
-            const slot = getCurrentWorldSlot();
-            if (slot) loadSongByIndex(slot.index, slot.seekTime, true);
-        }
-    });
-    
-    // Sincronização periódica (a cada 3 segundos)
-    setInterval(() => {
-        syncToLiveWorld();
-    }, 3000);
-    
-    // Inicializar
-    async function initRadio() {
-        playBtn.disabled = true;
-        const success = await fetchDriveFiles();
-        
-        if (success && globalPlaylist.length) {
-            playBtn.disabled = false;
-            statusSpan.innerText = "📻 SINAL ESTÁVEL • PRONTO";
-            
-            const slot = getCurrentWorldSlot();
-            if (slot && globalPlaylist[slot.index]) {
-                updateUI(globalPlaylist[slot.index]);
+
+        player.onended = () => {
+            if (estaPausadoManualmente) return;
+            icon.className = "fas fa-spinner fa-spin";
+            indiceMusicaAtual++; 
+            sincronizarEPlayComGradeGlobal(false); 
+        };
+
+        player.onerror = () => {
+            if (!estaPausadoManualmente) {
+                let proximoIndice = indiceMusicaAtual + 1;
+                indiceMusicaAtual = proximoIndice;
+                sincronizarEPlayComGradeGlobal(false);
             }
-            
-            isUserPaused = true;
-            updatePlayButtonUI(false);
-            containerDiv.classList.remove('playing-active');
-            statusSpan.innerText = "🎧 Toque no botão para ouvir ao vivo";
-        } else {
-            statusSpan.innerText = "⚠️ Verifique a pasta do Drive (MP3 + PNG)";
-            playBtn.disabled = true;
+        };
+
+        function updateLockScreen(title, artist, capaUrl) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: title,
+                    artist: artist,
+                    album: 'RADIO EXNA FM',
+                    artwork: [
+                        { src: capaUrl, sizes: '512x512', type: 'image/png' },
+                        { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+                navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
+                navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
+            }
         }
-    }
-    
-    // Eventos
-    playBtn.addEventListener('click', toggleLiveRadio);
-    
-    // PWA Install
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        const installBtnEl = document.getElementById('installPwaBtn');
-        installBtnEl.classList.add('visible');
-    });
-    
-    document.getElementById('installPwaBtn').addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt = null;
-            document.getElementById('installPwaBtn').classList.remove('visible');
+
+        const pwaBtn = document.getElementById('pwa-install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBtn.classList.add('visible');
+        });
+
+        pwaBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                pwaBtn.classList.remove('visible');
+            }
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
         }
-    });
-    
-    // Service Worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(e => console.log("SW error:", e));
-    }
-    
-    // Iniciar
-    initRadio();
-</script>
+
+        fetchDriveData();
+    </script>
 </body>
 </html>
