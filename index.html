@@ -123,6 +123,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             transition: all 0.5s ease;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
+            position: relative;
         }
 
         .playing .cover-area {
@@ -136,6 +137,16 @@
             height: 100%;
             object-fit: cover;
             background-color: #111;
+        }
+
+        .loading-cover {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--neon-aqua);
+            font-size: 2rem;
+            z-index: 2;
         }
 
         .info-area h1 {
@@ -181,6 +192,11 @@
             background: #fff;
             color: #000;
             box-shadow: 0 0 30px #fff;
+        }
+
+        .play-btn.loading {
+            opacity: 0.7;
+            cursor: wait;
         }
 
         .pwa-float-btn {
@@ -239,8 +255,9 @@
 
         .social-links a {
             color: var(--neon-aqua);
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             transition: 0.3s;
+            text-decoration: none;
         }
 
         .social-links a:hover {
@@ -294,8 +311,11 @@
                 <i class="fas fa-broadcast-tower"></i> TRANSMISSÃO EM TEMPO REAL <span class="live-badge"></span>
             </div>
 
-            <div class="cover-area">
+            <div class="cover-area" id="cover-area">
                 <img src="logo-quadrada.png" id="track-cover" class="cover-img" alt="Capa da Música">
+                <div class="loading-cover" id="loading-cover" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
             </div>
 
             <div class="info-area">
@@ -317,12 +337,12 @@
 
     <footer>
         <div class="social-links">
-            <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
-            <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
-            <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.instagram.com/naldoaoficial" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/@djnaldoaoficial" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.tiktok.com/@djnaldoaoficial" target="_blank"><i class="fab fa-tiktok"></i></a>
         </div>
         <div class="copyright">
-            EXNA FM © 2026 | NaldoA | Todos os Direitos Reservados
+            EXNA FM © 2026 | DJ NaldoA | Todos os Direitos Reservados
         </div>
     </footer>
 
@@ -339,40 +359,58 @@
         const txtTitle = document.getElementById('track-title');
         const txtCover = document.getElementById('track-cover');
         const txtStatus = document.getElementById('status-text');
+        const loadingCover = document.getElementById('loading-cover');
 
         let gradeOriginal = [];
-        let gradeStream = [];
-        let duracaoMusicaStream = 180;
+        let playlistAtual = [];
+        let indiceMusicaAtual = 0;
         let deferredPrompt;
         let isPlaying = false;
         let cacheCapas = new Map();
-        let currentTrackIndex = 0;
+        let carregandoMusica = false;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
 
+        function mostrarLoading(mostrar) {
+            if (mostrar) {
+                loadingCover.style.display = 'flex';
+                btn.classList.add('loading');
+            } else {
+                loadingCover.style.display = 'none';
+                btn.classList.remove('loading');
+            }
+        }
+
         async function buscarCapaNoITunes(musicaNome, artistaNome) {
-            const chaveCache = `${artistaNome}|${musicaNome}`;
+            const chaveCache = `${artistaNome}|${musicaNome}`.toLowerCase();
             
             if (cacheCapas.has(chaveCache)) {
                 return cacheCapas.get(chaveCache);
             }
             
             const query = encodeURIComponent(`${artistaNome} ${musicaNome}`);
-            const url = `https://itunes.apple.com/search?term=${query}&limit=1&entity=song`;
+            const url = `https://itunes.apple.com/search?term=${query}&limit=3&entity=song`;
             
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
                 if (data.results && data.results.length > 0) {
-                    const artworkUrl = data.results[0].artworkUrl100;
+                    // Procura a música mais relevante
+                    let melhorMatch = data.results.find(r => 
+                        r.trackName.toLowerCase().includes(musicaNome.toLowerCase()) ||
+                        musicaNome.toLowerCase().includes(r.trackName.toLowerCase())
+                    ) || data.results[0];
+                    
+                    const artworkUrl = melhorMatch.artworkUrl100;
                     const highResArtwork = artworkUrl.replace('100x100', '600x600');
                     cacheCapas.set(chaveCache, highResArtwork);
                     return highResArtwork;
                 }
                 return null;
             } catch (error) {
+                console.log('Erro ao buscar capa no iTunes:', error);
                 return null;
             }
         }
@@ -384,7 +422,7 @@
                 const data = await response.json();
                 
                 if(data.files && data.files.length > 0) {
-                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
+                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio'));
                     let imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
 
                     if (musicas.length === 0) {
@@ -410,14 +448,17 @@
                             id: m.id,
                             name: tituloDetectado,
                             artist: artistaDetectado,
-                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : null
+                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : null,
+                            fileName: m.name
                         };
                     });
                     
-                    gerarGradeStreamAoVivo();
+                    console.log('Músicas carregadas:', gradeOriginal.length);
                     
-                    // Inicia o stream automaticamente
-                    iniciarProximaMusica();
+                    gerarPlaylistAleatoria();
+                    
+                    // Inicia a primeira música
+                    await tocarMusica(0);
                     
                     // Configurar eventos do player
                     configurarPlayerEvents();
@@ -431,49 +472,84 @@
             }
         }
 
-        function gerarGradeStreamAoVivo() {
+        function gerarPlaylistAleatoria() {
+            if (gradeOriginal.length === 0) return;
+            
             let pool = [...gradeOriginal];
-            let resultado = [];
+            let novaPlaylist = [];
             let ultimoArtista = "";
-
-            let dataAtual = new Date();
-            let semente = dataAtual.getFullYear() * 10000 + (dataAtual.getMonth() + 1) * 100 + dataAtual.getDate();
-
-            function randomSemente() {
-                let x = Math.sin(semente++) * 10000;
-                return x - Math.floor(x);
-            }
-
+            
+            // Embaralha
             for (let i = pool.length - 1; i > 0; i--) {
-                const j = Math.floor(randomSemente() * (i + 1));
+                const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
             }
-
+            
+            // Não repete artista consecutivo
             while(pool.length > 0) {
                 let indexValido = pool.findIndex(m => m.artist.toLowerCase() !== ultimoArtista.toLowerCase());
                 if(indexValido === -1) indexValido = 0;
-
+                
                 let selecionada = pool.splice(indexValido, 1)[0];
-                resultado.push(selecionada);
+                novaPlaylist.push(selecionada);
                 ultimoArtista = selecionada.artist;
             }
+            
+            playlistAtual = novaPlaylist;
+            indiceMusicaAtual = 0;
+            
+            console.log('Playlist gerada com', playlistAtual.length, 'músicas');
+        }
 
-            gradeStream = resultado;
-            currentTrackIndex = 0;
-            console.log('Grade do stream gerada com', gradeStream.length, 'músicas');
+        async function atualizarCapaMusica(faixa) {
+            mostrarLoading(true);
+            
+            try {
+                if (faixa.capaUrl) {
+                    txtCover.src = faixa.capaUrl;
+                    mostrarLoading(false);
+                    return faixa.capaUrl;
+                }
+                
+                // Busca capa no iTunes
+                txtStatus.innerText = "Buscando capa da música...";
+                const capaITunes = await buscarCapaNoITunes(faixa.name, faixa.artist);
+                
+                if (capaITunes) {
+                    faixa.capaUrl = capaITunes;
+                    txtCover.src = capaITunes;
+                    txtStatus.innerText = `🎵 Tocando: ${faixa.name}`;
+                } else {
+                    txtCover.src = 'logo-quadrada.png';
+                    txtStatus.innerText = `🎵 Tocando: ${faixa.name}`;
+                }
+            } catch (error) {
+                txtCover.src = 'logo-quadrada.png';
+                txtStatus.innerText = `🎵 Tocando: ${faixa.name}`;
+            } finally {
+                mostrarLoading(false);
+            }
+            
+            return faixa.capaUrl || 'logo-quadrada.png';
         }
 
         async function tocarMusica(index) {
-            if (!gradeStream.length || index >= gradeStream.length) {
-                // Se chegou ao fim da playlist, regenera
-                gerarGradeStreamAoVivo();
+            if (carregandoMusica) return;
+            carregandoMusica = true;
+            
+            if (!playlistAtual.length || index >= playlistAtual.length) {
+                gerarPlaylistAleatoria();
                 index = 0;
+                indiceMusicaAtual = 0;
             }
             
-            const faixa = gradeStream[index];
-            currentTrackIndex = index;
+            const faixa = playlistAtual[index];
+            indiceMusicaAtual = index;
             
             let urlMusica = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+            
+            mostrarLoading(true);
+            icon.className = "fas fa-spinner fa-spin";
             
             player.src = urlMusica;
             player.currentTime = 0;
@@ -481,72 +557,52 @@
             txtTitle.innerText = faixa.name.toUpperCase();
             document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🔴 AO VIVO</span>`;
             
-            const capaUrl = await atualizarCapaMusica(faixa);
-            updateLockScreen(faixa.name, `${faixa.artist} - AO VIVO`, capaUrl);
+            await atualizarCapaMusica(faixa);
+            updateLockScreen(faixa.name, `${faixa.artist} - AO VIVO`, faixa.capaUrl || 'logo-quadrada.png');
             
             if (isPlaying) {
-                await player.play().catch(() => {});
-                txtStatus.innerText = `🎵 Tocando: ${faixa.name} - ${faixa.artist}`;
+                try {
+                    await player.play();
+                    icon.className = "fas fa-stop";
+                    btn.classList.add('active');
+                    card.classList.add('playing');
+                    txtStatus.innerText = `🔴 AO VIVO: ${faixa.name} - ${faixa.artist}`;
+                } catch (err) {
+                    console.log('Erro ao tocar:', err);
+                    icon.className = "fas fa-play";
+                    btn.classList.remove('active');
+                    card.classList.remove('playing');
+                    txtStatus.innerText = "Clique no Play para ouvir";
+                    isPlaying = false;
+                }
             }
+            
+            carregandoMusica = false;
         }
 
-        async function iniciarProximaMusica() {
-            let proximoIndex = currentTrackIndex + 1;
-            if (proximoIndex >= gradeStream.length) {
-                // Se acabou a playlist, regenera
-                gerarGradeStreamAoVivo();
+        async function proximaMusica() {
+            if (carregandoMusica) return;
+            
+            let proximoIndex = indiceMusicaAtual + 1;
+            if (proximoIndex >= playlistAtual.length) {
+                gerarPlaylistAleatoria();
                 proximoIndex = 0;
             }
+            
             await tocarMusica(proximoIndex);
         }
 
-        async function atualizarCapaMusica(faixa) {
-            if (faixa.capaUrl) {
-                txtCover.src = faixa.capaUrl;
-                return faixa.capaUrl;
-            }
-            
-            const capaITunes = await buscarCapaNoITunes(faixa.name, faixa.artist);
-            if (capaITunes) {
-                faixa.capaUrl = capaITunes;
-                txtCover.src = capaITunes;
-                return capaITunes;
-            }
-            
-            txtCover.src = 'logo-quadrada.png';
-            return 'logo-quadrada.png';
-        }
-
         function configurarPlayerEvents() {
-            // Evento que toca a próxima música AUTOMATICAMENTE quando a atual termina
-            player.onended = () => {
+            player.onended = async () => {
                 console.log('🎵 Música terminou, iniciando próxima...');
-                let proximoIndex = currentTrackIndex + 1;
-                if (proximoIndex >= gradeStream.length) {
-                    gerarGradeStreamAoVivo();
-                    proximoIndex = 0;
-                }
-                tocarMusica(proximoIndex);
+                await proximaMusica();
             };
 
-            player.onerror = (e) => {
-                console.error('Erro no player, pulando para próxima:', e);
+            player.onerror = async (e) => {
+                console.error('Erro no player:', e);
                 txtStatus.innerText = "Erro na música, pulando para próxima...";
-                setTimeout(() => {
-                    let proximoIndex = currentTrackIndex + 1;
-                    if (proximoIndex >= gradeStream.length) {
-                        gerarGradeStreamAoVivo();
-                        proximoIndex = 0;
-                    }
-                    tocarMusica(proximoIndex);
-                }, 1000);
-            };
-
-            player.ontimeupdate = () => {
-                // Verifica se a música está perto do fim (últimos 2 segundos)
-                if (player.duration && (player.duration - player.currentTime) <= 2 && !player.ended) {
-                    console.log('⚠️ Música quase acabando...');
-                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await proximaMusica();
             };
         }
 
@@ -558,7 +614,8 @@
                     btn.classList.add('active');
                     card.classList.add('playing');
                     txtStatus.innerText = "🔴 AO VIVO - Sintonizado";
-                }).catch(() => {
+                }).catch((err) => {
+                    console.log('Erro ao dar play:', err);
                     isPlaying = false;
                     icon.className = "fas fa-play";
                     btn.classList.remove('active');
@@ -619,6 +676,7 @@
             navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker error:', err));
         }
 
+        // Iniciar
         fetchDriveData();
     </script>
 </body>
