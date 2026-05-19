@@ -400,6 +400,7 @@
         let deferredPrompt;
         let isPlaying = false;
         let syncInterval = null;
+        let modoOffStream = false;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
@@ -442,13 +443,36 @@
                     });
                     
                     gerarGradeStreamAleatoria();
-                    iniciarStreamAoVivo();
-
+                    
                     btn.disabled = false;
                     prevBtn.disabled = false;
                     nextBtn.disabled = false;
                     icon.className = "fas fa-play";
                     txtStatus.innerText = "Sinal sintonizado | Stream Ao Vivo";
+                    
+                    // Inicia o stream automaticamente
+                    iniciarStreamAoVivo();
+                    isPlaying = true;
+                    
+                    player.play().then(() => {
+                        icon.className = "fas fa-stop";
+                        btn.classList.add('active');
+                        card.classList.add('playing');
+                        txtStatus.innerText = "Stream Ao Vivo - Sintonizado";
+                        
+                        if (syncInterval) clearInterval(syncInterval);
+                        syncInterval = setInterval(() => {
+                            if (!player.paused && !modoOffStream) {
+                                sincronizarStream();
+                            }
+                        }, 3000);
+                    }).catch(() => {
+                        icon.className = "fas fa-play";
+                        btn.classList.remove('active');
+                        card.classList.remove('playing');
+                        txtStatus.innerText = "Toque no Play para ouvir ao vivo.";
+                        isPlaying = false;
+                    });
 
                 } else {
                     txtStatus.innerText = "Pasta vazia.";
@@ -516,48 +540,49 @@
             
             player.currentTime = streamPos.seek;
             
+            // Atualiza a interface
             txtTitle.innerText = ConvertName(faixa.name);
             document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🔴 AO VIVO</span>`;
             txtCover.src = faixa.capaUrl;
             
+            // CRUCIAL: Atualiza a tela bloqueada IMEDIATAMENTE
             updateLockScreen(faixa.name, `${faixa.artist} - AO VIVO`, faixa.capaUrl);
-            
-            if (isPlaying) {
-                player.play().catch(() => {});
-            }
         }
 
         function sincronizarStream() {
-            if (!gradeStream.length) return;
+            if (!gradeStream.length || modoOffStream) return;
             
             const streamPos = obterStreamPosition();
             const faixa = streamPos.track;
-            let currentTrack = gradeStream[indiceStreamAtual];
             
-            if (!currentTrack || currentTrack.id !== faixa.id) {
-                indiceStreamAtual = streamPos.index;
-                let urlStream = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
-                
-                if (player.src !== urlStream) {
-                    player.src = urlStream;
-                }
-                
+            // Verifica se a música atual é a correta
+            let urlStreamAtual = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+            
+            if (player.src !== urlStreamAtual) {
+                player.src = urlStreamAtual;
                 player.currentTime = streamPos.seek;
                 
+                // Atualiza tudo quando a música muda
                 txtTitle.innerText = ConvertName(faixa.name);
                 document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🔴 AO VIVO</span>`;
                 txtCover.src = faixa.capaUrl;
                 
+                // Atualiza a tela bloqueada quando a música muda
                 updateLockScreen(faixa.name, `${faixa.artist} - AO VIVO`, faixa.capaUrl);
             } else {
                 let timeDiff = Math.abs(player.currentTime - streamPos.seek);
-                if (timeDiff > 2) {
+                if (timeDiff > 3) {
                     player.currentTime = streamPos.seek;
                 }
             }
         }
 
-        let indiceStreamAtual = 0;
+        function atualizarInterfaceStream(faixa, status = "AO VIVO") {
+            txtTitle.innerText = ConvertName(faixa.name);
+            document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🔴 ${status}</span>`;
+            txtCover.src = faixa.capaUrl;
+            updateLockScreen(faixa.name, `${faixa.artist} - ${status}`, faixa.capaUrl);
+        }
 
         function ConvertName(str) {
             return str.replace(/_/g, " ").toUpperCase();
@@ -572,27 +597,20 @@
                     card.classList.add('playing');
                     txtStatus.innerText = "Stream Ao Vivo - Sintonizado";
                     
-                    if (syncInterval) clearInterval(syncInterval);
-                    syncInterval = setInterval(() => {
-                        if (!player.paused) {
-                            sincronizarStream();
-                        }
-                    }, 3000);
-                }).catch(() => {
-                    iniciarStreamAoVivo();
-                    isPlaying = true;
-                    icon.className = "fas fa-stop";
-                    btn.classList.add('active');
-                    card.classList.add('playing');
-                    txtStatus.innerText = "Stream Ao Vivo - Sintonizado";
+                    if (!syncInterval) {
+                        syncInterval = setInterval(() => {
+                            if (!player.paused && !modoOffStream) {
+                                sincronizarStream();
+                            }
+                        }, 3000);
+                    }
                     
-                    if (syncInterval) clearInterval(syncInterval);
-                    syncInterval = setInterval(() => {
-                        if (!player.paused) {
-                            sincronizarStream();
-                        }
-                    }, 3000);
-                });
+                    // Se estava fora do stream, volta para o stream
+                    if (modoOffStream) {
+                        modoOffStream = false;
+                        iniciarStreamAoVivo();
+                    }
+                }).catch(() => {});
             } else {
                 player.pause();
                 isPlaying = false;
@@ -600,74 +618,61 @@
                 btn.classList.remove('active');
                 card.classList.remove('playing');
                 txtStatus.innerText = "Stream em pausa - Volte ao vivo";
-                
-                if (syncInterval) clearInterval(syncInterval);
-                syncInterval = null;
             }
         }
 
         function nextTrack() {
             if (!gradeStream.length) return;
             
-            let novoIndice = (indiceStreamAtual + 1) % gradeStream.length;
-            indiceStreamAtual = novoIndice;
+            modoOffStream = true;
+            
+            // Pega a próxima música baseada na posição atual do stream
+            const streamPos = obterStreamPosition();
+            let novoIndice = (streamPos.index + 1) % gradeStream.length;
             const faixa = gradeStream[novoIndice];
             
             let urlStream = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
             player.src = urlStream;
             player.currentTime = 0;
             
-            txtTitle.innerText = ConvertName(faixa.name);
-            document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">⏩ AVANÇADO</span>`;
-            txtCover.src = faixa.capaUrl;
-            
-            updateLockScreen(faixa.name, `${faixa.artist} - AVANÇADO`, faixa.capaUrl);
+            atualizarInterfaceStream(faixa, "⏩ AVANÇADO");
             
             if (isPlaying) {
                 player.play().catch(() => {});
-                txtStatus.innerText = "Você avançou - Saindo do sync";
+                txtStatus.innerText = "Modo avanço - Volte ao vivo com PLAY";
             }
-            
-            setTimeout(() => {
-                if (!player.paused) {
-                    sincronizarStream();
-                }
-            }, 10000);
         }
 
         function previousTrack() {
             if (!gradeStream.length) return;
             
-            let novoIndice = indiceStreamAtual - 1;
+            modoOffStream = true;
+            
+            // Pega a música anterior baseada na posição atual do stream
+            const streamPos = obterStreamPosition();
+            let novoIndice = streamPos.index - 1;
             if (novoIndice < 0) novoIndice = gradeStream.length - 1;
-            indiceStreamAtual = novoIndice;
             const faixa = gradeStream[novoIndice];
             
             let urlStream = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
             player.src = urlStream;
             player.currentTime = 0;
             
-            txtTitle.innerText = ConvertName(faixa.name);
-            document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">⏪ VOLTADO</span>`;
-            txtCover.src = faixa.capaUrl;
-            
-            updateLockScreen(faixa.name, `${faixa.artist} - VOLTADO`, faixa.capaUrl);
+            atualizarInterfaceStream(faixa, "⏪ VOLTADO");
             
             if (isPlaying) {
                 player.play().catch(() => {});
-                txtStatus.innerText = "Você voltou - Saindo do sync";
+                txtStatus.innerText = "Modo voltar - Volte ao vivo com PLAY";
             }
-            
-            setTimeout(() => {
-                if (!player.paused) {
-                    sincronizarStream();
-                }
-            }, 10000);
         }
 
         player.onended = () => {
-            if (syncInterval) {
+            if (!modoOffStream && !player.paused) {
                 sincronizarStream();
+            } else if (modoOffStream && isPlaying) {
+                // Se estava no modo off-stream, volta para o stream ao vivo
+                modoOffStream = false;
+                iniciarStreamAoVivo();
             }
         };
 
@@ -682,10 +687,20 @@
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
                     ]
                 });
-                navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
-                navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
-                navigator.mediaSession.setActionHandler('previoustrack', () => { previousTrack(); });
-                navigator.mediaSession.setActionHandler('nexttrack', () => { nextTrack(); });
+                
+                // Configura os handlers para os botões do fone/carro
+                navigator.mediaSession.setActionHandler('play', () => { 
+                    if (player.paused) toggleRadio();
+                });
+                navigator.mediaSession.setActionHandler('pause', () => { 
+                    if (!player.paused) toggleRadio();
+                });
+                navigator.mediaSession.setActionHandler('previoustrack', () => { 
+                    previousTrack();
+                });
+                navigator.mediaSession.setActionHandler('nexttrack', () => { 
+                    nextTrack();
+                });
             }
         }
 
