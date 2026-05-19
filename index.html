@@ -281,12 +281,12 @@
             width: 100%;
             max-width: 320px;
             height: 100vh;
-            background: rgba(5, 6, 8, 0.95);
+            background: rgba(5, 6, 8, 0.98);
             backdrop-filter: blur(25px);
             border-left: 1px solid var(--glass-border);
             box-shadow: -10px 0 30px rgba(0,0,0,0.8);
             z-index: 9999;
-            transition: cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+            transition: right 0.3s ease;
             padding: 25px;
             display: flex;
             flex-direction: column;
@@ -330,7 +330,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px;
+            padding: 10px;
             border-radius: 10px;
             font-size: 0.85rem;
             cursor: pointer;
@@ -340,17 +340,17 @@
             margin-bottom: 6px;
             background: rgba(255, 255, 255, 0.01);
         }
-        .playlist-item:hover { background: rgba(255, 255, 255, 0.04); }
+        .playlist-item:hover { background: rgba(255, 255, 255, 0.08); }
         
         .playlist-item.current-track {
-            background: rgba(102, 252, 241, 0.15);
-            border: 1px solid rgba(102, 252, 241, 0.3);
+            background: rgba(102, 252, 241, 0.2);
+            border: 1px solid rgba(102, 252, 241, 0.4);
             color: var(--neon-aqua);
         }
 
         .list-thumb {
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             border-radius: 6px;
             object-fit: cover;
             background-color: #111;
@@ -361,8 +361,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-align: left;
         }
-        .track-meta-box span { display: block; font-size: 0.7rem; color: #666; margin-top: 1px; }
+        .track-meta-box span { display: block; font-size: 0.7rem; color: #888; margin-top: 2px; }
 
         footer {
             padding: 20px;
@@ -389,10 +390,24 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         
         button { touch-action: manipulation; }
+        
+        /* Fechar sidebar ao clicar fora */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+            display: none;
+        }
+        .overlay.open { display: block; }
     </style>
 </head>
 <body>
 
+    <div class="overlay" id="overlay" onclick="fecharSidebar()"></div>
     <div class="blur-background" id="bg-glow"></div>
 
     <div class="playlist-sidebar" id="sidebar">
@@ -476,7 +491,7 @@
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
         const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
         const DB_NAME = 'ExnaMusicDB';
-        const DB_VERSION = 3;
+        const DB_VERSION = 4;
 
         // ==================== ELEMENTOS ====================
         const player = document.getElementById('audio-core');
@@ -492,6 +507,8 @@
         const progressBar = document.getElementById('progress');
         const tempoAtualSpan = document.getElementById('time-current');
         const tempoTotalSpan = document.getElementById('time-duration');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
         
         // ==================== VARIÁVEIS ====================
         let playlist = [];           
@@ -502,7 +519,6 @@
         let cacheCapas = new Map();
         let db = null;
         let sincronizando = false;
-        let primeiraVez = true;
         
         // ==================== FUNÇÕES DE BANCO DE DADOS ====================
         function abrirBancoDados() {
@@ -547,7 +563,7 @@
             });
         }
         
-        async function salvarEstado() {
+        async function salvarEstado(tempo = null) {
             if (!db) return;
             const tx = db.transaction(['estado'], 'readwrite');
             const store = tx.objectStore('estado');
@@ -555,14 +571,16 @@
             const estado = {
                 chave: 'player_state',
                 indiceAtual: indiceAtual,
-                tempo: player.currentTime || 0,
+                tempo: tempo !== null ? tempo : (player.currentTime || 0),
                 volume: player.volume,
                 shuffle: modoShuffle,
                 loop: modoLoop,
                 ordemExecucao: ordemExecucao,
-                playlistIds: playlist.map(m => m.id)
+                playlistIds: playlist.map(m => m.id),
+                wasPlaying: !player.paused
             };
             store.put(estado);
+            console.log(`💾 Estado salvo: música ${indiceAtual}, tempo ${estado.tempo.toFixed(2)}s`);
         }
         
         async function carregarEstado() {
@@ -595,18 +613,6 @@
                 }
             } catch(e) {}
             
-            try {
-                const res = await fetch(`https://api.deezer.com/search?q=${query}&limit=1`);
-                const data = await res.json();
-                if (data.data && data.data[0] && data.data[0].album) {
-                    const capa = data.data[0].album.cover_big;
-                    if (capa) {
-                        cacheCapas.set(chave, capa);
-                        return capa;
-                    }
-                }
-            } catch(e) {}
-            
             cacheCapas.set(chave, null);
             return null;
         }
@@ -617,8 +623,7 @@
             sincronizando = true;
             txtStatus.innerHTML = '<span class="loading"></span> Sincronizando com Google Drive...';
             
-            // Buscar TODOS os arquivos (sem filtro de nome)
-            const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
+            const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}&pageSize=1000`;
             
             try {
                 const response = await fetch(url);
@@ -630,11 +635,12 @@
                     return;
                 }
                 
-                // PEGA TODOS OS MP3 (sem filtro de nome duplicado)
+                // PEGA TODOS OS MP3 (sem filtro nenhum)
                 const musicasDrive = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3'));
                 const imagensDrive = data.files.filter(f => f.mimeType.includes('image'));
                 
                 console.log(`📁 Total de MP3 encontrados: ${musicasDrive.length}`);
+                txtStatus.innerHTML = `<span class="loading"></span> Encontrados ${musicasDrive.length} MP3...`;
                 
                 if (musicasDrive.length === 0) {
                     txtStatus.innerText = "Nenhum MP3 encontrado!";
@@ -644,38 +650,45 @@
                 
                 // Carregar playlist atual do banco
                 const playlistAtual = await carregarPlaylistDoBanco();
-                const idsExistentes = new Set(playlistAtual.map(m => m.id));
+                const mapaExistente = new Map();
+                playlistAtual.forEach(m => mapaExistente.set(m.id, m));
                 
-                // Processar TODAS as músicas (incluindo as que já existem para atualizar capas)
+                // Processar TODAS as músicas
                 const musicasProcessadas = [];
                 
                 for (let i = 0; i < musicasDrive.length; i++) {
                     const m = musicasDrive[i];
-                    const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
+                    const nomeCompleto = m.name;
+                    const nomeSemExtensao = nomeCompleto.replace(/\.mp3$/i, "");
+                    
+                    // Extrair artista e título - PEGA O TEXTO COMPLETO
                     let artista = "EXNA MUSIC";
                     let titulo = nomeSemExtensao;
                     
-                    if (nomeSemExtensao.includes(" - ")) {
-                        const partes = nomeSemExtensao.split(" - ");
-                        artista = partes[0].trim();
-                        titulo = partes.slice(1).join(" - ").trim(); // Pega o resto todo após o primeiro " - "
+                    // Procura pelo primeiro " - " para separar artista e música
+                    const separador = nomeSemExtensao.indexOf(" - ");
+                    if (separador > 0) {
+                        artista = nomeSemExtensao.substring(0, separador).trim();
+                        titulo = nomeSemExtensao.substring(separador + 3).trim();
                     }
                     
-                    // Verifica se tem capa local (pelo nome completo do arquivo)
-                    const capaLocal = imagensDrive.find(img => 
-                        img.name.toLowerCase() === nomeSemExtensao.toLowerCase() + '.jpg' ||
-                        img.name.toLowerCase() === nomeSemExtensao.toLowerCase() + '.png' ||
-                        img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase())
-                    );
+                    // Verifica se tem capa local (comparando o nome completo)
+                    const capaLocal = imagensDrive.find(img => {
+                        const imgNome = img.name.replace(/\.(jpg|png|jpeg)$/i, "");
+                        return imgNome === nomeSemExtensao || imgNome === nomeCompleto.replace(/\.mp3$/i, "");
+                    });
                     
                     let capaUrl = capaLocal ? `https://www.googleapis.com/drive/v3/files/${capaLocal.id}?alt=media&key=${API_KEY}` : null;
                     
-                    // Se não tem capa local e é música nova ou não tem capa, busca online
-                    const musicaExistente = playlistAtual.find(p => p.id === m.id);
-                    if (!capaUrl && (!musicaExistente || !musicaExistente.capaUrl || musicaExistente.capaUrl === 'logo-quadrada.png')) {
+                    // Se não tem capa local, busca online
+                    if (!capaUrl) {
                         capaUrl = await buscarCapaOnline(titulo, artista);
-                    } else if (musicaExistente && musicaExistente.capaUrl && musicaExistente.capaUrl !== 'logo-quadrada.png') {
-                        capaUrl = musicaExistente.capaUrl;
+                    }
+                    
+                    // Se já existia, mantém a capa que tinha
+                    const existente = mapaExistente.get(m.id);
+                    if (existente && existente.capaUrl && existente.capaUrl !== 'logo-quadrada.png') {
+                        capaUrl = existente.capaUrl;
                     }
                     
                     musicasProcessadas.push({
@@ -686,8 +699,7 @@
                         url: `https://www.googleapis.com/drive/v3/files/${m.id}?alt=media&key=${API_KEY}`
                     });
                     
-                    // Atualizar status a cada 10 músicas
-                    if (i % 10 === 0) {
+                    if ((i + 1) % 20 === 0) {
                         txtStatus.innerHTML = `<span class="loading"></span> Processando: ${i+1}/${musicasDrive.length}`;
                     }
                 }
@@ -696,6 +708,7 @@
                 await salvarPlaylistNoBanco();
                 
                 txtStatus.innerText = `✅ ${playlist.length} músicas sincronizadas!`;
+                console.log(`📊 Total sincronizado: ${playlist.length} músicas`);
                 
                 // Inicializar ordem de execução
                 if (ordemExecucao.length === 0 || ordemExecucao.length !== playlist.length) {
@@ -710,12 +723,7 @@
                 
                 btnPlay.disabled = false;
                 renderizarPlaylist();
-                
-                // Se é a primeira vez ou não tem música carregada
-                if (primeiraVez || (player.src === '' || player.src === null)) {
-                    primeiraVez = false;
-                    await carregarEstadoSalvo();
-                }
+                await carregarEstadoSalvo();
                 
             } catch (e) {
                 console.error(e);
@@ -728,6 +736,7 @@
         // ==================== CARREGAR ESTADO SALVO ====================
         async function carregarEstadoSalvo() {
             const estado = await carregarEstado();
+            console.log("📀 Estado carregado:", estado);
             
             if (estado && estado.playlistIds && estado.ordemExecucao) {
                 const idsAtuais = playlist.map(m => m.id);
@@ -770,12 +779,20 @@
                         if (player.duration && !isNaN(player.duration) && estado.tempo < player.duration) {
                             player.currentTime = estado.tempo;
                             atualizarBarraProgresso();
+                            console.log(`⏰ Tempo restaurado: ${estado.tempo.toFixed(2)}s`);
                         }
                         player.removeEventListener('loadedmetadata', restaurarTempo);
                         player.removeEventListener('canplay', restaurarTempo);
                     };
                     player.addEventListener('loadedmetadata', restaurarTempo);
                     player.addEventListener('canplay', restaurarTempo);
+                }
+                
+                // Se estava tocando antes, volta a tocar
+                if (estado && estado.wasPlaying) {
+                    setTimeout(() => {
+                        player.play().catch(() => {});
+                    }, 500);
                 }
             }
             
@@ -804,9 +821,7 @@
             imgCapa.src = musica.capaUrl;
             bgGlow.style.backgroundImage = `url('${musica.capaUrl}')`;
             
-            // FORÇA ATUALIZAÇÃO DA TELA BLOQUEADA
             atualizarTelaBloqueada(musica.nome, musica.artista, musica.capaUrl);
-            
             renderizarPlaylist();
             
             if (wasPlaying) {
@@ -817,7 +832,7 @@
         }
         
         function atualizarBarraProgresso() {
-            if (player.duration && !isNaN(player.duration)) {
+            if (player.duration && !isNaN(player.duration) && player.duration > 0) {
                 const pct = (player.currentTime / player.duration) * 100;
                 progressBar.value = pct;
                 tempoAtualSpan.innerText = formatarTempo(player.currentTime);
@@ -828,7 +843,7 @@
         }
         
         function formatarTempo(segundos) {
-            if (isNaN(segundos)) return "0:00";
+            if (isNaN(segundos) || segundos === Infinity) return "0:00";
             const min = Math.floor(segundos / 60);
             const sec = Math.floor(segundos % 60);
             return `${min}:${sec < 10 ? '0' + sec : sec}`;
@@ -852,6 +867,7 @@
             if (playlist.length === 0) return;
             if (player.currentTime > 3) {
                 player.currentTime = 0;
+                salvarEstado();
             } else {
                 carregarMusica(indiceAtual - 1);
                 player.play().catch(() => {});
@@ -899,7 +915,6 @@
             cardPlayer.classList.add('playing');
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
             txtStatus.innerText = "🎵 Tocando...";
-            // Atualiza tela bloqueada novamente ao tocar
             if (playlist.length > 0 && ordemExecucao[indiceAtual] !== undefined) {
                 const musica = playlist[ordemExecucao[indiceAtual]];
                 atualizarTelaBloqueada(musica.nome, musica.artista, musica.capaUrl);
@@ -917,7 +932,7 @@
         
         // CRUCIAL: Quando a música termina, toca a próxima
         player.addEventListener('ended', () => {
-            console.log("🎵 Música terminou!");
+            console.log("🎵 Música terminou, tocando próxima!");
             if (!modoLoop) {
                 proximaMusica();
             }
@@ -940,9 +955,15 @@
             }
         });
         
-        // Salvar estado ao sair
+        // Salvar estado ao sair da página ou minimizar
         window.addEventListener('beforeunload', () => {
             salvarEstado();
+        });
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                salvarEstado();
+            }
         });
         
         // ==================== INTERFACE DA PLAYLIST ====================
@@ -962,12 +983,12 @@
                 div.onclick = () => {
                     carregarMusica(idx);
                     player.play().catch(() => {});
-                    fecharSidebar();
+                    fecharSidebar(); // FECHA A PLAYLIST AO TOCAR
                 };
                 div.innerHTML = `
                     <img src="${musica.capaUrl}" class="list-thumb" onerror="this.src='logo-quadrada.png'">
                     <div class="track-meta-box">
-                        ${musica.nome.toUpperCase()}
+                        <strong>${musica.nome.substring(0, 30)}</strong>
                         <span>${musica.artista}</span>
                     </div>
                 `;
@@ -976,17 +997,18 @@
         }
         
         function abrirSidebar() {
-            document.getElementById('sidebar').classList.add('open');
+            sidebar.classList.add('open');
+            overlay.classList.add('open');
         }
         
         function fecharSidebar() {
-            document.getElementById('sidebar').classList.remove('open');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
         }
         
-        // ==================== TELA BLOQUEADA (CORRIGIDA) ====================
+        // ==================== TELA BLOQUEADA ====================
         function atualizarTelaBloqueada(titulo, artista, capaUrl) {
             if ('mediaSession' in navigator) {
-                // Garantir que a capa seja uma URL válida
                 const imagemUrl = (capaUrl && capaUrl !== 'logo-quadrada.png') ? capaUrl : 'logo-quadrada.png';
                 
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -999,13 +1021,12 @@
                     ]
                 });
                 
-                // Configurar ações dos botões do fone/carro
                 navigator.mediaSession.setActionHandler('play', () => player.play());
                 navigator.mediaSession.setActionHandler('pause', () => player.pause());
                 navigator.mediaSession.setActionHandler('previoustrack', () => musicaAnterior());
                 navigator.mediaSession.setActionHandler('nexttrack', () => proximaMusica());
                 
-                console.log(`🖼️ Tela bloqueada atualizada: ${titulo} - ${imagemUrl}`);
+                console.log(`🖼️ Tela bloqueada: ${titulo}`);
             }
         }
         
