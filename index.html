@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RADIO EXNA FM</title>
+    <title>RADIO EXNA FM - STREAM AO VIVO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -311,7 +311,7 @@
             </div>
 
             <div class="live-indicator">
-                <i class="fas fa-broadcast-tower"></i> TRANSMISSÃO EM TEMPO REAL <span class="live-badge"></span>
+                <i class="fas fa-broadcast-tower"></i> STREAM GLOBAL SINCRONIZADO <span class="live-badge"></span>
             </div>
 
             <div class="cover-area" id="cover-area">
@@ -366,13 +366,15 @@
         const loadingCover = document.getElementById('loading-cover');
         const timerInfo = document.getElementById('timer-info');
 
-        let playlist = [];
-        let indexAtual = 0;
-        let isPlaying = false;
+        let gradeOriginal = [];
+        let gradeStream = [];
+        let duracoesReais = [];
         let deferredPrompt;
+        let isPlaying = false;
+        let syncInterval = null;
 
-        txtTitle.innerText = "CARREGANDO...";
-        txtStatus.innerText = "Conectando à playlist...";
+        txtTitle.innerText = "SINTONIA ONLINE";
+        txtStatus.innerText = "Conectando ao stream global...";
 
         function mostrarLoading(mostrar) {
             loadingCover.style.display = mostrar ? 'flex' : 'none';
@@ -385,20 +387,23 @@
             return `${min}:${seg.toString().padStart(2, '0')}`;
         }
 
-        function atualizarTimer() {
-            if (player.duration && !isNaN(player.duration)) {
-                const atual = formatarTempo(player.currentTime);
-                const total = formatarTempo(player.duration);
-                timerInfo.innerHTML = `🎙️ AO VIVO | ${atual}/${total}`;
-            } else {
-                timerInfo.innerHTML = `🎙️ AO VIVO | Carregando...`;
-            }
+        // Busca a duração real da música
+        function obterDuracaoReal(url) {
+            return new Promise((resolve) => {
+                const audioTemp = new Audio();
+                audioTemp.preload = 'metadata';
+                audioTemp.onloadedmetadata = () => {
+                    resolve(audioTemp.duration);
+                    audioTemp.src = '';
+                };
+                audioTemp.onerror = () => resolve(180);
+                audioTemp.src = url;
+            });
         }
 
         async function buscarCapaNoITunes(musicaNome, artistaNome) {
             const query = encodeURIComponent(`${artistaNome} ${musicaNome}`);
             const url = `https://itunes.apple.com/search?term=${query}&limit=1&entity=song`;
-            
             try {
                 const response = await fetch(url);
                 const data = await response.json();
@@ -427,7 +432,8 @@
                         return;
                     }
 
-                    playlist = musicas.map(m => {
+                    // Carrega todas as músicas com suas durações reais
+                    for (const m of musicas) {
                         const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
                         let artista = "EXNA FM";
                         let titulo = nomeSemExtensao;
@@ -439,28 +445,30 @@
                         }
 
                         const capa = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
+                        const urlMusica = `https://www.googleapis.com/drive/v3/files/${m.id}?alt=media&key=${API_KEY}`;
+                        const duracao = await obterDuracaoReal(urlMusica);
                         
-                        return {
+                        gradeOriginal.push({
                             id: m.id,
                             name: titulo,
                             artist: artista,
-                            capaUrl: capa ? `https://www.googleapis.com/drive/v3/files/${capa.id}?alt=media&key=${API_KEY}` : null
-                        };
-                    });
-                    
-                    // Embaralhar playlist
-                    for (let i = playlist.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
+                            capaUrl: capa ? `https://www.googleapis.com/drive/v3/files/${capa.id}?alt=media&key=${API_KEY}` : null,
+                            duracao: duracao
+                        });
+                        
+                        console.log(`📏 ${titulo} - ${Math.floor(duracao/60)}min ${Math.floor(duracao%60)}s`);
                     }
                     
-                    indexAtual = 0;
-                    await carregarMusica(indexAtual);
+                    gerarGradeStreamGlobal();
+                    iniciarStream();
                     
-                    // Tenta tocar automaticamente
+                    // Toca automaticamente
                     setTimeout(() => {
                         if (!isPlaying) {
-                            player.play().catch(() => {});
+                            player.play().catch(() => {
+                                icon.className = "fas fa-play";
+                                txtStatus.innerText = "Clique no Play para ouvir";
+                            });
                         }
                     }, 1000);
 
@@ -473,30 +481,73 @@
             }
         }
 
-        async function carregarMusica(index) {
-            if (!playlist.length) return;
-            
-            if (index >= playlist.length) {
-                index = 0;
-                indexAtual = 0;
+        function gerarGradeStreamGlobal() {
+            let pool = [...gradeOriginal];
+            let resultado = [];
+            let ultimoArtista = "";
+
+            let dataAtual = new Date();
+            let semente = dataAtual.getFullYear() * 10000 + (dataAtual.getMonth() + 1) * 100 + dataAtual.getDate();
+
+            function randomSemente() {
+                let x = Math.sin(semente++) * 10000;
+                return x - Math.floor(x);
             }
+
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(randomSemente() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            while(pool.length > 0) {
+                let indexValido = pool.findIndex(m => m.artist.toLowerCase() !== ultimoArtista.toLowerCase());
+                if(indexValido === -1) indexValido = 0;
+                let selecionada = pool.splice(indexValido, 1)[0];
+                resultado.push(selecionada);
+                ultimoArtista = selecionada.artist;
+            }
+
+            gradeStream = resultado;
+            let total = gradeStream.reduce((acc, m) => acc + m.duracao, 0);
+            console.log('📻 Stream Global -', gradeStream.length, 'músicas,', Math.floor(total/60), 'minutos');
+        }
+
+        // Posição baseada nas durações REAIS
+        function obterPosicaoStream() {
+            let timestamp = Math.floor(Date.now() / 1000);
+            let totalDuracao = gradeStream.reduce((acc, m) => acc + m.duracao, 0);
+            let posicaoGlobal = timestamp % totalDuracao;
+            let acumulado = 0;
             
-            const faixa = playlist[index];
+            for (let i = 0; i < gradeStream.length; i++) {
+                let duracao = gradeStream[i].duracao;
+                if (posicaoGlobal >= acumulado && posicaoGlobal < acumulado + duracao) {
+                    return {
+                        index: i,
+                        seek: posicaoGlobal - acumulado,
+                        track: gradeStream[i]
+                    };
+                }
+                acumulado += duracao;
+            }
+            return { index: 0, seek: 0, track: gradeStream[0] };
+        }
+
+        async function carregarMusicaStream(faixa, seekTime) {
             const url = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
             
-            mostrarLoading(true);
-            
-            player.src = url;
+            if (player.src !== url) {
+                player.src = url;
+            }
+            player.currentTime = seekTime;
             
             txtTitle.innerText = faixa.name.toUpperCase();
             document.getElementById('artist-name').innerHTML = faixa.artist;
             
-            // Carrega capa
             if (faixa.capaUrl) {
                 txtCover.src = faixa.capaUrl;
             } else {
                 txtCover.src = 'logo-quadrada.png';
-                // Busca capa no iTunes em background
                 buscarCapaNoITunes(faixa.name, faixa.artist).then(capa => {
                     if (capa) {
                         faixa.capaUrl = capa;
@@ -505,35 +556,70 @@
                 });
             }
             
-            // Atualiza tela bloqueada
+            // Tela bloqueada
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: faixa.name,
                     artist: faixa.artist,
-                    album: 'RADIO EXNA FM',
-                    artwork: [
-                        { src: faixa.capaUrl || 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
-                    ]
+                    album: 'EXNA FM - STREAM GLOBAL',
+                    artwork: [{ src: faixa.capaUrl || 'logo-quadrada.png', sizes: '512x512' }]
                 });
             }
             
-            txtStatus.innerText = `Tocando: ${faixa.name}`;
+            txtStatus.innerText = `🔴 AO VIVO: ${faixa.name}`;
+        }
+
+        async function iniciarStream() {
+            if (!gradeStream.length) return;
+            const pos = obterPosicaoStream();
+            await carregarMusicaStream(pos.track, pos.seek);
+            atualizarTimer();
             
-            player.onloadedmetadata = () => {
-                mostrarLoading(false);
-                atualizarTimer();
+            if (isPlaying) {
+                player.play().catch(() => {});
+            }
+        }
+
+        function atualizarTimer() {
+            if (player.duration && !isNaN(player.duration)) {
+                const atual = formatarTempo(player.currentTime);
+                const total = formatarTempo(player.duration);
+                timerInfo.innerHTML = `🎙️ LIVE | ${atual}/${total}`;
+            } else {
+                timerInfo.innerHTML = `🎙️ LIVE | Carregando...`;
+            }
+        }
+
+        // CRUCIAL: Quando a música termina, vai para a próxima do stream
+        function configurarEventos() {
+            player.onended = () => {
+                console.log('🎵 Música terminou, próxima do stream...');
+                const pos = obterPosicaoStream();
+                carregarMusicaStream(pos.track, pos.seek);
                 if (isPlaying) {
                     player.play().catch(() => {});
                 }
             };
-        }
-
-        function proximaMusica() {
-            indexAtual++;
-            if (indexAtual >= playlist.length) {
-                indexAtual = 0;
-            }
-            carregarMusica(indexAtual);
+            
+            player.ontimeupdate = () => {
+                atualizarTimer();
+                // Verifica se está perto do fim e se o stream mudou
+                if (player.duration && (player.duration - player.currentTime) < 1) {
+                    const pos = obterPosicaoStream();
+                    if (Math.abs(player.currentTime - pos.seek) > 2) {
+                        player.currentTime = pos.seek;
+                    }
+                }
+            };
+            
+            player.onerror = () => {
+                console.log('Erro, recuperando stream...');
+                const pos = obterPosicaoStream();
+                carregarMusicaStream(pos.track, pos.seek);
+                if (isPlaying) {
+                    player.play().catch(() => {});
+                }
+            };
         }
 
         function toggleRadio() {
@@ -543,7 +629,7 @@
                 icon.className = "fas fa-stop";
                 btn.classList.add('active');
                 card.classList.add('playing');
-                txtStatus.innerText = "🔴 AO VIVO";
+                txtStatus.innerText = "🔴 STREAM GLOBAL - AO VIVO";
             } else {
                 player.pause();
                 isPlaying = false;
@@ -553,21 +639,6 @@
                 txtStatus.innerText = "Pausado - Clique Play";
             }
         }
-
-        // Evento que toca a próxima música automaticamente
-        player.onended = () => {
-            console.log("Música terminou, tocando próxima...");
-            proximaMusica();
-        };
-
-        player.ontimeupdate = () => {
-            atualizarTimer();
-        };
-
-        player.onerror = () => {
-            console.log("Erro na música, pulando...");
-            proximaMusica();
-        };
 
         const pwaBtn = document.getElementById('pwa-install-btn');
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -589,6 +660,7 @@
         }
 
         fetchDriveData();
+        configurarEventos();
     </script>
 </body>
 </html>
