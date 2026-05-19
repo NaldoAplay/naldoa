@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>EXNA MUSIC - Google Drive Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RADIO EXNA FM</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -20,10 +20,13 @@
             --glass-border: rgba(255, 255, 255, 0.08);
         }
 
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; }
 
         body {
             background-color: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(138, 43, 226, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(255, 0, 85, 0.15) 0%, transparent 45%);
             color: #fff;
             font-family: 'Rajdhani', sans-serif;
             margin: 0;
@@ -34,123 +37,86 @@
             position: relative;
         }
 
-        .blur-background {
-            position: fixed;
-            top: -10%;
-            left: -10%;
-            width: 120%;
-            height: 120%;
-            background-image: url('logo-quadrada.png');
-            background-position: center;
-            background-size: cover;
-            filter: blur(60px) brightness(0.3);
-            z-index: -1;
-            transition: background-image 0.8s ease-in-out;
-        }
-
         main {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            position: relative;
-            z-index: 1;
         }
 
         .glass-player {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 30px;
             width: 100%;
             max-width: 380px;
-            padding: 30px 25px;
+            padding: 35px 25px;
             text-align: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.02);
             position: relative;
         }
 
         .radio-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 12px;
-        }
-
-        .header-brand-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding-bottom: 15px;
         }
 
         .radio-top-logo {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
             filter: drop-shadow(0 0 8px var(--neon-aqua));
         }
 
         .radio-brand-text h2 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             margin: 0;
+            letter-spacing: 1px;
             text-align: left;
         }
+
         .radio-brand-text h2 span { color: var(--neon-aqua); }
+
         .radio-brand-text p {
             margin: 0;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: var(--neon-pink);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-weight: bold;
             text-align: left;
         }
 
-        .hamburger-btn {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 1.3rem;
-            cursor: pointer;
-            transition: 0.3s;
-            padding: 5px 10px;
-        }
-        .hamburger-btn:hover {
-            color: var(--neon-aqua);
-            filter: drop-shadow(0 0 5px var(--neon-aqua));
-        }
-
-        .sync-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--neon-aqua);
-            color: var(--neon-aqua);
-            padding: 10px 18px;
+        .live-indicator {
+            background: var(--neon-pink);
+            padding: 4px 10px;
             border-radius: 50px;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.65rem;
+            font-weight: 700;
             letter-spacing: 1px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 20px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-        }
-        .sync-btn:hover {
-            background: var(--neon-aqua);
-            color: #000;
-            box-shadow: 0 0 15px var(--neon-aqua);
+            gap: 6px;
+            box-shadow: 0 0 15px var(--neon-pink);
+            animation: pulse 2s infinite;
+            margin-bottom: 20px;
         }
 
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
         .cover-area {
-            width: 190px;
-            height: 190px;
-            margin: 0 auto 20px;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 25px;
             border-radius: 20px;
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.05);
@@ -160,912 +126,449 @@
 
         .playing .cover-area {
             border-color: var(--neon-aqua);
-            box-shadow: 0 0 25px rgba(102, 252, 241, 0.2);
+            box-shadow: 0 0 30px rgba(102, 252, 241, 0.25);
+            transform: scale(1.02);
         }
 
-        .cover-img { width: 100%; height: 100%; object-fit: cover; background-color: #111; }
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: #111;
+        }
 
         .info-area h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             margin: 0;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .info-area p {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--neon-aqua);
-            margin: 4px 0 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            margin: 6px 0 25px;
+            font-weight: 600;
         }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: 0.8rem;
-            color: #aaa;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            flex: 1;
-            -webkit-appearance: none;
-            appearance: none;
-            height: 5px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            outline: none;
-            cursor: pointer;
-        }
-        .progress-bar::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--neon-aqua);
-            box-shadow: 0 0 8px var(--neon-aqua);
-        }
-
-        .controls-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .nav-btn {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 1.4rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .nav-btn:hover, .nav-btn.active { color: var(--neon-aqua); filter: drop-shadow(0 0 5px var(--neon-aqua)); }
 
         .play-btn {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             border: none;
             background: linear-gradient(45deg, var(--primary-purple), var(--neon-pink));
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.4);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 35px rgba(255, 0, 85, 0.5);
+        }
+
+        .play-btn.active {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 30px #fff;
+        }
+
+        .pwa-float-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--neon-aqua);
+            font-size: 1.3rem;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
-        }
-        .play-btn.active { background: #fff; color: #000; box-shadow: 0 0 25px #fff; }
-
-        .volume-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: #aaa;
-            font-size: 0.9rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
         }
 
-        .volume-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 80px;
-            height: 4px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            outline: none;
-        }
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--neon-pink);
+        .pwa-float-btn.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
         }
 
-        .playlist-sidebar {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            max-width: 320px;
-            height: 100vh;
-            background: rgba(5, 6, 8, 0.98);
-            backdrop-filter: blur(25px);
-            border-left: 1px solid var(--glass-border);
-            box-shadow: -10px 0 30px rgba(0,0,0,0.8);
-            z-index: 9999;
-            transition: right 0.3s ease;
+        .pwa-float-btn:hover {
+            color: white;
+            background: linear-gradient(45deg, var(--primary-purple), var(--neon-pink));
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+            transform: scale(1.1) translateY(-3px);
+            border-color: transparent;
+        }
+
+        footer {
             padding: 25px;
-            display: flex;
-            flex-direction: column;
+            text-align: center;
+            background: rgba(0,0,0,0.4);
+            border-top: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
         }
 
-        .playlist-sidebar.open { right: 0; }
-
-        .sidebar-header {
+        .social-links {
+            margin-bottom: 12px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            justify-content: center;
+            gap: 22px;
         }
 
-        .sidebar-header h3 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
-            margin: 0;
+        .social-links a {
             color: var(--neon-aqua);
+            font-size: 1.4rem;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--neon-pink);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .close-sidebar-btn {
-            background: transparent;
-            border: none;
-            color: #aaa;
-            font-size: 1.2rem;
-            cursor: pointer;
+        @media (max-width: 480px) {
+            .glass-player { padding: 30px 20px; margin: 10px; }
+            .cover-area { width: 190px; height: 190px; }
+            .pwa-float-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 1.1rem; }
         }
-        .close-sidebar-btn:hover { color: var(--neon-pink); }
-
-        .playlist-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
+        @media (max-height: 500px) {
+            body { background-image: none; background-color: transparent; min-height: auto; }
+            main { padding: 5px; }
+            .glass-player { max-width: 100%; border-radius: 20px; padding: 20px 15px; box-shadow: none; }
+            footer { display: none; }
         }
-
-        .playlist-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: 0.2s;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            margin-bottom: 6px;
-            background: rgba(255, 255, 255, 0.01);
-        }
-        .playlist-item:hover { background: rgba(255, 255, 255, 0.08); }
-        
-        .playlist-item.current-track {
-            background: rgba(102, 252, 241, 0.2);
-            border: 1px solid rgba(102, 252, 241, 0.4);
-            color: var(--neon-aqua);
-        }
-
-        .list-thumb {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            object-fit: cover;
-            background-color: #111;
-        }
-
-        .track-meta-box {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: left;
-        }
-        .track-meta-box span { display: block; font-size: 0.7rem; color: #888; margin-top: 2px; }
-
-        footer {
-            padding: 20px;
-            text-align: center;
-            background: rgba(0,0,0,0.5);
-            border-top: 1px solid var(--glass-border);
-            position: relative;
-            z-index: 1;
-        }
-        .social-links { margin-bottom: 10px; display: flex; justify-content: center; gap: 20px; }
-        .social-links a { color: var(--neon-aqua); font-size: 1.3rem; transition: 0.3s; text-decoration: none; }
-        .social-links a:hover { color: var(--neon-pink); }
-        .copyright { font-size: 0.7rem; color: #555; text-transform: uppercase; }
-
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        button { touch-action: manipulation; }
-        
-        /* Fechar sidebar ao clicar fora */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 9998;
-            display: none;
-        }
-        .overlay.open { display: block; }
     </style>
 </head>
 <body>
-
-    <div class="overlay" id="overlay" onclick="fecharSidebar()"></div>
-    <div class="blur-background" id="bg-glow"></div>
-
-    <div class="playlist-sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3><i class="fas fa-list-ul"></i> MINHA PLAYLIST</h3>
-            <button class="close-sidebar-btn" onclick="fecharSidebar()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="playlist-scroll-area" id="playlist-box">
-            <div style="text-align: center; color: #444; padding: 20px;">Carregando...</div>
-        </div>
-    </div>
 
     <main>
         <div class="glass-player" id="main-player">
             
             <div class="radio-header">
-                <div class="header-brand-box">
-                    <img src="logo-quadrada.png" class="radio-top-logo" alt="EXNA Logo">
-                    <div class="radio-brand-text">
-                        <h2>EXNA <span>MUSIC</span></h2>
-                        <p>Google Drive Player</p>
-                    </div>
+                <img src="logo-quadrada.png" class="radio-top-logo" alt="EXNA Logo">
+                <div class="radio-brand-text">
+                    <h2>EXNA <span>FM</span></h2>
+                    <p>A Rádio que toca todas!</p>
                 </div>
-                <button class="hamburger-btn" onclick="abrirSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
 
-            <button class="sync-btn" onclick="sincronizarGoogleDrive()">
-                <i class="fab fa-google-drive"></i> SINCRONIZAR COM DRIVE
-            </button>
+            <div class="live-indicator">
+                <i class="fas fa-broadcast-tower"></i> TRANSMISSÃO EM TEMPO REAL
+            </div>
 
             <div class="cover-area">
-                <img src="logo-quadrada.png" id="track-cover" class="cover-img" alt="Capa">
+                <img src="logo-quadrada.png" id="track-cover" class="cover-img" alt="Capa da Música">
             </div>
 
             <div class="info-area">
-                <h1 id="track-title">EXNA MUSIC</h1>
-                <p id="artist-name">Sincronize para começar</p>
+                <h1 id="track-title">SINTONIZANDO...</h1>
+                <p id="artist-name">DJ NaldoA</p>
             </div>
 
-            <div class="progress-container">
-                <span id="time-current">0:00</span>
-                <input type="range" id="progress" class="progress-bar" value="0" min="0" max="100">
-                <span id="time-duration">0:00</span>
-            </div>
-
-            <div class="controls-row">
-                <button class="nav-btn" id="shuffle-btn" onclick="toggleShuffle()"><i class="fas fa-random"></i></button>
-                <button class="nav-btn" onclick="musicaAnterior()"><i class="fas fa-step-backward"></i></button>
-                <button class="play-btn" id="master-play" onclick="togglePlayPause()" disabled>
-                    <i class="fas fa-play" id="btn-icon"></i>
-                </button>
-                <button class="nav-btn" onclick="proximaMusica()"><i class="fas fa-step-forward"></i></button>
-                <button class="nav-btn" id="loop-btn" onclick="toggleLoop()"><i class="fas fa-redo"></i></button>
-            </div>
-
-            <div class="volume-container">
-                <i class="fas fa-volume-down"></i>
-                <input type="range" id="volume" class="volume-slider" value="80" min="0" max="100" oninput="ajustarVolume(this.value)">
-                <i class="fas fa-volume-up"></i>
-            </div>
+            <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
+                <i class="fas fa-spinner fa-spin" id="btn-icon"></i>
+            </button>
             
-            <p id="status-text" style="margin-top:20px; font-size: 0.75rem; color: #45a29e;">Aguardando sincronização</p>
+            <p id="status-text" style="margin-top:20px; font-size: 0.8rem; color: #45a29e; font-weight: bold; letter-spacing: 1px;"></p>
         </div>
     </main>
 
+    <button id="pwa-install-btn" class="pwa-float-btn" title="Baixar App da Rádio">
+        <i class="fas fa-download"></i>
+    </button>
+
     <footer>
         <div class="social-links">
-            <a href="https://www.instagram.com/naldoaoficial" target="_blank"><i class="fab fa-instagram"></i></a>
-            <a href="https://youtube.com/@djnaldoaoficial" target="_blank"><i class="fab fa-youtube"></i></a>
-            <a href="https://www.tiktok.com/@djnaldoaoficial" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
         </div>
-        <div class="copyright">EXNA MUSIC © 2026</div>
+        <div class="copyright">
+            EXNA FM © 2026 | NaldoA | Todos os Direitos Reservados
+        </div>
     </footer>
 
-    <audio id="audio-core" crossorigin="anonymous" preload="auto"></audio>
+    <audio id="audio-core" crossorigin="anonymous" preload="auto" audio-bitrate="320" high-fidelity="true"></audio>
 
     <script>
-        // ==================== CONFIGURAÇÕES ====================
         const PASTA_ID = '1vcukZmaqRgdkg6hEe-zgMjY7H9VwwY9J'; 
         const API_KEY = 'AIzaSyBVpSXuoQT0jjh6nqzKo5U1IYlaP_qolSs'; 
-        const DB_NAME = 'ExnaMusicDB';
-        const DB_VERSION = 4;
 
-        // ==================== ELEMENTOS ====================
         const player = document.getElementById('audio-core');
-        const btnPlay = document.getElementById('master-play');
-        const iconPlay = document.getElementById('btn-icon');
-        const cardPlayer = document.getElementById('main-player');
-        const txtTitulo = document.getElementById('track-title');
-        const txtArtista = document.getElementById('artist-name');
-        const imgCapa = document.getElementById('track-cover');
-        const bgGlow = document.getElementById('bg-glow');
+        const btn = document.getElementById('master-play');
+        const icon = document.getElementById('btn-icon');
+        const card = document.getElementById('main-player');
+        const txtTitle = document.getElementById('track-title');
+        const txtCover = document.getElementById('track-cover');
         const txtStatus = document.getElementById('status-text');
-        const playlistBox = document.getElementById('playlist-box');
-        const progressBar = document.getElementById('progress');
-        const tempoAtualSpan = document.getElementById('time-current');
-        const tempoTotalSpan = document.getElementById('time-duration');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        
-        // ==================== VARIÁVEIS ====================
-        let playlist = [];           
-        let ordemExecucao = [];      
-        let indiceAtual = 0;         
-        let modoShuffle = false;
-        let modoLoop = false;
-        let cacheCapas = new Map();
-        let db = null;
-        let sincronizando = false;
-        
-        // ==================== FUNÇÕES DE BANCO DE DADOS ====================
-        function abrirBancoDados() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('playlist')) {
-                        db.createObjectStore('playlist', { keyPath: 'id' });
-                    }
-                    if (!db.objectStoreNames.contains('estado')) {
-                        db.createObjectStore('estado', { keyPath: 'chave' });
-                    }
-                };
-                
-                request.onsuccess = (e) => {
-                    db = e.target.result;
-                    resolve(db);
-                };
-                
-                request.onerror = (e) => reject(e);
-            });
-        }
-        
-        async function salvarPlaylistNoBanco() {
-            if (!db || !playlist.length) return;
-            const tx = db.transaction(['playlist'], 'readwrite');
-            const store = tx.objectStore('playlist');
-            store.clear();
-            playlist.forEach(musica => store.put(musica));
-        }
-        
-        async function carregarPlaylistDoBanco() {
-            if (!db) return [];
-            return new Promise((resolve) => {
-                const tx = db.transaction(['playlist'], 'readonly');
-                const store = tx.objectStore('playlist');
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result || []);
-                request.onerror = () => resolve([]);
-            });
-        }
-        
-        async function salvarEstado(tempo = null) {
-            if (!db) return;
-            const tx = db.transaction(['estado'], 'readwrite');
-            const store = tx.objectStore('estado');
-            
-            const estado = {
-                chave: 'player_state',
-                indiceAtual: indiceAtual,
-                tempo: tempo !== null ? tempo : (player.currentTime || 0),
-                volume: player.volume,
-                shuffle: modoShuffle,
-                loop: modoLoop,
-                ordemExecucao: ordemExecucao,
-                playlistIds: playlist.map(m => m.id),
-                wasPlaying: !player.paused
-            };
-            store.put(estado);
-            console.log(`💾 Estado salvo: música ${indiceAtual}, tempo ${estado.tempo.toFixed(2)}s`);
-        }
-        
-        async function carregarEstado() {
-            if (!db) return null;
-            return new Promise((resolve) => {
-                const tx = db.transaction(['estado'], 'readonly');
-                const store = tx.objectStore('estado');
-                const request = store.get('player_state');
-                request.onsuccess = () => resolve(request.result || null);
-                request.onerror = () => resolve(null);
-            });
-        }
-        
-        // ==================== BUSCAR CAPAS ONLINE ====================
-        async function buscarCapaOnline(musicaNome, artistaNome) {
-            const chave = `${artistaNome}|${musicaNome}`.toLowerCase();
-            if (cacheCapas.has(chave)) return cacheCapas.get(chave);
-            
-            const query = encodeURIComponent(`${artistaNome} ${musicaNome}`);
-            
-            try {
-                const res = await fetch(`https://itunes.apple.com/search?term=${query}&limit=1&entity=song`);
-                const data = await res.json();
-                if (data.results && data.results[0]) {
-                    const capa = data.results[0].artworkUrl100?.replace('100x100', '600x600');
-                    if (capa) {
-                        cacheCapas.set(chave, capa);
-                        return capa;
-                    }
-                }
-            } catch(e) {}
-            
-            cacheCapas.set(chave, null);
-            return null;
-        }
-        
-        // ==================== SINCRONIZAR COM GOOGLE DRIVE ====================
-        async function sincronizarGoogleDrive() {
-            if (sincronizando) return;
-            sincronizando = true;
-            txtStatus.innerHTML = '<span class="loading"></span> Sincronizando com Google Drive...';
-            
-            const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}&pageSize=1000`;
-            
+
+        let gradeOriginal = [];
+        let gradeSincronizadaGlobal = [];
+        let indiceMusicaAtual = 0;
+        let blocoTempoFixo = 180; 
+        let deferredPrompt;
+        let estaPausadoManualmente = true;
+
+        txtTitle.innerText = "SINTONIA ONLINE";
+        txtStatus.innerText = "Conectando à torre...";
+
+        async function fetchDriveData() {
+            const url = `https://www.googleapis.com/drive/v3/files?q='${PASTA_ID}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${API_KEY}`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (!data.files || data.files.length === 0) {
-                    txtStatus.innerText = "Nenhum arquivo encontrado!";
-                    sincronizando = false;
-                    return;
-                }
-                
-                // PEGA TODOS OS MP3 (sem filtro nenhum)
-                const musicasDrive = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3'));
-                const imagensDrive = data.files.filter(f => f.mimeType.includes('image'));
-                
-                console.log(`📁 Total de MP3 encontrados: ${musicasDrive.length}`);
-                txtStatus.innerHTML = `<span class="loading"></span> Encontrados ${musicasDrive.length} MP3...`;
-                
-                if (musicasDrive.length === 0) {
-                    txtStatus.innerText = "Nenhum MP3 encontrado!";
-                    sincronizando = false;
-                    return;
-                }
-                
-                // Carregar playlist atual do banco
-                const playlistAtual = await carregarPlaylistDoBanco();
-                const mapaExistente = new Map();
-                playlistAtual.forEach(m => mapaExistente.set(m.id, m));
-                
-                // Processar TODAS as músicas
-                const musicasProcessadas = [];
-                
-                for (let i = 0; i < musicasDrive.length; i++) {
-                    const m = musicasDrive[i];
-                    const nomeCompleto = m.name;
-                    const nomeSemExtensao = nomeCompleto.replace(/\.mp3$/i, "");
-                    
-                    // Extrair artista e título - PEGA O TEXTO COMPLETO
-                    let artista = "EXNA MUSIC";
-                    let titulo = nomeSemExtensao;
-                    
-                    // Procura pelo primeiro " - " para separar artista e música
-                    const separador = nomeSemExtensao.indexOf(" - ");
-                    if (separador > 0) {
-                        artista = nomeSemExtensao.substring(0, separador).trim();
-                        titulo = nomeSemExtensao.substring(separador + 3).trim();
+                if(data.files && data.files.length > 0) {
+                    let musicas = data.files.filter(f => f.name.toLowerCase().endsWith('.mp3') || f.mimeType.includes('audio')).sort((a,b) => a.name.localeCompare(b.name));
+                    let imagens = data.files.filter(f => f.mimeType.includes('image') || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.png'));
+
+                    if (musicas.length === 0) {
+                        txtTitle.innerText = "EXNA FM";
+                        txtStatus.innerText = "Nenhuma música disponível.";
+                        return;
                     }
-                    
-                    // Verifica se tem capa local (comparando o nome completo)
-                    const capaLocal = imagensDrive.find(img => {
-                        const imgNome = img.name.replace(/\.(jpg|png|jpeg)$/i, "");
-                        return imgNome === nomeSemExtensao || imgNome === nomeCompleto.replace(/\.mp3$/i, "");
-                    });
-                    
-                    let capaUrl = capaLocal ? `https://www.googleapis.com/drive/v3/files/${capaLocal.id}?alt=media&key=${API_KEY}` : null;
-                    
-                    // Se não tem capa local, busca online
-                    if (!capaUrl) {
-                        capaUrl = await buscarCapaOnline(titulo, artista);
-                    }
-                    
-                    // Se já existia, mantém a capa que tinha
-                    const existente = mapaExistente.get(m.id);
-                    if (existente && existente.capaUrl && existente.capaUrl !== 'logo-quadrada.png') {
-                        capaUrl = existente.capaUrl;
-                    }
-                    
-                    musicasProcessadas.push({
-                        id: m.id,
-                        nome: titulo,
-                        artista: artista,
-                        capaUrl: capaUrl || 'logo-quadrada.png',
-                        url: `https://www.googleapis.com/drive/v3/files/${m.id}?alt=media&key=${API_KEY}`
-                    });
-                    
-                    if ((i + 1) % 20 === 0) {
-                        txtStatus.innerHTML = `<span class="loading"></span> Processando: ${i+1}/${musicasDrive.length}`;
-                    }
-                }
-                
-                playlist = musicasProcessadas;
-                await salvarPlaylistNoBanco();
-                
-                txtStatus.innerText = `✅ ${playlist.length} músicas sincronizadas!`;
-                console.log(`📊 Total sincronizado: ${playlist.length} músicas`);
-                
-                // Inicializar ordem de execução
-                if (ordemExecucao.length === 0 || ordemExecucao.length !== playlist.length) {
-                    ordemExecucao = playlist.map((_, i) => i);
-                    if (modoShuffle) {
-                        for (let i = ordemExecucao.length - 1; i > 0; i--) {
-                            const j = Math.floor(Math.random() * (i + 1));
-                            [ordemExecucao[i], ordemExecucao[j]] = [ordemExecucao[j], ordemExecucao[i]];
+
+                    gradeOriginal = musicas.map(m => {
+                        const nomeSemExtensao = m.name.replace(/\.[^/.]+$/, "");
+                        
+                        let artistaDetectado = "EXNA FM - AO VIVO";
+                        let tituloDetectado = nomeSemExtensao;
+                        if(nomeSemExtensao.includes(" - ")) {
+                            let partes = nomeSemExtensao.split(" - ");
+                            artistaDetectado = partes[0].trim();
+                            tituloDetectado = partes[1].trim();
                         }
-                    }
-                }
-                
-                btnPlay.disabled = false;
-                renderizarPlaylist();
-                await carregarEstadoSalvo();
-                
-            } catch (e) {
-                console.error(e);
-                txtStatus.innerText = "Erro ao sincronizar!";
-            } finally {
-                sincronizando = false;
-            }
-        }
-        
-        // ==================== CARREGAR ESTADO SALVO ====================
-        async function carregarEstadoSalvo() {
-            const estado = await carregarEstado();
-            console.log("📀 Estado carregado:", estado);
-            
-            if (estado && estado.playlistIds && estado.ordemExecucao) {
-                const idsAtuais = playlist.map(m => m.id);
-                const valido = estado.playlistIds.length === idsAtuais.length && 
-                              estado.playlistIds.every(id => idsAtuais.includes(id));
-                
-                if (valido && estado.ordemExecucao.length === playlist.length) {
-                    ordemExecucao = estado.ordemExecucao;
-                    indiceAtual = estado.indiceAtual;
-                    if (indiceAtual >= ordemExecucao.length) indiceAtual = 0;
+
+                        const capaCorrespondente = imagens.find(img => img.name.toLowerCase().startsWith(nomeSemExtensao.toLowerCase()));
+                        
+                        return {
+                            id: m.id,
+                            name: tituloDetectado,
+                            artist: artistaDetectado,
+                            capaUrl: capaCorrespondente ? `https://www.googleapis.com/drive/v3/files/${capaCorrespondente.id}?alt=media&key=${API_KEY}` : 'logo-quadrada.png'
+                        };
+                    });
+                    
+                    gradeSincronizadaGlobal = gerarGradeMestreEstavel();
+
+                    btn.disabled = false;
+                    icon.className = "fas fa-play";
+                    txtStatus.innerText = "Sinal sintonizado";
+
+                    estaPausadoManualmente = false;
+                    sincronizarEPlayComGradeGlobal(true);
+
                 } else {
-                    ordemExecucao = playlist.map((_, i) => i);
-                    indiceAtual = 0;
+                    txtStatus.innerText = "Pasta vazia.";
                 }
-            } else if (playlist.length > 0) {
-                ordemExecucao = playlist.map((_, i) => i);
-                indiceAtual = 0;
-            }
-            
-            // Restaurar modos
-            if (estado) {
-                modoShuffle = estado.shuffle || false;
-                modoLoop = estado.loop || false;
-                document.getElementById('shuffle-btn').classList.toggle('active', modoShuffle);
-                document.getElementById('loop-btn').classList.toggle('active', modoLoop);
-                player.loop = modoLoop;
-                if (estado.volume !== undefined) {
-                    player.volume = estado.volume;
-                    document.getElementById('volume').value = estado.volume * 100;
-                }
-            }
-            
-            // Carregar primeira música
-            if (playlist.length > 0 && ordemExecucao.length > 0) {
-                carregarMusica(indiceAtual);
-                
-                // Restaurar tempo
-                if (estado && estado.tempo !== undefined && estado.tempo > 0) {
-                    const restaurarTempo = () => {
-                        if (player.duration && !isNaN(player.duration) && estado.tempo < player.duration) {
-                            player.currentTime = estado.tempo;
-                            atualizarBarraProgresso();
-                            console.log(`⏰ Tempo restaurado: ${estado.tempo.toFixed(2)}s`);
-                        }
-                        player.removeEventListener('loadedmetadata', restaurarTempo);
-                        player.removeEventListener('canplay', restaurarTempo);
-                    };
-                    player.addEventListener('loadedmetadata', restaurarTempo);
-                    player.addEventListener('canplay', restaurarTempo);
-                }
-                
-                // Se estava tocando antes, volta a tocar
-                if (estado && estado.wasPlaying) {
-                    setTimeout(() => {
-                        player.play().catch(() => {});
-                    }, 500);
-                }
-            }
-            
-            renderizarPlaylist();
-        }
-        
-        // ==================== FUNÇÕES DO PLAYER ====================
-        function carregarMusica(index) {
-            if (playlist.length === 0 || ordemExecucao.length === 0) return;
-            
-            if (index >= ordemExecucao.length) index = 0;
-            if (index < 0) index = ordemExecucao.length - 1;
-            indiceAtual = index;
-            
-            const idReal = ordemExecucao[indiceAtual];
-            const musica = playlist[idReal];
-            if (!musica) return;
-            
-            const wasPlaying = !player.paused;
-            player.pause();
-            player.src = musica.url;
-            player.load();
-            
-            txtTitulo.innerText = musica.nome.toUpperCase();
-            txtArtista.innerText = musica.artista;
-            imgCapa.src = musica.capaUrl;
-            bgGlow.style.backgroundImage = `url('${musica.capaUrl}')`;
-            
-            atualizarTelaBloqueada(musica.nome, musica.artista, musica.capaUrl);
-            renderizarPlaylist();
-            
-            if (wasPlaying) {
-                setTimeout(() => player.play().catch(() => {}), 200);
-            }
-            
-            salvarEstado();
-        }
-        
-        function atualizarBarraProgresso() {
-            if (player.duration && !isNaN(player.duration) && player.duration > 0) {
-                const pct = (player.currentTime / player.duration) * 100;
-                progressBar.value = pct;
-                tempoAtualSpan.innerText = formatarTempo(player.currentTime);
-                tempoTotalSpan.innerText = formatarTempo(player.duration);
-            } else if (player.currentTime > 0) {
-                tempoAtualSpan.innerText = formatarTempo(player.currentTime);
+            } catch (e) {
+                txtStatus.innerText = "Falha ao conectar com o servidor.";
             }
         }
-        
-        function formatarTempo(segundos) {
-            if (isNaN(segundos) || segundos === Infinity) return "0:00";
-            const min = Math.floor(segundos / 60);
-            const sec = Math.floor(segundos % 60);
-            return `${min}:${sec < 10 ? '0' + sec : sec}`;
-        }
-        
-        function togglePlayPause() {
-            if (player.paused) {
-                player.play().catch(() => {});
-            } else {
-                player.pause();
+
+        function gerarGradeMestreEstavel() {
+            let pool = [...gradeOriginal];
+            let resultado = [];
+            let ultimoArtista = "";
+
+            let dataAtual = new Date();
+            let semente = dataAtual.getFullYear() * 1000 + dataAtual.getMonth() * 100 + dataAtual.getDate();
+
+            function randomSemente() {
+                let x = Math.sin(semente++) * 10000;
+                return x - Math.floor(x);
             }
-        }
-        
-        function proximaMusica() {
-            if (playlist.length === 0) return;
-            carregarMusica(indiceAtual + 1);
-            player.play().catch(() => {});
-        }
-        
-        function musicaAnterior() {
-            if (playlist.length === 0) return;
-            if (player.currentTime > 3) {
-                player.currentTime = 0;
-                salvarEstado();
-            } else {
-                carregarMusica(indiceAtual - 1);
-                player.play().catch(() => {});
+
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(randomSemente() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
             }
+
+            while(pool.length > 0) {
+                let indexValido = pool.findIndex(m => m.artist.toLowerCase() !== ultimoArtista.toLowerCase());
+                if(indexValido === -1) indexValido = 0;
+
+                let selecionada = pool.splice(indexValido, 1)[0];
+                resultado.push(selecionada);
+                ultimoArtista = selecionada.artist;
+            }
+
+            return resultado;
         }
-        
-        function toggleShuffle() {
-            modoShuffle = !modoShuffle;
-            document.getElementById('shuffle-btn').classList.toggle('active', modoShuffle);
+
+        function obterPontoDaGradeAoVivo() {
+            if (gradeSincronizadaGlobal.length === 0) return null;
             
-            const musicaAtual = playlist[ordemExecucao[indiceAtual]];
+            let duracaoTotalGrade = gradeSincronizadaGlobal.length * blocoTempoFixo;
+            let timestampSegundos = Math.floor(Date.now() / 1000);
+            let tempoAtualNaLinhaGeral = timestampSegundos % duracaoTotalGrade;
             
-            if (modoShuffle) {
-                for (let i = ordemExecucao.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [ordemExecucao[i], ordemExecucao[j]] = [ordemExecucao[j], ordemExecucao[i]];
+            let indexCalculado = Math.floor(tempoAtualNaLinhaGeral / blocoTempoFixo);
+            let segundoExatoNaFaixa = tempoAtualNaLinhaGeral % blocoTempoFixo;
+
+            return {
+                indice: indexCalculado,
+                seek: segundoExatoNaFaixa
+            };
+        }
+
+        function sincronizarEPlayComGradeGlobal(usarSincroniaHorarioMundial = false) {
+            if (gradeSincronizadaGlobal.length === 0 || estaPausadoManualmente) return;
+
+            let tempoDeCorte = 0;
+
+            if (usarSincroniaHorarioMundial) {
+                const estadoAoVivo = obterPontoDaGradeAoVivo();
+                if (estadoAoVivo) {
+                    indiceMusicaAtual = estadoAoVivo.indice;
+                    tempoDeCorte = estadoAoVivo.seek;
                 }
             } else {
-                ordemExecucao = playlist.map((_, i) => i);
+                if (indiceMusicaAtual >= gradeSincronizadaGlobal.length) indiceMusicaAtual = 0;
             }
-            
-            indiceAtual = ordemExecucao.findIndex(i => playlist[i].id === musicaAtual.id);
-            if (indiceAtual === -1) indiceAtual = 0;
-            
-            renderizarPlaylist();
-            salvarEstado();
-        }
-        
-        function toggleLoop() {
-            modoLoop = !modoLoop;
-            document.getElementById('loop-btn').classList.toggle('active', modoLoop);
-            player.loop = modoLoop;
-            salvarEstado();
-        }
-        
-        function ajustarVolume(valor) {
-            player.volume = valor / 100;
-            salvarEstado();
-        }
-        
-        // ==================== EVENTOS DO PLAYER ====================
-        player.addEventListener('play', () => {
-            iconPlay.className = "fas fa-stop";
-            btnPlay.classList.add('active');
-            cardPlayer.classList.add('playing');
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
-            txtStatus.innerText = "🎵 Tocando...";
-            if (playlist.length > 0 && ordemExecucao[indiceAtual] !== undefined) {
-                const musica = playlist[ordemExecucao[indiceAtual]];
-                atualizarTelaBloqueada(musica.nome, musica.artista, musica.capaUrl);
+
+            const faixa = gradeSincronizadaGlobal[indiceMusicaAtual];
+            let urlFonte = `https://www.googleapis.com/drive/v3/files/${faixa.id}?alt=media&key=${API_KEY}`;
+
+            if (player.src !== urlFonte) {
+                player.src = urlFonte;
             }
-        });
-        
-        player.addEventListener('pause', () => {
-            iconPlay.className = "fas fa-play";
-            btnPlay.classList.remove('active');
-            cardPlayer.classList.remove('playing');
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
-            txtStatus.innerText = "⏸️ Pausado";
-            salvarEstado();
-        });
-        
-        // CRUCIAL: Quando a música termina, toca a próxima
-        player.addEventListener('ended', () => {
-            console.log("🎵 Música terminou, tocando próxima!");
-            if (!modoLoop) {
-                proximaMusica();
-            }
-        });
-        
-        player.addEventListener('timeupdate', () => {
-            atualizarBarraProgresso();
-        });
-        
-        player.addEventListener('error', (e) => {
-            console.error("Erro no áudio:", e);
-            txtStatus.innerText = "Erro na música, pulando...";
-            setTimeout(() => proximaMusica(), 1000);
-        });
-        
-        progressBar.addEventListener('input', () => {
-            if (player.duration && !isNaN(player.duration)) {
-                player.currentTime = (progressBar.value / 100) * player.duration;
-                salvarEstado();
-            }
-        });
-        
-        // Salvar estado ao sair da página ou minimizar
-        window.addEventListener('beforeunload', () => {
-            salvarEstado();
-        });
-        
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                salvarEstado();
-            }
-        });
-        
-        // ==================== INTERFACE DA PLAYLIST ====================
-        function renderizarPlaylist() {
-            if (!playlistBox) return;
-            playlistBox.innerHTML = "";
-            
-            if (playlist.length === 0) {
-                playlistBox.innerHTML = '<div style="text-align: center; color: #444; padding: 20px;">Nenhuma música carregada</div>';
-                return;
-            }
-            
-            ordemExecucao.forEach((idReal, idx) => {
-                const musica = playlist[idReal];
-                const div = document.createElement('div');
-                div.className = `playlist-item ${idx === indiceAtual ? 'current-track' : ''}`;
-                div.onclick = () => {
-                    carregarMusica(idx);
-                    player.play().catch(() => {});
-                    fecharSidebar(); // FECHA A PLAYLIST AO TOCAR
-                };
-                div.innerHTML = `
-                    <img src="${musica.capaUrl}" class="list-thumb" onerror="this.src='logo-quadrada.png'">
-                    <div class="track-meta-box">
-                        <strong>${musica.nome.substring(0, 30)}</strong>
-                        <span>${musica.artista}</span>
-                    </div>
-                `;
-                playlistBox.appendChild(div);
+            player.currentTime = tempoDeCorte;
+
+            // BLINDAGEM VISUAL: Injeta o título, artista e a capa no app imediatamente
+            txtTitle.innerText = ConvertName(faixa.name);
+            document.getElementById('artist-name').innerText = faixa.artist;
+            txtCover.src = faixa.capaUrl;
+            txtStatus.innerText = "Sintonizando transmissão ao vivo...";
+
+            // CORREÇÃO CRUCIAL DA TELA BLOQUEADA: Atualiza o sistema do celular na hora, ANTES do play rodar de verdade!
+            updateLockScreen(faixa.name, faixa.artist, faixa.capaUrl);
+
+            icon.className = "fas fa-spinner fa-spin";
+
+            player.play().then(() => {
+                icon.className = "fas fa-stop";
+                btn.classList.add('active');
+                card.classList.add('playing');
+                txtStatus.innerText = "Transmissão Digital em Tempo Real";
+            }).catch((err) => {
+                // Se o navegador barrar o autoplay no início, as informações já estão salvas na barra de notificações e na tela bloqueada esperando o play físico do usuário!
+                icon.className = "fas fa-play";
+                btn.classList.remove('active');
+                card.classList.remove('playing');
+                txtStatus.innerText = "Toque no Play para ouvir ao vivo.";
             });
         }
-        
-        function abrirSidebar() {
-            sidebar.classList.add('open');
-            overlay.classList.add('open');
+
+        function ConvertName(str) {
+            return str.replace(/_/g, " ").toUpperCase();
         }
-        
-        function fecharSidebar() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('open');
-        }
-        
-        // ==================== TELA BLOQUEADA ====================
-        function atualizarTelaBloqueada(titulo, artista, capaUrl) {
-            if ('mediaSession' in navigator) {
-                const imagemUrl = (capaUrl && capaUrl !== 'logo-quadrada.png') ? capaUrl : 'logo-quadrada.png';
+
+        function toggleRadio() {
+            if (player.paused) {
+                estaPausadoManualmente = false;
+                icon.className = "fas fa-spinner fa-spin";
                 
+                if (player.src && player.src !== "") {
+                    player.play().then(() => {
+                        icon.className = "fas fa-stop";
+                        btn.classList.add('active');
+                        card.classList.add('playing');
+                        txtStatus.innerText = "Transmissão Digital em Tempo Real";
+                    }).catch(() => {
+                        sincronizarEPlayComGradeGlobal(true);
+                    });
+                } else {
+                    sincronizarEPlayComGradeGlobal(true);
+                }
+            } else {
+                player.pause();
+                icon.className = "fas fa-play";
+                btn.classList.remove('active');
+                card.classList.remove('playing');
+                txtStatus.innerText = "Transmissão em espera";
+            }
+        }
+
+        player.onended = () => {
+            if (estaPausadoManualmente) return;
+            icon.className = "fas fa-spinner fa-spin";
+            indiceMusicaAtual++; 
+            sincronizarEPlayComGradeGlobal(false); 
+        };
+
+        player.onerror = () => {
+            if (!estaPausadoManualmente) {
+                let proximoIndice = indiceMusicaAtual + 1;
+                indiceMusicaAtual = proximoIndice;
+                sincronizarEPlayComGradeGlobal(false);
+            }
+        };
+
+        function updateLockScreen(title, artist, capaUrl) {
+            if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: titulo || 'EXNA MUSIC',
-                    artist: artista || 'EXNA',
-                    album: 'EXNA MUSIC PLAYER',
+                    title: title,
+                    artist: artist,
+                    album: 'RADIO EXNA FM',
                     artwork: [
-                        { src: imagemUrl, sizes: '512x512', type: 'image/png' },
+                        { src: capaUrl, sizes: '512x512', type: 'image/png' },
                         { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
                     ]
                 });
-                
-                navigator.mediaSession.setActionHandler('play', () => player.play());
-                navigator.mediaSession.setActionHandler('pause', () => player.pause());
-                navigator.mediaSession.setActionHandler('previoustrack', () => musicaAnterior());
-                navigator.mediaSession.setActionHandler('nexttrack', () => proximaMusica());
-                
-                console.log(`🖼️ Tela bloqueada: ${titulo}`);
+                navigator.mediaSession.setActionHandler('play', () => { toggleRadio(); });
+                navigator.mediaSession.setActionHandler('pause', () => { toggleRadio(); });
             }
         }
-        
-        // ==================== INSTALAÇÃO PWA ====================
-        let deferredPrompt;
-        const pwaBtn = document.createElement('button');
-        pwaBtn.style.cssText = "position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#ff0055;color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:999;font-size:1.3rem;box-shadow:0 0 15px #ff0055;";
-        pwaBtn.innerHTML = '<i class="fas fa-download"></i>';
-        document.body.appendChild(pwaBtn);
-        
+
+        const pwaBtn = document.getElementById('pwa-install-btn');
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            pwaBtn.style.display = 'flex';
+            pwaBtn.classList.add('visible');
         });
-        
+
         pwaBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt = null;
-                pwaBtn.style.display = 'none';
+                pwaBtn.classList.remove('visible');
             }
         });
-        
-        // ==================== INICIALIZAÇÃO ====================
-        (async function init() {
-            await abrirBancoDados();
-            const playlistSalva = await carregarPlaylistDoBanco();
-            if (playlistSalva.length > 0) {
-                playlist = playlistSalva;
-                ordemExecucao = playlist.map((_, i) => i);
-                btnPlay.disabled = false;
-                renderizarPlaylist();
-                await carregarEstadoSalvo();
-                txtStatus.innerText = `${playlist.length} músicas carregadas`;
-            } else {
-                txtStatus.innerText = "Clique em SINCRONIZAR para começar";
-            }
-        })();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        fetchDriveData();
     </script>
 </body>
 </html>
