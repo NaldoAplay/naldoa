@@ -349,13 +349,13 @@
             </div>
 
             <div class="controls-container">
-                <button class="nav-btn" id="prev-btn" onclick="previousTrack()" disabled>
+                <button class="nav-btn" id="prev-btn" onclick="previousTrack()">
                     <i class="fas fa-backward"></i>
                 </button>
-                <button class="play-btn" id="master-play" onclick="toggleRadio()" disabled>
+                <button class="play-btn" id="master-play" onclick="toggleRadio()">
                     <i class="fas fa-spinner fa-spin" id="btn-icon"></i>
                 </button>
-                <button class="nav-btn" id="next-btn" onclick="nextTrack()" disabled>
+                <button class="nav-btn" id="next-btn" onclick="nextTrack()">
                     <i class="fas fa-forward"></i>
                 </button>
             </div>
@@ -397,17 +397,17 @@
 
         let gradeOriginal = [];
         let gradeStream = [];
-        let duracaoMusicaStream = 180; // 3 minutos por música no stream
+        let duracaoMusicaStream = 180;
         let deferredPrompt;
         let isPlaying = false;
         let syncInterval = null;
         let modoOffStream = false;
-        let cacheCapas = new Map(); // Cache de capas buscadas
+        let cacheCapas = new Map();
+        let contadorPulaProxima = 0;
 
         txtTitle.innerText = "SINTONIA ONLINE";
         txtStatus.innerText = "Conectando à torre...";
 
-        // Função para buscar capa no iTunes API
         async function buscarCapaNoITunes(musicaNome, artistaNome) {
             const chaveCache = `${artistaNome}|${musicaNome}`;
             
@@ -430,7 +430,6 @@
                 }
                 return null;
             } catch (error) {
-                console.log('Erro ao buscar capa no iTunes:', error);
                 return null;
             }
         }
@@ -472,20 +471,14 @@
                         };
                     });
                     
-                    // Gera grade do stream AO VIVO (todos os ouvintes ouvem a mesma ordem)
                     gerarGradeStreamAoVivo();
-                    
-                    btn.disabled = false;
-                    prevBtn.disabled = false;
-                    nextBtn.disabled = false;
-                    icon.className = "fas fa-play";
-                    txtStatus.innerText = "Sinal sintonizado | Stream Ao Vivo";
                     
                     // Inicia o stream automaticamente
                     iniciarStreamAoVivo();
-                    isPlaying = true;
                     
+                    // CRUCIAL: Força o play e configura o onended corretamente
                     player.play().then(() => {
+                        isPlaying = true;
                         icon.className = "fas fa-stop";
                         btn.classList.add('active');
                         card.classList.add('playing');
@@ -497,7 +490,8 @@
                                 sincronizarStream();
                             }
                         }, 3000);
-                    }).catch(() => {
+                    }).catch((err) => {
+                        console.log('Autoplay bloqueado:', err);
                         icon.className = "fas fa-play";
                         btn.classList.remove('active');
                         card.classList.remove('playing');
@@ -514,7 +508,6 @@
             }
         }
 
-        // Gera grade do stream baseada na DATA - TODOS os ouvintes têm a MESMA ordem
         function gerarGradeStreamAoVivo() {
             let pool = [...gradeOriginal];
             let resultado = [];
@@ -546,7 +539,6 @@
             console.log('Grade do stream gerada com', gradeStream.length, 'músicas');
         }
 
-        // Calcula a posição atual no stream baseada no TIMESTAMP (TODOS sincronizados)
         function obterStreamPosition() {
             let totalDuracao = gradeStream.length * duracaoMusicaStream;
             let timestamp = Math.floor(Date.now() / 1000);
@@ -567,7 +559,6 @@
                 return faixa.capaUrl;
             }
             
-            // Busca capa no iTunes
             const capaITunes = await buscarCapaNoITunes(faixa.name, faixa.artist);
             if (capaITunes) {
                 faixa.capaUrl = capaITunes;
@@ -593,14 +584,10 @@
             
             player.currentTime = streamPos.seek;
             
-            // Atualiza a interface
             txtTitle.innerText = faixa.name.toUpperCase();
             document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🔴 AO VIVO</span>`;
             
-            // Atualiza capa (com fallback iTunes)
             const capaUrl = await atualizarCapaMusica(faixa);
-            
-            // Atualiza tela bloqueada
             updateLockScreen(faixa.name, `${faixa.artist} - AO VIVO`, capaUrl);
         }
 
@@ -616,7 +603,6 @@
                 player.src = urlStreamAtual;
                 player.currentTime = streamPos.seek;
                 
-                // Atualiza tudo quando a música muda
                 txtTitle.innerText = faixa.name.toUpperCase();
                 document.getElementById('artist-name').innerHTML = `${faixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🔴 AO VIVO</span>`;
                 
@@ -639,10 +625,6 @@
             updateLockScreen(faixa.name, `${faixa.artist} - ${status}`, capaUrl);
         }
 
-        function ConvertName(str) {
-            return str.replace(/_/g, " ").toUpperCase();
-        }
-
         function toggleRadio() {
             if (player.paused) {
                 player.play().then(() => {
@@ -660,7 +642,6 @@
                         }, 3000);
                     }
                     
-                    // Se estava fora do stream, volta para o stream
                     if (modoOffStream) {
                         modoOffStream = false;
                         iniciarStreamAoVivo();
@@ -680,6 +661,7 @@
             if (!gradeStream.length) return;
             
             modoOffStream = true;
+            contadorPulaProxima++;
             
             const streamPos = obterStreamPosition();
             let novoIndice = (streamPos.index + 1) % gradeStream.length;
@@ -689,11 +671,11 @@
             player.src = urlStream;
             player.currentTime = 0;
             
-            await atualizarInterfaceStream(faixa, "⏩ AVANÇADO");
+            await atualizarInterfaceStream(faixa, "⏩ PULADO");
             
             if (isPlaying) {
-                player.play().catch(() => {});
-                txtStatus.innerText = "⏩ Modo avanço - Volte ao vivo com PLAY";
+                await player.play().catch(() => {});
+                txtStatus.innerText = `⏩ Pulou para: ${faixa.name}`;
             }
         }
 
@@ -711,22 +693,63 @@
             player.src = urlStream;
             player.currentTime = 0;
             
-            await atualizarInterfaceStream(faixa, "⏪ VOLTADO");
+            await atualizarInterfaceStream(faixa, "⏪ VOLTOU");
             
             if (isPlaying) {
-                player.play().catch(() => {});
-                txtStatus.innerText = "⏪ Modo voltar - Volte ao vivo com PLAY";
+                await player.play().catch(() => {});
+                txtStatus.innerText = `⏪ Voltou para: ${faixa.name}`;
             }
         }
 
+        // CRUCIAL: Evento que toca a próxima música automaticamente
         player.onended = () => {
-            if (!modoOffStream && !player.paused) {
-                sincronizarStream();
-            } else if (modoOffStream && isPlaying) {
-                // Volta para o stream ao vivo automaticamente após a música terminar
+            console.log('🎵 Música terminou, tocando próxima...');
+            
+            if (modoOffStream) {
+                // Se estava no modo off-stream, volta para o stream ao vivo
                 modoOffStream = false;
                 iniciarStreamAoVivo();
+                if (isPlaying) {
+                    player.play().catch(() => {});
+                }
+                txtStatus.innerText = "🔴 Voltando ao stream ao vivo...";
+            } else {
+                // Modo normal: vai para a próxima música do stream
+                const streamPos = obterStreamPosition();
+                let proximoIndice = (streamPos.index + 1) % gradeStream.length;
+                const proximaFaixa = gradeStream[proximoIndice];
+                let proximaUrl = `https://www.googleapis.com/drive/v3/files/${proximaFaixa.id}?alt=media&key=${API_KEY}`;
+                
+                player.src = proximaUrl;
+                player.currentTime = 0;
+                
+                txtTitle.innerText = proximaFaixa.name.toUpperCase();
+                document.getElementById('artist-name').innerHTML = `${proximaFaixa.artist} <span style="font-size: 0.7rem; color: #ff0055;">🔴 AO VIVO</span>`;
+                atualizarCapaMusica(proximaFaixa).then(capaUrl => {
+                    updateLockScreen(proximaFaixa.name, `${proximaFaixa.artist} - AO VIVO`, capaUrl);
+                });
+                
+                if (isPlaying) {
+                    player.play().catch(() => {});
+                }
+                txtStatus.innerText = `🎵 Próxima música: ${proximaFaixa.name}`;
             }
+        };
+
+        player.onerror = (e) => {
+            console.error('Erro no player:', e);
+            txtStatus.innerText = "Erro na música, carregando próxima...";
+            setTimeout(() => {
+                const streamPos = obterStreamPosition();
+                let proximoIndice = (streamPos.index + 1) % gradeStream.length;
+                const proximaFaixa = gradeStream[proximoIndice];
+                let proximaUrl = `https://www.googleapis.com/drive/v3/files/${proximaFaixa.id}?alt=media&key=${API_KEY}`;
+                player.src = proximaUrl;
+                player.currentTime = 0;
+                if (isPlaying) {
+                    player.play().catch(() => {});
+                }
+            }, 1000);
         };
 
         function updateLockScreen(title, artist, capaUrl) {
