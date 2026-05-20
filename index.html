@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NaldoA Play">
     
-    <!-- Ícones -->
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="manifest" href="manifest.json">
@@ -86,7 +85,6 @@
             background: transparent;
         }
 
-        /* Ajuste: padding-top maior para descer o conteúdo, padding-bottom maior para o rodapé */
         .inner {
             max-width: 550px;
             width: 100%;
@@ -97,13 +95,13 @@
             margin: 0 auto;
         }
 
-        /* Header */
+        /* Header com botão TV */
         .station-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
         }
 
         .logo-area {
@@ -137,6 +135,28 @@
             letter-spacing: 1px;
         }
 
+        /* Botão da TV */
+        .tv-btn {
+            background: rgba(255,215,0,0.15);
+            backdrop-filter: blur(4px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #FFD966;
+            text-decoration: none;
+            border: 0.5px solid rgba(255,215,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .tv-btn:active {
+            transform: scale(0.96);
+            background: rgba(255,215,0,0.3);
+        }
+
         .live-badge {
             background: rgba(231, 76, 60, 0.85);
             backdrop-filter: blur(4px);
@@ -162,7 +182,6 @@
             100% { transform: scale(1.5); opacity: 0.2; }
         }
 
-        /* Slideshow */
         .slideshow-section {
             position: relative;
             width: 100%;
@@ -227,7 +246,6 @@
             color: rgba(255,255,255,0.5);
         }
 
-        /* Track info */
         .track-info {
             text-align: center;
             margin: 5px 0;
@@ -246,7 +264,6 @@
             margin-top: 5px;
         }
 
-        /* Controles */
         .controls {
             display: flex;
             justify-content: center;
@@ -285,7 +302,6 @@
             color: #ff3366;
         }
 
-        /* Progresso */
         .progress-section {
             margin: 8px 0;
         }
@@ -312,7 +328,6 @@
             margin-top: 7px;
         }
 
-        /* Volume */
         .volume-row {
             display: flex;
             align-items: center;
@@ -347,7 +362,6 @@
             cursor: pointer;
         }
 
-        /* Redes sociais */
         .social-links {
             display: flex;
             justify-content: center;
@@ -397,6 +411,7 @@
             #playPauseBtn { width: 68px; height: 68px; font-size: 1.6rem; }
             .ctrl-btn { width: 48px; height: 48px; font-size: 1.1rem; }
             .social-links a { font-size: 1.2rem; gap: 25px; }
+            .tv-btn { padding: 6px 12px; font-size: 0.7rem; }
         }
 
         @media (min-width: 768px) {
@@ -423,9 +438,12 @@
                     <p>A SUA RÁDIO WEB!</p>
                 </div>
             </div>
-            <div class="live-badge">
-                <span class="live-dot"></span>
-                <span>AO VIVO</span>
+            <div style="display: flex; gap: 8px;">
+                <a href="tv.html" class="tv-btn"><i class="fas fa-tv"></i> EXNA TV</a>
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    <span>AO VIVO</span>
+                </div>
             </div>
         </div>
 
@@ -554,7 +572,6 @@
         trackArtist.textContent = track.artist;
         currentMusicIndex++;
         
-        // LOGO DA RÁDIO na tela de bloqueio (não as imagens do slideshow)
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: track.title,
@@ -660,7 +677,6 @@
     audio.load();
     statusMsg.textContent = "🔊 Clique no play para ouvir";
     
-    // Media Session com a LOGO da rádio (fixa)
     if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', () => togglePlay());
         navigator.mediaSession.setActionHandler('pause', () => togglePlay());
