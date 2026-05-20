@@ -6,14 +6,14 @@
     <meta name="theme-color" content="#0a0f1e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="EXNA TV">
+    <meta name="apple-mobile-web-app-title" content="NaldoA Play">
     
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="manifest" href="manifest.json">
     
-    <title>EXNA TV - Canais ao Vivo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>NaldoA Play - Sua Rádio Web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -22,628 +22,640 @@
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
+            min-height: 100vh;
             background: #0a0f1e;
-            font-family: 'Inter', sans-serif;
-            color: #fff;
-            height: 100vh;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
+            margin: 0;
+            padding: 0;
         }
 
-        .tv-app {
+        body {
+            background: radial-gradient(ellipse at 30% 40%, #0a0f1e, #03060c);
+            font-family: 'Rajdhani', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, rgba(255,215,0,0.12), transparent),
+                radial-gradient(3px 3px at 80% 70%, rgba(138,43,226,0.12), transparent);
+            background-repeat: no-repeat;
+            background-size: 200px 200px, 300px 300px;
+            pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); opacity: 0.5; }
+            50% { transform: translate(30px, 20px); opacity: 0.8; }
+            100% { transform: translate(0, 0); opacity: 0.5; }
+        }
+
+        .glass-radio {
+            width: 100%;
+            min-height: 100vh;
+            background: rgba(10, 20, 30, 0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .glass-radio::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        .inner {
+            max-width: 550px;
+            width: 100%;
+            padding: 35px 24px 35px;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            width: 100%;
-            background: radial-gradient(ellipse at 30% 40%, #0f1422, #05080c);
+            gap: 20px;
+            margin: 0 auto;
         }
 
-        /* Header fixo */
-        .tv-header {
-            background: rgba(10, 15, 30, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 10px 16px;
+        /* Header com botão TV */
+        .station-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(255,215,0,0.2);
-            flex-shrink: 0;
-            z-index: 10;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
         }
 
-        .logo-area img {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+        .logo-img {
+            width: 58px;
+            height: 58px;
+            object-fit: cover;
+            border-radius: 18px;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
         }
 
-        .logo-area h1 {
+        .station-title h1 {
             font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFE68F, #FFA500);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            line-height: 1.2;
         }
 
-        .back-btn {
+        .station-title p {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 1px;
+        }
+
+        /* Botão da TV - versão simplificada */
+        .tv-btn {
             background: rgba(255,215,0,0.15);
-            padding: 6px 14px;
-            border-radius: 30px;
-            text-decoration: none;
-            color: #FFD966;
-            font-size: 0.7rem;
-            font-weight: 500;
+            backdrop-filter: blur(4px);
+            padding: 8px 16px;
+            border-radius: 40px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #FFD966;
+            text-decoration: none;
             border: 0.5px solid rgba(255,215,0,0.3);
+            transition: all 0.2s;
         }
 
-        /* Player */
-        .player-area {
-            background: #00000066;
-            backdrop-filter: blur(10px);
-            padding: 12px;
-            flex-shrink: 0;
+        .tv-btn:active {
+            transform: scale(0.96);
+            background: rgba(255,215,0,0.3);
         }
 
-        .video-container {
+        .slideshow-section {
             position: relative;
             width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #000;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            max-width: 300px;
+            margin: 5px auto;
         }
 
-        #videoPlayer {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            display: block;
-        }
-
-        .fullscreen-btn {
+        .blur-backdrop {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.6);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.9rem;
-            z-index: 20;
-            transition: 0.2s;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            filter: blur(35px);
+            opacity: 0.5;
+            border-radius: 32px;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
         }
 
-        .fullscreen-btn:active {
+        .image-frame {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+        }
+
+        .playing .image-frame {
+            animation: frameGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes frameGlow {
+            0% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,215,0,0.2); }
+            50% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,215,0,0.6); }
+            100% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,215,0,0.2); }
+        }
+
+        .slideshow-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .playing .slideshow-img {
+            animation: imagePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes imagePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .image-caption {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .track-info {
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        .track-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .track-artist {
+            font-size: 0.9rem;
+            color: #FFD966;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .ctrl-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #FFE5B4;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:active {
             transform: scale(0.95);
         }
 
-        .channel-meta {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            padding: 0 4px;
-            flex-wrap: wrap;
-        }
-
-        .channel-meta img {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            background: #1e1e2e;
-            border-radius: 10px;
-            padding: 5px;
-        }
-
-        .info-time {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .info-time .channel-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .info-time .datetime {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.5);
-            margin-top: 2px;
-        }
-
-        .fav-btn {
-            background: rgba(255,255,255,0.1);
+        #playPauseBtn {
+            width: 78px;
+            height: 78px;
+            background: linear-gradient(145deg, rgba(255,215,0,0.9), rgba(255,140,0,0.9));
+            color: #1a1f2e;
+            font-size: 1.8rem;
             border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            color: #FFD966;
-            cursor: pointer;
-            font-size: 0.9rem;
+            box-shadow: 0 0 18px rgba(255,215,0,0.5);
         }
 
-        .fav-btn.active {
-            background: #FFD966;
-            color: #0a0f1e;
+        #playPauseBtn.playing {
+            background: white;
+            color: #ff3366;
         }
 
-        /* Lista de canais */
-        .channels-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            -webkit-overflow-scrolling: touch;
+        .progress-section {
+            margin: 8px 0;
         }
 
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            padding: 0 4px;
-        }
-
-        .tab-btn {
-            background: rgba(255,255,255,0.08);
-            border: none;
-            padding: 6px 16px;
+        .progress-area {
+            background: rgba(45, 55, 72, 0.7);
             border-radius: 30px;
-            color: #ccc;
+            height: 5px;
             cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 500;
+            overflow: hidden;
         }
 
-        .tab-btn.active {
-            background: #FFD966;
-            color: #0a0f1e;
+        .progress-bar {
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            width: 0%;
+            height: 5px;
         }
 
-        .channels-grid {
+        .time-stamp {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: #aaa;
+            margin-top: 7px;
         }
 
-        .channel-card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            padding: 10px 12px;
+        .volume-row {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+            background: rgba(0,0,0,0.25);
+            padding: 6px 18px;
+            border-radius: 40px;
+            width: fit-content;
+            margin: 8px auto;
         }
 
-        .channel-card:hover {
-            background: rgba(255,215,0,0.1);
-        }
-
-        .channel-card.playing {
-            background: rgba(255,215,0,0.2);
-            border-color: #FFD966;
-        }
-
-        .card-logo {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            background: #1e1e2e;
-            border-radius: 10px;
-            padding: 5px;
-        }
-
-        .card-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .card-title {
-            font-weight: 600;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .card-group {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .card-fav {
-            color: rgba(255,255,255,0.3);
-            font-size: 0.9rem;
-            cursor: pointer;
-            width: 36px;
-            text-align: center;
-        }
-
-        .card-fav.active {
+        .volume-row i {
             color: #FFD966;
+            font-size: 0.9rem;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #aaa;
-            font-size: 0.85rem;
-        }
-
-        .channels-area::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .channels-area::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .channels-area::-webkit-scrollbar-thumb {
+        input[type="range"] {
+            width: 110px;
+            height: 3px;
+            -webkit-appearance: none;
             background: #FFD966;
-            border-radius: 4px;
+            border-radius: 5px;
         }
 
-        /* Tela cheia */
-        .video-container:-webkit-full-screen {
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #FFD966;
+            border-radius: 50%;
+            cursor: pointer;
         }
 
-        .video-container:fullscreen {
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 12px;
+            padding-top: 14px;
+            border-top: 0.5px solid rgba(255,215,0,0.15);
         }
 
-        .video-container:-webkit-full-screen video {
-            height: 100%;
+        .social-links a {
+            color: rgba(255,255,255,0.5);
+            font-size: 1.4rem;
+            transition: all 0.3s;
         }
 
-        .video-container:fullscreen video {
-            height: 100%;
+        .social-links a:active {
+            color: #FFD966;
+            transform: scale(1.1);
         }
 
-        @media (min-width: 600px) {
-            .channels-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            .tv-header { padding: 12px 20px; }
-            .player-area { padding: 16px 20px; }
-            .channels-area { padding: 16px 20px; }
-            .logo-area h1 { font-size: 1.4rem; }
-            .logo-area img { width: 42px; height: 42px; }
+        .status-text {
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 5px;
         }
 
-        @media (min-width: 900px) {
-            .channels-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.2);
+            margin-top: 5px;
+        }
+
+        @media (display-mode: standalone) {
+            body { padding: 0; }
+            .glass-radio { min-height: 100vh; border-radius: 0; }
+        }
+
+        @media (max-width: 450px) {
+            .inner { padding: 30px 18px 30px; gap: 16px; }
+            .logo-img { width: 50px; height: 50px; }
+            .station-title h1 { font-size: 1.3rem; }
+            .slideshow-section { max-width: 250px; }
+            .track-title { font-size: 1rem; }
+            .track-artist { font-size: 0.8rem; }
+            #playPauseBtn { width: 68px; height: 68px; font-size: 1.6rem; }
+            .ctrl-btn { width: 48px; height: 48px; font-size: 1.1rem; }
+            .social-links a { font-size: 1.2rem; gap: 25px; }
+            .tv-btn { padding: 6px 12px; font-size: 0.7rem; }
+        }
+
+        @media (min-width: 768px) {
+            .inner { max-width: 600px; padding: 40px 30px 40px; gap: 25px; }
+            .logo-img { width: 70px; height: 70px; }
+            .station-title h1 { font-size: 1.8rem; }
+            .slideshow-section { max-width: 340px; }
+            .track-title { font-size: 1.3rem; }
+            #playPauseBtn { width: 90px; height: 90px; font-size: 2rem; }
+            .ctrl-btn { width: 62px; height: 62px; font-size: 1.5rem; }
+            .social-links a { font-size: 1.6rem; gap: 35px; }
         }
     </style>
 </head>
 <body>
 
-<div class="tv-app">
-    <div class="tv-header">
-        <div class="logo-area">
-            <img src="logo.png" alt="Logo">
-            <h1>EXNA TV</h1>
-        </div>
-        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Rádio</a>
-    </div>
-
-    <div class="player-area">
-        <div class="video-container" id="videoContainer">
-            <video id="videoPlayer" controls autoplay playsinline></video>
-            <button id="fullscreenBtn" class="fullscreen-btn"><i class="fas fa-expand"></i></button>
-        </div>
-        <div class="channel-meta" id="channelMeta">
-            <img id="currentLogo" src="logo.png" alt="Logo">
-            <div class="info-time">
-                <div class="channel-name" id="currentName">Selecione um canal</div>
-                <div class="datetime" id="currentDateTime"></div>
+<div class="glass-radio" id="radioContainer">
+    <div class="inner">
+        <div class="station-header">
+            <div class="logo-area">
+                <img src="logo.png" class="logo-img" alt="NaldoA Play" onerror="this.src='https://via.placeholder.com/58?text=NP'">
+                <div class="station-title">
+                    <h1>NALDOA PLAY</h1>
+                    <p>A SUA RÁDIO WEB!</p>
+                </div>
             </div>
-            <button id="currentFavBtn" class="fav-btn"><i class="far fa-star"></i></button>
+            <a href="tv.html" class="tv-btn"><i class="fas fa-tv"></i> TV AO VIVO</a>
         </div>
-    </div>
 
-    <div class="channels-area">
-        <div class="tabs">
-            <button class="tab-btn active" data-filter="all">📺 Todos</button>
-            <button class="tab-btn" data-filter="fav">⭐ Favoritos</button>
+        <div class="slideshow-section">
+            <div class="blur-backdrop" id="blurBackdrop"></div>
+            <div class="image-frame" id="imageFrame">
+                <img id="slideshowImg" class="slideshow-img" src="img/IMG_4484.jpg" alt="Imagem">
+            </div>
+            <div class="image-caption" id="imageCaption">Momento NaldoA Play</div>
         </div>
-        <div id="channelsList" class="channels-grid">
-            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando canais...</div>
+
+        <div class="track-info">
+            <div class="track-title" id="trackTitle">SINTONIZANDO...</div>
+            <div class="track-artist" id="trackArtist">NALDOA PLAY</div>
         </div>
+
+        <div class="controls">
+            <button class="ctrl-btn" id="prevBtn"><i class="fas fa-backward-step"></i></button>
+            <button class="ctrl-btn" id="playPauseBtn"><i class="fas fa-play" id="playIcon"></i></button>
+            <button class="ctrl-btn" id="nextBtn"><i class="fas fa-forward-step"></i></button>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-area" id="progressArea">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="time-stamp">
+                <span id="currentTime">0:00</span>
+                <span id="durationTime">0:00</span>
+            </div>
+        </div>
+
+        <div class="volume-row">
+            <i class="fas fa-volume-up"></i>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+        </div>
+
+        <div class="social-links">
+            <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
+        </div>
+
+        <div class="status-text" id="statusMsg">🔊 Pronto para tocar</div>
+        <footer>NaldoA Play © 2026 | 24h no ar</footer>
     </div>
 </div>
 
 <script>
-    const M3U_URL = 'https://iptv-org.github.io/iptv/countries/br.m3u';
+    const STREAM_URL = "https://stream.zeno.fm/xx785t45mf9uv";
     
-    let allChannels = [];
-    let favoriteIds = new Set();
-    let currentChannel = null;
-    let currentFilter = 'all';
-    
-    const video = document.getElementById('videoPlayer');
-    const videoContainer = document.getElementById('videoContainer');
-    const channelsDiv = document.getElementById('channelsList');
-    const currentNameSpan = document.getElementById('currentName');
-    const currentLogoImg = document.getElementById('currentLogo');
-    const currentFavBtn = document.getElementById('currentFavBtn');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    const currentDateTimeSpan = document.getElementById('currentDateTime');
-    
-    // Atualizar data e hora
-    function updateDateTime() {
-        const now = new Date();
-        const options = { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' };
-        currentDateTimeSpan.textContent = now.toLocaleDateString('pt-BR', options);
-    }
-    updateDateTime();
-    setInterval(updateDateTime, 60000);
-    
-    function loadFavorites() {
-        const saved = localStorage.getItem('exna_tv_favorites');
-        if (saved) {
-            favoriteIds = new Set(JSON.parse(saved));
-        }
+    const imagens = [];
+    for (let i = 4484; i <= 4596; i++) {
+        imagens.push(`img/IMG_${i}.jpg`);
     }
     
-    function saveFavorites() {
-        localStorage.setItem('exna_tv_favorites', JSON.stringify([...favoriteIds]));
-        updateAllFavoriteButtons();
+    let currentImageIndex = 0;
+    let slideshowInterval = null;
+    let currentMusicIndex = 0;
+    let musicIntervalId = null;
+    let progressInterval = null;
+    let reconnectAttempts = 0;
+    
+    const audio = new Audio();
+    audio.src = STREAM_URL;
+    audio.crossOrigin = "anonymous";
+    audio.preload = "auto";
+    
+    let isPlaying = false;
+    
+    const playBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const trackTitle = document.getElementById('trackTitle');
+    const trackArtist = document.getElementById('trackArtist');
+    const slideshowImg = document.getElementById('slideshowImg');
+    const blurBackdrop = document.getElementById('blurBackdrop');
+    const imageCaption = document.getElementById('imageCaption');
+    const progressBar = document.getElementById('progressBar');
+    const progressArea = document.getElementById('progressArea');
+    const currentTimeSpan = document.getElementById('currentTime');
+    const durationSpan = document.getElementById('durationTime');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const statusMsg = document.getElementById('statusMsg');
+    const radioContainer = document.getElementById('radioContainer');
+    
+    const playlistDemo = [
+        { title: "BATIDÃO EXPLOSIVO", artist: "DJ NALDOA" },
+        { title: "ELETRO HITS 2025", artist: "NALDOA PLAY" },
+        { title: "SÓ AS TOP", artist: "RÁDIO NALDOA" },
+        { title: "PISTA QUENTE", artist: "DJ NALDOA" },
+        { title: "FUNK MANDELADO", artist: "NALDOA SELECT" },
+        { title: "PAGODE DO NALDOA", artist: "SAMBA AO VIVO" },
+        { title: "SERTANEJO TOP", artist: "NALDOA PLAY" },
+        { title: "ROCK IN RIO", artist: "NALDOA" }
+    ];
+    
+    function updateImage(index) {
+        const imgPath = imagens[index];
+        slideshowImg.src = imgPath;
+        blurBackdrop.style.backgroundImage = `url(${imgPath})`;
+        blurBackdrop.style.backgroundSize = 'cover';
+        blurBackdrop.style.backgroundPosition = 'center';
+        const match = imgPath.match(/IMG_(\d+)\.jpg/);
+        imageCaption.textContent = match ? `Momento #${match[1]}` : `Momento NaldoA Play`;
     }
     
-    function toggleFavorite(channel) {
-        if (favoriteIds.has(channel.id)) {
-            favoriteIds.delete(channel.id);
-        } else {
-            favoriteIds.add(channel.id);
-        }
-        saveFavorites();
-        if (currentChannel && currentChannel.id === channel.id) {
-            updateCurrentFavoriteButton();
-        }
-        renderChannels();
+    function nextImage() {
+        currentImageIndex = (currentImageIndex + 1) % imagens.length;
+        updateImage(currentImageIndex);
     }
     
-    function isFavorite(id) {
-        return favoriteIds.has(id);
+    function startSlideshow() {
+        if (slideshowInterval) clearInterval(slideshowInterval);
+        slideshowInterval = setInterval(() => nextImage(), 8000);
     }
     
-    function updateCurrentFavoriteButton() {
-        if (currentChannel) {
-            const isFav = isFavorite(currentChannel.id);
-            currentFavBtn.innerHTML = isFav ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-        }
+    function stopSlideshow() {
+        if (slideshowInterval) clearInterval(slideshowInterval);
     }
     
-    function updateAllFavoriteButtons() {
-        document.querySelectorAll('.card-fav').forEach(btn => {
-            const id = btn.dataset.id;
-            if (id && isFavorite(id)) {
-                btn.classList.add('active');
-                btn.innerHTML = '<i class="fas fa-star"></i>';
-            } else if (id) {
-                btn.classList.remove('active');
-                btn.innerHTML = '<i class="far fa-star"></i>';
-            }
-        });
-        updateCurrentFavoriteButton();
-    }
-    
-    function playChannel(channel) {
-        currentChannel = channel;
-        video.src = channel.url;
-        video.play().catch(e => console.log('Clique no play do player'));
+    function rotateTrackInfo() {
+        const track = playlistDemo[currentMusicIndex % playlistDemo.length];
+        trackTitle.textContent = track.title;
+        trackArtist.textContent = track.artist;
+        currentMusicIndex++;
         
-        currentNameSpan.textContent = channel.name;
-        if (channel.logo && channel.logo.trim() !== '' && (channel.logo.startsWith('http') || channel.logo.startsWith('https'))) {
-            currentLogoImg.src = channel.logo;
-        } else {
-            currentLogoImg.src = 'logo.png';
-        }
-        updateCurrentFavoriteButton();
-        
-        document.querySelectorAll('.channel-card').forEach(card => {
-            card.classList.remove('playing');
-            if (card.dataset.id === channel.id) {
-                card.classList.add('playing');
-            }
-        });
-    }
-    
-    async function fetchChannels() {
-        try {
-            const response = await fetch(M3U_URL);
-            const text = await response.text();
-            
-            const lines = text.split('\n');
-            const channels = [];
-            let current = null;
-            
-            for (let line of lines) {
-                line = line.trim();
-                if (line.startsWith('#EXTINF:')) {
-                    const match = line.match(/#EXTINF:-?\d+\s+(?:tvg-logo="([^"]*)"\s+)?(?:group-title="([^"]*)"\s+)?(?:tvg-id="([^"]*)"\s+)?(?:tvg-name="([^"]*)"\s+)?(.*)/i);
-                    if (match) {
-                        const logo = match[1] || '';
-                        const group = match[2] || 'Geral';
-                        const tvgId = match[3] || '';
-                        const tvgName = match[4] || '';
-                        let name = (match[5] || '').replace(/,$/, '').trim();
-                        if (!name && tvgName) name = tvgName;
-                        if (!name) name = 'Canal sem nome';
-                        
-                        current = {
-                            id: tvgId || name.replace(/\s/g, '_'),
-                            name: name,
-                            group: group,
-                            logo: logo,
-                            url: ''
-                        };
-                    }
-                } else if (line && !line.startsWith('#') && current) {
-                    current.url = line;
-                    if (current.url && current.name) {
-                        channels.push(current);
-                    }
-                    current = null;
-                }
-            }
-            
-            if (channels.length === 0) {
-                channels.push({
-                    id: 'demo1',
-                    name: 'Canal Demo - M3U não carregou',
-                    group: 'Informação',
-                    logo: '',
-                    url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
-                });
-            }
-            
-            allChannels = channels;
-            renderChannels();
-            
-            if (allChannels.length > 0 && !currentChannel) {
-                playChannel(allChannels[0]);
-            }
-        } catch (error) {
-            channelsDiv.innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar lista de canais.</div>`;
-        }
-    }
-    
-    function renderChannels() {
-        let filtered = [...allChannels];
-        if (currentFilter === 'fav') {
-            filtered = filtered.filter(ch => isFavorite(ch.id));
-        }
-        
-        if (filtered.length === 0) {
-            channelsDiv.innerHTML = `<div class="loading">Nenhum canal encontrado${currentFilter === 'fav' ? ' nos favoritos' : ''}</div>`;
-            return;
-        }
-        
-        channelsDiv.innerHTML = filtered.map(ch => {
-            let logoUrl = (ch.logo && ch.logo.trim() !== '' && (ch.logo.startsWith('http') || ch.logo.startsWith('https'))) ? ch.logo : 'logo.png';
-            return `
-            <div class="channel-card ${currentChannel && currentChannel.id === ch.id ? 'playing' : ''}" data-id="${ch.id}" data-url="${ch.url}" data-name="${ch.name.replace(/"/g, '&quot;')}" data-logo="${logoUrl}">
-                <img class="card-logo" src="${logoUrl}" onerror="this.src='logo.png'">
-                <div class="card-info">
-                    <div class="card-title">${ch.name}</div>
-                    <div class="card-group">${ch.group}</div>
-                </div>
-                <div class="card-fav ${isFavorite(ch.id) ? 'active' : ''}" data-id="${ch.id}">
-                    ${isFavorite(ch.id) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}
-                </div>
-            </div>
-        `}).join('');
-        
-        document.querySelectorAll('.channel-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (e.target.closest('.card-fav')) return;
-                
-                const channel = {
-                    id: card.dataset.id,
-                    name: card.dataset.name,
-                    url: card.dataset.url,
-                    logo: card.dataset.logo
-                };
-                playChannel(channel);
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.title,
+                artist: track.artist,
+                album: 'NaldoA Play - Ao Vivo',
+                artwork: [{ src: "logo.png", sizes: "512x512", type: "image/png" }]
             });
-            
-            const favBtn = card.querySelector('.card-fav');
-            if (favBtn) {
-                favBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const ch = {
-                        id: favBtn.dataset.id,
-                        name: card.dataset.name,
-                        url: card.dataset.url,
-                        logo: card.dataset.logo
-                    };
-                    toggleFavorite(ch);
-                });
-            }
-        });
+        }
     }
     
-    // Tela cheia CORRIGIDA - entra e sai
-    function toggleFullscreen() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            if (videoContainer.requestFullscreen) {
-                videoContainer.requestFullscreen();
-            } else if (videoContainer.webkitRequestFullscreen) {
-                videoContainer.webkitRequestFullscreen();
+    function startMusicRotation() {
+        if (musicIntervalId) clearInterval(musicIntervalId);
+        musicIntervalId = setInterval(() => { if (isPlaying) rotateTrackInfo(); }, 30000);
+    }
+    
+    function stopMusicRotation() {
+        if (musicIntervalId) clearInterval(musicIntervalId);
+    }
+    
+    function startProgressAnimation() {
+        if (progressInterval) clearInterval(progressInterval);
+        let fakeProgress = 0;
+        progressInterval = setInterval(() => {
+            if (isPlaying) {
+                fakeProgress = (fakeProgress + 0.5) % 100;
+                progressBar.style.width = fakeProgress + '%';
+                const fakeSeconds = Math.floor((fakeProgress / 100) * 180);
+                const mins = Math.floor(fakeSeconds / 60);
+                const secs = fakeSeconds % 60;
+                currentTimeSpan.textContent = `${mins}:${secs < 10 ? '0'+secs : secs}`;
+                durationSpan.textContent = "3:00";
             }
+        }, 500);
+    }
+    
+    function stopProgressAnimation() {
+        if (progressInterval) clearInterval(progressInterval);
+        progressBar.style.width = '0%';
+        currentTimeSpan.textContent = "0:00";
+    }
+    
+    function togglePlay() {
+        if (isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            playIcon.className = "fas fa-play";
+            playBtn.classList.remove('playing');
+            radioContainer.classList.remove('playing');
+            statusMsg.textContent = "⏸️ Pausado";
+            stopSlideshow();
+            stopMusicRotation();
+            stopProgressAnimation();
         } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
+            audio.play().then(() => {
+                isPlaying = true;
+                playIcon.className = "fas fa-stop";
+                playBtn.classList.add('playing');
+                radioContainer.classList.add('playing');
+                statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+                startSlideshow();
+                startMusicRotation();
+                startProgressAnimation();
+                rotateTrackInfo();
+                reconnectAttempts = 0;
+            }).catch((err) => {
+                console.log(err);
+                statusMsg.textContent = "🔊 Clique novamente para ouvir";
+            });
         }
     }
     
-    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    function nextTrackSimulate() {
+        if (!isPlaying) return;
+        rotateTrackInfo();
+        statusMsg.textContent = "🎵 Próxima faixa";
+        setTimeout(() => { if (isPlaying) statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧"; }, 2000);
+    }
     
-    // Detectar saída da tela cheia (ESC)
-    document.addEventListener('fullscreenchange', exitHandler);
-    document.addEventListener('webkitfullscreenchange', exitHandler);
-    
-    function exitHandler() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            console.log('Saiu da tela cheia');
+    function handleError() {
+        if (isPlaying) {
+            reconnectAttempts++;
+            statusMsg.textContent = `⚠️ Reconectando... (tentativa ${reconnectAttempts})`;
+            setTimeout(() => {
+                if (isPlaying) audio.play().catch(() => {});
+            }, 3000);
         }
     }
     
-    currentFavBtn.addEventListener('click', () => {
-        if (currentChannel) {
-            toggleFavorite(currentChannel);
-        }
+    volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
+    audio.volume = 0.8;
+    audio.addEventListener('playing', () => {
+        statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+        reconnectAttempts = 0;
     });
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('stalled', handleError);
     
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.dataset.filter;
-            renderChannels();
-        });
-    });
+    playBtn.addEventListener('click', togglePlay);
+    nextBtn.addEventListener('click', nextTrackSimulate);
+    prevBtn.addEventListener('click', nextTrackSimulate);
     
-    loadFavorites();
-    fetchChannels();
+    updateImage(0);
+    audio.load();
+    statusMsg.textContent = "🔊 Clique no play para ouvir";
     
     if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', () => video.play());
-        navigator.mediaSession.setActionHandler('pause', () => video.pause());
+        navigator.mediaSession.setActionHandler('play', () => togglePlay());
+        navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+        navigator.mediaSession.setActionHandler('nexttrack', () => nextTrackSimulate());
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: "NaldoA Play",
+            artist: "Ao Vivo",
+            album: "Sua Rádio Web",
+            artwork: [{ src: "logo.png", sizes: "512x512", type: "image/png" }]
+        });
     }
 </script>
 </body>
