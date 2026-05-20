@@ -1,4 +1,4 @@
-const CACHE_NAME = 'naldoa-play-v2';
+const CACHE_NAME = 'naldoa-play-v1';
 const urlsToCache = [
   '/naldoa/',
   '/naldoa/index.html',
