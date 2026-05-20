@@ -1,8 +1,8 @@
 const CACHE_NAME = 'naldoa-play-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/logo.png'
+  '.',
+  'index.html',
+  'logo.png'
 ];
 
 self.addEventListener('install', event => {
