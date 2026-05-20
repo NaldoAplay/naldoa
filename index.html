@@ -45,8 +45,8 @@
             left: -10%;
             width: 120%;
             height: 120%;
-            filter: blur(40px);
-            opacity: 0.5;
+            filter: blur(45px);
+            opacity: 0.55;
             transform: scale(1.1);
             background-size: cover;
             background-position: center;
@@ -54,26 +54,26 @@
             z-index: 0;
         }
 
-        /* Overlay escuro para dar contraste */
+        /* Overlay escuro (mais escuro) */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.65);
             z-index: 1;
         }
 
-        /* Vidro fosco principal */
+        /* Vidro fosco (menos fosco, mais escuro) */
         .glass-radio {
             position: relative;
             z-index: 2;
             width: 100%;
             height: 100%;
-            background: rgba(18, 22, 35, 0.55);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(10, 12, 18, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -87,12 +87,11 @@
             padding: 20px 24px 20px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 20px;
+            justify-content: space-between;
             height: 100%;
         }
 
-        /* ========== HEADER COM LOGO E NOME LADO A LADO ========== */
+        /* ========== HEADER COM LOGO E NOME ========== */
         .station-header {
             display: flex;
             align-items: center;
@@ -113,7 +112,7 @@
             height: 55px;
             object-fit: cover;
             border-radius: 18px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .station-title h1 {
@@ -162,12 +161,12 @@
             50% { opacity: 0.3; transform: scale(1.2); }
         }
 
-        /* ========== QUADRADO DA IMAGEM NO CENTRO ========== */
+        /* ========== QUADRADO DA IMAGEM (mais para baixo) ========== */
         .slideshow-section {
             position: relative;
             width: 100%;
-            max-width: 260px;
-            margin: 0 auto;
+            max-width: 240px;
+            margin: 30px auto 20px;
             flex-shrink: 0;
         }
 
@@ -176,9 +175,9 @@
             z-index: 2;
             width: 100%;
             aspect-ratio: 1 / 1;
-            border-radius: 28px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.4);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
         }
 
         .playing .image-frame {
@@ -186,9 +185,9 @@
         }
 
         @keyframes framePulse {
-            0% { box-shadow: 0 20px 35px rgba(0,0,0,0.4); }
-            50% { box-shadow: 0 20px 35px rgba(255,140,0,0.2); }
-            100% { box-shadow: 0 20px 35px rgba(0,0,0,0.4); }
+            0% { box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+            50% { box-shadow: 0 15px 30px rgba(255,140,0,0.2); }
+            100% { box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
         }
 
         .slideshow-img {
@@ -200,15 +199,15 @@
         .image-caption {
             text-align: center;
             margin-top: 8px;
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.45);
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.4);
             font-weight: 500;
         }
 
-        /* ========== INFORMAÇÕES DA MÚSICA ========== */
-        .track-info {
+        /* ========== TEXTO VARIÁVEL NO LUGAR DAS INFORMAÇÕES FALSAS ========== */
+        .variable-text {
             text-align: center;
-            margin: 5px 0;
+            margin: 10px 0 15px;
             flex-shrink: 0;
         }
 
@@ -221,7 +220,7 @@
             backdrop-filter: blur(4px);
             padding: 4px 14px;
             border-radius: 30px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             border: 0.5px solid rgba(255,80,80,0.3);
         }
 
@@ -245,18 +244,12 @@
             letter-spacing: 1px;
         }
 
-        .track-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.3px;
-        }
-
-        .track-artist {
-            font-size: 0.85rem;
-            color: #FFD966;
-            margin-top: 4px;
+        .dynamic-message {
+            font-size: 1rem;
             font-weight: 500;
+            color: #FFD966;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         /* ========== CONTROLES ========== */
@@ -265,7 +258,7 @@
             justify-content: center;
             align-items: center;
             gap: 30px;
-            margin: 8px 0;
+            margin: 10px 0 5px;
             flex-shrink: 0;
         }
 
@@ -415,12 +408,11 @@
 
         /* Telas pequenas */
         @media (max-width: 380px) {
-            .inner { padding: 15px 18px; gap: 16px; }
+            .inner { padding: 15px 18px; }
             .logo-img { width: 48px; height: 48px; }
             .station-title h1 { font-size: 1.3rem; }
-            .slideshow-section { max-width: 200px; }
-            .track-title { font-size: 1rem; }
-            .track-artist { font-size: 0.75rem; }
+            .slideshow-section { max-width: 200px; margin: 20px auto; }
+            .dynamic-message { font-size: 0.85rem; }
             #playPauseBtn { width: 62px; height: 62px; font-size: 1.4rem; }
             .ctrl-btn { width: 44px; height: 44px; font-size: 1rem; }
             .social-links a { font-size: 1.2rem; gap: 28px; }
@@ -428,11 +420,11 @@
 
         /* Telas maiores */
         @media (min-width: 414px) and (min-height: 800px) {
-            .inner { padding: 30px 24px; gap: 28px; }
+            .inner { padding: 30px 24px; }
             .logo-img { width: 65px; height: 65px; }
             .station-title h1 { font-size: 1.8rem; }
-            .slideshow-section { max-width: 280px; }
-            .track-title { font-size: 1.4rem; }
+            .slideshow-section { max-width: 260px; margin: 40px auto 25px; }
+            .dynamic-message { font-size: 1.2rem; }
             #playPauseBtn { width: 80px; height: 80px; font-size: 1.8rem; }
             .ctrl-btn { width: 55px; height: 55px; font-size: 1.3rem; }
         }
@@ -446,7 +438,7 @@
 
     <div class="glass-radio" id="radioContainer">
         <div class="inner">
-            <!-- Header com logo e nome lado a lado -->
+            <!-- Header com logo e nome -->
             <div class="station-header">
                 <div class="logo-area">
                     <img src="logo.png" class="logo-img" alt="NaldoA Play" onerror="this.src='https://via.placeholder.com/55?text=NP'">
@@ -461,7 +453,7 @@
                 </div>
             </div>
 
-            <!-- QUADRADO DA IMAGEM NO CENTRO -->
+            <!-- QUADRADO DA IMAGEM (mais para baixo) -->
             <div class="slideshow-section">
                 <div class="image-frame" id="imageFrame">
                     <img id="slideshowImg" class="slideshow-img" src="img/IMG_4484.jpg" alt="Imagem">
@@ -469,14 +461,13 @@
                 <div class="image-caption" id="imageCaption">Momento NaldoA Play</div>
             </div>
 
-            <!-- Informações da música -->
-            <div class="track-info">
+            <!-- TEXTO VARIÁVEL (sem informações falsas) -->
+            <div class="variable-text">
                 <div class="live-badge-inline">
                     <span class="live-dot-small"></span>
-                    <span class="live-text">TRANSMISSÃO AO VIVO</span>
+                    <span class="live-text">AO VIVO</span>
                 </div>
-                <div class="track-title" id="trackTitle">SINTONIZANDO...</div>
-                <div class="track-artist" id="trackArtist">NALDOA PLAY</div>
+                <div class="dynamic-message" id="dynamicMessage">NALDOA PLAY</div>
             </div>
 
             <!-- Controles -->
@@ -525,18 +516,29 @@
             imagens.push(`img/IMG_${i}.jpg`);
         }
         
+        // Frases que vão variar
+        const frases = [
+            "AO VIVO",
+            "NALDOA PLAY",
+            "ELETRO HITS",
+            "TOP 10",
+            "SÓ TOCA AS MELHORES",
+            "NALDOA"
+        ];
+        
         let currentImageIndex = 0;
         let slideshowInterval = null;
+        let currentFraseIndex = 0;
+        let fraseInterval = null;
         
         const bgBlur = document.getElementById('bgBlur');
         const slideshowImg = document.getElementById('slideshowImg');
         const imageCaption = document.getElementById('imageCaption');
+        const dynamicMessage = document.getElementById('dynamicMessage');
         
         function updateImage(index) {
             const imgPath = imagens[index];
-            // Atualiza a imagem do quadrado
             slideshowImg.src = imgPath;
-            // Atualiza o fundo com blur (MESMA IMAGEM)
             bgBlur.style.backgroundImage = `url(${imgPath})`;
             bgBlur.style.backgroundSize = 'cover';
             bgBlur.style.backgroundPosition = 'center';
@@ -559,8 +561,21 @@
             if (slideshowInterval) clearInterval(slideshowInterval);
         }
         
-        let currentMusicIndex = 0;
-        let musicIntervalId = null;
+        function rotateFrase() {
+            dynamicMessage.textContent = frases[currentFraseIndex];
+            currentFraseIndex = (currentFraseIndex + 1) % frases.length;
+        }
+        
+        function startFraseRotation() {
+            if (fraseInterval) clearInterval(fraseInterval);
+            rotateFrase();
+            fraseInterval = setInterval(() => rotateFrase(), 5000);
+        }
+        
+        function stopFraseRotation() {
+            if (fraseInterval) clearInterval(fraseInterval);
+        }
+        
         let progressInterval = null;
         let reconnectAttempts = 0;
         
@@ -575,8 +590,6 @@
         const playIcon = document.getElementById('playIcon');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-        const trackTitle = document.getElementById('trackTitle');
-        const trackArtist = document.getElementById('trackArtist');
         const progressBar = document.getElementById('progressBar');
         const progressArea = document.getElementById('progressArea');
         const currentTimeSpan = document.getElementById('currentTime');
@@ -584,42 +597,6 @@
         const volumeSlider = document.getElementById('volumeSlider');
         const statusMsg = document.getElementById('statusMsg');
         const radioContainer = document.getElementById('radioContainer');
-        
-        const playlistDemo = [
-            { title: "BATIDÃO EXPLOSIVO", artist: "DJ NALDOA" },
-            { title: "ELETRO HITS 2025", artist: "NALDOA PLAY" },
-            { title: "SÓ AS TOP", artist: "RÁDIO NALDOA" },
-            { title: "PISTA QUENTE", artist: "DJ NALDOA" },
-            { title: "FUNK MANDELADO", artist: "NALDOA SELECT" },
-            { title: "PAGODE DO NALDOA", artist: "SAMBA AO VIVO" },
-            { title: "SERTANEJO TOP", artist: "NALDOA PLAY" },
-            { title: "ROCK IN RIO", artist: "NALDOA" }
-        ];
-        
-        function rotateTrackInfo() {
-            const track = playlistDemo[currentMusicIndex % playlistDemo.length];
-            trackTitle.textContent = track.title;
-            trackArtist.textContent = track.artist;
-            currentMusicIndex++;
-            
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title,
-                    artist: track.artist,
-                    album: 'NaldoA Play',
-                    artwork: [{ src: imagens[currentImageIndex], sizes: '512x512' }]
-                });
-            }
-        }
-        
-        function startMusicRotation() {
-            if (musicIntervalId) clearInterval(musicIntervalId);
-            musicIntervalId = setInterval(() => { if (isPlaying) rotateTrackInfo(); }, 30000);
-        }
-        
-        function stopMusicRotation() {
-            if (musicIntervalId) clearInterval(musicIntervalId);
-        }
         
         function startProgressAnimation() {
             if (progressInterval) clearInterval(progressInterval);
@@ -652,7 +629,7 @@
                 radioContainer.classList.remove('playing');
                 statusMsg.textContent = "⏸️ Pausado";
                 stopSlideshow();
-                stopMusicRotation();
+                stopFraseRotation();
                 stopProgressAnimation();
             } else {
                 audio.play().then(() => {
@@ -660,24 +637,16 @@
                     playIcon.className = "fas fa-stop";
                     playBtn.classList.add('playing');
                     radioContainer.classList.add('playing');
-                    statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+                    statusMsg.textContent = "🎧 TRANSMISSÃO AO VIVO 🎧";
                     startSlideshow();
-                    startMusicRotation();
+                    startFraseRotation();
                     startProgressAnimation();
-                    rotateTrackInfo();
                     reconnectAttempts = 0;
                 }).catch((err) => {
                     console.log(err);
                     statusMsg.textContent = "🔊 Clique novamente para ouvir";
                 });
             }
-        }
-        
-        function nextTrackSimulate() {
-            if (!isPlaying) return;
-            rotateTrackInfo();
-            statusMsg.textContent = "🎵 Próxima faixa";
-            setTimeout(() => { if (isPlaying) statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧"; }, 2000);
         }
         
         function handleError() {
@@ -693,17 +662,29 @@
         volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
         audio.volume = 0.8;
         audio.addEventListener('playing', () => {
-            statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+            statusMsg.textContent = "🎧 TRANSMISSÃO AO VIVO 🎧";
             reconnectAttempts = 0;
         });
         audio.addEventListener('error', handleError);
         audio.addEventListener('stalled', handleError);
         
         playBtn.addEventListener('click', togglePlay);
-        nextBtn.addEventListener('click', nextTrackSimulate);
-        prevBtn.addEventListener('click', nextTrackSimulate);
+        nextBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                rotateFrase();
+                statusMsg.textContent = "🎵 Próxima faixa";
+                setTimeout(() => { if (isPlaying) statusMsg.textContent = "🎧 TRANSMISSÃO AO VIVO 🎧"; }, 2000);
+            }
+        });
+        prevBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                rotateFrase();
+                statusMsg.textContent = "🎵 Faixa anterior";
+                setTimeout(() => { if (isPlaying) statusMsg.textContent = "🎧 TRANSMISSÃO AO VIVO 🎧"; }, 2000);
+            }
+        });
         
-        // Inicializar primeira imagem
+        // Inicializar
         updateImage(0);
         audio.load();
         statusMsg.textContent = "🔊 Clique no play para ouvir";
@@ -711,7 +692,6 @@
         if ('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => togglePlay());
             navigator.mediaSession.setActionHandler('pause', () => togglePlay());
-            navigator.mediaSession.setActionHandler('nexttrack', () => nextTrackSimulate());
         }
     </script>
 </body>
