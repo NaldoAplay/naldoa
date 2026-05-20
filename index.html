@@ -135,7 +135,7 @@
             letter-spacing: 1px;
         }
 
-        /* Botão da TV */
+        /* Botão da TV - versão simplificada */
         .tv-btn {
             background: rgba(255,215,0,0.15);
             backdrop-filter: blur(4px);
@@ -155,31 +155,6 @@
         .tv-btn:active {
             transform: scale(0.96);
             background: rgba(255,215,0,0.3);
-        }
-
-        .live-badge {
-            background: rgba(231, 76, 60, 0.85);
-            backdrop-filter: blur(4px);
-            padding: 7px 16px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .live-dot {
-            width: 9px;
-            height: 9px;
-            background: #ff5e5e;
-            border-radius: 50%;
-            animation: livePulse 1.2s infinite;
-        }
-
-        @keyframes livePulse {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0.2; }
         }
 
         .slideshow-section {
@@ -438,13 +413,7 @@
                     <p>A SUA RÁDIO WEB!</p>
                 </div>
             </div>
-            <div style="display: flex; gap: 8px;">
-                <a href="tv.html" class="tv-btn"><i class="fas fa-tv"></i> EXNA TV</a>
-                <div class="live-badge">
-                    <span class="live-dot"></span>
-                    <span>AO VIVO</span>
-                </div>
-            </div>
+            <a href="tv.html" class="tv-btn"><i class="fas fa-tv"></i> TV AO VIVO</a>
         </div>
 
         <div class="slideshow-section">
