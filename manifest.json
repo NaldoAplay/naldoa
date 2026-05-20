@@ -1,19 +1,26 @@
 {
-  "name": "EXNA FM",
-  "short_name": "EXNA FM",
-  "description": "A rádio que toca todas!",
-  "start_url": ".",
+  "name": "NaldoA Play",
+  "short_name": "NaldoA Play",
+  "description": "A sua rádio web! 24h no ar",
+  "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0a0f1e",
-  "theme_color": "#ff8c00",
+  "theme_color": "#FF8C00",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192x192?text=EXNA",
+      "src": "logo.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://via.placeholder.com/512x512?text=EXNA",
+      "src": "logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }
