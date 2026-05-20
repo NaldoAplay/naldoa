@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
+    /* Reset e Variáveis de Interface Premium */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -32,6 +33,7 @@
       position: relative;
     }
 
+    /* Blur de Fundo Dinâmico que acompanha as cores da Capa do iTunes */
     .bg-blur {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -43,6 +45,7 @@
       transition: background-image 1s ease-in-out;
     }
 
+    /* --- CABEÇALHO DO APP (Ajustado para Dynamic Island / Notch) --- */
     header {
       display: flex;
       justify-content: space-between;
@@ -61,6 +64,7 @@
       gap: 12px;
     }
 
+    /* Truque do Blend Mode: camufla o fundo branco original da imagem com o fundo escuro da rádio */
     .logo-img {
       width: 42px;
       height: 42px;
@@ -79,6 +83,7 @@
       line-height: 1.1;
     }
 
+    /* Slogan pequeno e integrado logo abaixo do nome da rádio */
     .titulo-radio p {
       font-size: 9px;
       color: #ff2d55;
@@ -98,8 +103,15 @@
       font-size: 18px;
       text-decoration: none;
       opacity: 0.8;
+      transition: color 0.2s, transform 0.2s;
     }
 
+    .redes-sociais a:hover {
+      color: #ff2d55;
+      transform: scale(1.1);
+    }
+
+    /* --- PLAYER CONTAINER CENTRAL --- */
     main {
       flex: 1;
       display: flex;
@@ -173,6 +185,7 @@
       100% { opacity: 0.3; }
     }
 
+    /* Letreiro de Mensagens Institucionais (Marquee) */
     .container-letreiro {
       width: 100%;
       overflow: hidden;
@@ -200,6 +213,7 @@
       font-weight: 600;
     }
 
+    /* Botão Play/Pause Perfeitamente Centralizado */
     .controles {
       display: flex;
       justify-content: center;
@@ -221,8 +235,14 @@
       cursor: pointer;
       box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
       margin: 0 auto; 
+      transition: transform 0.2s;
     }
 
+    .btn-play-live:active {
+      transform: scale(0.92);
+    }
+
+    /* --- RODAPÉ ELEVADO (Protegido contra barras de navegação do Safari) --- */
     footer {
       text-align: center;
       padding: 10px 14px calc(24px + env(safe-area-inset-bottom)) 14px;
@@ -300,9 +320,10 @@
     let indiceAtualGlobal = 0;
     let jaSintonizouPrimeiraVez = false;
     
-    // Média matemática estimada de 3 minutos APENAS para calcular a entrada sintonizada inicial
+    // Média matemática de 3 minutos para posicionamento da grade no relógio
     const DURACAO_FAIXA_ESTIMADA = 180; 
 
+    // Mensagens institucionais da programação
     const slogansRadio = [
       "EXNA FM - A RÁDIO QUE TOCA TODAS!",
       "CONEXÃO TOTAL • SÓ AS MELHORES CONSTANTEMENTE",
@@ -312,6 +333,7 @@
     let indexFrase = 0;
     const termosCapas = ["electronic-music", "house-music", "progressive-house", "trance", "dance-hits", "techno-remix"];
 
+    // 1. Carrega os arquivos brutos diretamente da raiz do Archive
     async function carregarAutoDJ() {
       try {
         const resposta = await fetch(urlArchiveJson);
@@ -322,6 +344,7 @@
           if (arq.name.endsWith('.mp3')) {
             playlistMp3.push({
               id: arq.name,
+              // O uso de '/download/' força o Archive a servir seu arquivo original intocado na qualidade máxima de som (320kbps/256kbps)
               url: `https://archive.org/download/exna-fm/${arq.name}`
             });
           }
@@ -330,9 +353,14 @@
         if (playlistMp3.length > 0) {
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
           
-          // Prepara o ponto inicial sintonizado ao carregar a página
+          // Calcula onde a grade mundial estaria rodando
           calcularPontoDeSintoniaInicial();
           
+          // Se o ouvinte não deu play ainda, mantém a linha do tempo correndo solta em silêncio de fundo
+          setInterval(() => {
+            if (audio.paused && !jaSintonizouPrimeiraVez) calcularPontoDeSintoniaInicial();
+          }, 1000);
+
           setInterval(alternarSloganTexto, 14000);
         }
       } catch (erro) {
@@ -346,6 +374,7 @@
       txtFrase.innerText = slogansRadio[indexFrase];
     }
 
+    // 2. Coleta artes em HD via iTunes API vinculadas estaticamente ao ID da faixa
     async function buscarCapaDoiTunes(sementeId) {
       try {
         const indexTermo = sementeId % termosCapas.length;
@@ -364,7 +393,7 @@
       }
     }
 
-    // --- MODO 1: CALCULA O AO VIVO SÓ NO MOMENTO DA ENTRADA ---
+    // --- ENGENHARIA DO AO VIVO (MODO 1: ENTRADA) ---
     function calcularPontoDeSintoniaInicial() {
       if (jaSintonizouPrimeiraVez) return;
 
@@ -384,14 +413,27 @@
       buscarCapaDoiTunes(indiceAtualGlobal);
     }
 
+    // Previne congelamento ou atrasos de stream caso o iOS suspenda o Safari em background
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && !audio.paused && jaSintonizouPrimeiraVez) {
+        // Nada de mudar de faixa abruptamente! Apenas ajustamos pequenos delays de buffer
+        const tempoAgora = new Date();
+        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+        const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
+        
+        if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 5 && !jaSintonizouPrimeiraVez) {
+          audio.currentTime = segundoDeEntradaNaMusica;
+        }
+      }
+    });
+
     function comandarPlayer() {
       if (audio.paused) {
-        // Se for o primeiro clique do usuário ao entrar na página, força a sincronia ao vivo do relógio
         if (!jaSintonizouPrimeiraVez) {
           const tempoAgora = new Date();
           const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
           audio.currentTime = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
-          jaSintonizouPrimeiraVez = true; // Trava para não cortar mais baseado no relógio!
+          jaSintonizouPrimeiraVez = true; // Desativa o relógio! A rádio agora entra em modo fluxo ininterrupto de áudio!
         }
 
         audio.play().then(() => {
@@ -406,6 +448,7 @@
       }
     }
 
+    // Injeta as informações corretas e imagem em HD na Central de Controle e Tela de Bloqueio do iOS
     function atualizarMetadadosSistema() {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -422,15 +465,13 @@
       }
     }
 
-    // --- MODO 2: FLUXO CONTÍNUO REAL (Sem interrupções e sem cortes de tempo) ---
-    // O evento 'ended' avisa nativamente o iOS que o arquivo acabou por completo, mantendo a rádio acordada em background.
+    // --- AUTODJ CONTÍNUO (MODO 2: REPRODUÇÃO SEM CORTES) ---
+    // O evento nativo 'ended' aguarda a música terminar 100% de seu tamanho e puxa a próxima do segundo zero, mantendo o iOS acordado.
     audio.addEventListener('ended', () => {
-      // Avança para a próxima da lista em loop contínuo e orgânico
       indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
       const proximaMusica = playlistMp3[indiceAtualGlobal];
       
-      audio.src = proximaMusica.url;
-      // Não mexemos no currentTime aqui, a música nova começará obrigatoriamente do segundo 0!
+      audio.src = proximaMusica.url; 
       buscarCapaDoiTunes(indiceAtualGlobal);
 
       audio.play().then(() => {
