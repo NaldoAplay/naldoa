@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EXNA FM - Player Embutido</title>
+  <title>RÁDIO EXNA FM</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
@@ -146,7 +146,7 @@
 
   <div class="widget-container">
     <div class="info-bloco">
-      <img src="logo-quadrada.png" alt="EXNA" class="logo-widget" id="imgLogo">
+      <img src="logo-quadrada.png" alt="EXNA" class="logo-widget">
       <div class="textos">
         <h1>EXNA FM</h1>
         <div class="marquee-container">
@@ -247,13 +247,17 @@
 
     function atualizarMetadadosBloqueio() {
       if ('mediaSession' in navigator) {
-        // "AO VIVO" injetado perfeitamente na tag 'artist'
         navigator.mediaSession.metadata = new MediaMetadata({
           title: "EXNA FM - A Rádio que toca todas!",
           artist: 'AO VIVO', 
           album: 'EXNA FM - A Rádio que toca todas!',
           artwork: [
-            { src: window.location.origin + window.location.pathname.replace('player.html', 'logo-quadrada.png'), sizes: '600x600', type: 'image/png' }
+            { 
+              // Link direto absoluto e blindado contra as restrições de iFrame do navegador
+              src: 'https://naldoaplay.github.io/exna-fm/logo-quadrada.png', 
+              sizes: '600x600', 
+              type: 'image/png' 
+            }
           ]
         });
 
