@@ -2,7 +2,16 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#0a0f1e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EXNA TV">
+    
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    
     <title>EXNA TV - Canais ao Vivo</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,7 +30,6 @@
             overflow: hidden;
         }
 
-        /* Layout principal - sem scroll na grade, apenas grade rolável */
         .tv-container {
             display: flex;
             flex-direction: column;
@@ -29,7 +37,6 @@
             background: radial-gradient(ellipse at 30% 40%, #0f1422, #05080c);
         }
 
-        /* Header fixo */
         .tv-header {
             background: rgba(10, 15, 30, 0.85);
             backdrop-filter: blur(15px);
@@ -65,21 +72,26 @@
         }
 
         .back-link {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,215,0,0.15);
+            backdrop-filter: blur(4px);
             padding: 8px 16px;
-            border-radius: 30px;
+            border-radius: 40px;
             text-decoration: none;
             color: #FFD966;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             transition: 0.2s;
+            border: 0.5px solid rgba(255,215,0,0.3);
         }
 
-        .back-link:hover {
-            background: #FFD966;
-            color: #0a0f1e;
+        .back-link:active {
+            transform: scale(0.96);
+            background: rgba(255,215,0,0.3);
         }
 
-        /* Player fixo no topo (modo compacto) */
         .player-section {
             background: #00000055;
             backdrop-filter: blur(12px);
@@ -142,7 +154,7 @@
 
         .channel-name {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             flex: 1;
         }
 
@@ -162,7 +174,6 @@
             color: #0a0f1e;
         }
 
-        /* Lista de canais rolável */
         .channels-section {
             flex: 1;
             overflow-y: auto;
@@ -241,7 +252,6 @@
             color: #aaa;
         }
 
-        /* Tabs de filtro */
         .tabs {
             display: flex;
             gap: 12px;
@@ -270,22 +280,22 @@
             .channels-section { padding: 10px 15px; }
             .channels-grid { grid-template-columns: 1fr; }
             .channel-name { font-size: 0.9rem; }
+            .back-link { padding: 6px 12px; font-size: 0.7rem; }
+            .logo-area h1 { font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="tv-container">
-    <!-- Header -->
     <div class="tv-header">
         <div class="logo-area">
             <img src="logo.png" class="logo-img" alt="Logo">
             <h1>EXNA TV</h1>
         </div>
-        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Voltar para Rádio</a>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Rádio NaldoA Play</a>
     </div>
 
-    <!-- Player fixo -->
     <div class="player-section">
         <div class="player-container">
             <div class="video-wrapper">
@@ -300,7 +310,6 @@
         </div>
     </div>
 
-    <!-- Lista de canais -->
     <div class="channels-section">
         <div class="tabs">
             <button class="tab-btn active" data-filter="all">📺 Todos</button>
@@ -313,10 +322,6 @@
 </div>
 
 <script>
-    // ============================================================
-    // EXNA TV - IPTV Player com Favoritos
-    // ============================================================
-    
     const M3U_URL = 'https://iptv-org.github.io/iptv/countries/br.m3u';
     
     let allChannels = [];
@@ -331,7 +336,6 @@
     const currentFavBtn = document.getElementById('currentFavBtn');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     
-    // Carregar favoritos do localStorage
     function loadFavorites() {
         const saved = localStorage.getItem('exna_tv_favorites');
         if (saved) {
@@ -382,21 +386,19 @@
         updateCurrentFavoriteButton();
     }
     
-    // Play do canal
     function playChannel(channel) {
         currentChannel = channel;
         video.src = channel.url;
         video.play().catch(e => console.log('Auto-play bloqueado, clique no play do player'));
         
         currentNameSpan.textContent = channel.name;
-        if (channel.logo) {
+        if (channel.logo && channel.logo.startsWith('http')) {
             currentLogoImg.src = channel.logo;
         } else {
             currentLogoImg.src = 'logo.png';
         }
         updateCurrentFavoriteButton();
         
-        // Marcar como ativo na lista
         document.querySelectorAll('.channel-card').forEach(card => {
             card.classList.remove('playing');
             if (card.dataset.id === channel.id) {
@@ -405,7 +407,6 @@
         });
     }
     
-    // Processar arquivo M3U
     async function fetchChannels() {
         try {
             const response = await fetch(M3U_URL);
@@ -418,7 +419,6 @@
             for (let line of lines) {
                 line = line.trim();
                 if (line.startsWith('#EXTINF:')) {
-                    // Extrair informações
                     const match = line.match(/#EXTINF:-?\d+\s+(?:tvg-logo="([^"]*)"\s+)?(?:group-title="([^"]*)"\s+)?(?:tvg-id="([^"]*)"\s+)?(?:tvg-name="([^"]*)"\s+)?(.*)/i);
                     if (match) {
                         const logo = match[1] || '';
@@ -437,7 +437,6 @@
                             url: ''
                         };
                     } else {
-                        // Fallback
                         const nameMatch = line.match(/#EXTINF:-?\d+,\s*(.*)/);
                         if (nameMatch && !current) {
                             current = {
@@ -458,7 +457,6 @@
                 }
             }
             
-            // Fallback: se não encontrou canais, adiciona alguns testes
             if (channels.length === 0) {
                 channels.push({
                     id: 'teste1',
@@ -505,10 +503,8 @@
             </div>
         `).join('');
         
-        // Adicionar eventos aos cards
         document.querySelectorAll('.channel-card').forEach(card => {
             card.addEventListener('click', (e) => {
-                // Se clicou no ícone de favorito, não troca de canal
                 if (e.target.closest('.card-fav')) return;
                 
                 const channel = {
@@ -536,7 +532,6 @@
         });
     }
     
-    // Tela cheia
     function toggleFullscreen() {
         const wrapper = document.querySelector('.video-wrapper');
         if (!document.fullscreenElement) {
@@ -548,14 +543,12 @@
     
     fullscreenBtn.addEventListener('click', toggleFullscreen);
     
-    // Favorito do canal atual
     currentFavBtn.addEventListener('click', () => {
         if (currentChannel) {
             toggleFavorite(currentChannel);
         }
     });
     
-    // Filtros por tab
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -565,11 +558,9 @@
         });
     });
     
-    // Inicializar
     loadFavorites();
     fetchChannels();
     
-    // Media Session (tela de bloqueio)
     if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', () => video.play());
         navigator.mediaSession.setActionHandler('pause', () => video.pause());
