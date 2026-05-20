@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.json">
     
     <title>EXNA TV - Canais ao Vivo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -28,145 +28,142 @@
             color: #fff;
             height: 100vh;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
         }
 
-        .tv-container {
+        /* Container principal - flex column */
+        .tv-app {
             display: flex;
             flex-direction: column;
             height: 100vh;
+            width: 100%;
             background: radial-gradient(ellipse at 30% 40%, #0f1422, #05080c);
         }
 
+        /* Header fixo */
         .tv-header {
-            background: rgba(10, 15, 30, 0.85);
+            background: rgba(10, 15, 30, 0.95);
             backdrop-filter: blur(15px);
-            padding: 12px 20px;
+            padding: 10px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
             border-bottom: 1px solid rgba(255,215,0,0.2);
+            flex-shrink: 0;
             z-index: 10;
         }
 
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .logo-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+        .logo-area img {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
         }
 
         .logo-area h1 {
             font-family: 'Orbitron', monospace;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             background: linear-gradient(135deg, #FFD700, #FFA500);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        .back-link {
+        .back-btn {
             background: rgba(255,215,0,0.15);
-            backdrop-filter: blur(4px);
-            padding: 8px 16px;
-            border-radius: 40px;
+            padding: 6px 14px;
+            border-radius: 30px;
             text-decoration: none;
             color: #FFD966;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: 0.2s;
+            gap: 6px;
             border: 0.5px solid rgba(255,215,0,0.3);
         }
 
-        .back-link:active {
-            transform: scale(0.96);
-            background: rgba(255,215,0,0.3);
-        }
-
-        .player-section {
+        /* Player - tamanho compacto e proporcional */
+        .player-area {
             background: #00000055;
-            backdrop-filter: blur(12px);
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            flex-shrink: 0;
         }
 
-        .player-container {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .video-wrapper {
+        .video-container {
             position: relative;
             width: 100%;
-            background: #000;
+            max-width: 100%;
+            margin: 0 auto;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            background: #000;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
         #videoPlayer {
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: #000;
+            display: block;
         }
 
         .fullscreen-btn {
             position: absolute;
-            bottom: 12px;
-            right: 12px;
+            bottom: 10px;
+            right: 10px;
             background: rgba(0,0,0,0.6);
             border: none;
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             cursor: pointer;
+            font-size: 0.8rem;
             z-index: 20;
-            font-size: 1rem;
         }
 
-        .channel-info {
-            margin-top: 10px;
+        .channel-meta {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 0 4px;
         }
 
-        .channel-logo {
-            width: 45px;
-            height: 45px;
+        .channel-meta img {
+            width: 36px;
+            height: 36px;
             object-fit: contain;
             background: #1e1e2e;
-            border-radius: 10px;
-            padding: 5px;
+            border-radius: 8px;
+            padding: 4px;
         }
 
-        .channel-name {
-            font-weight: 700;
-            font-size: 1rem;
+        .channel-meta span {
             flex: 1;
+            font-weight: 600;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .fav-btn {
             background: rgba(255,255,255,0.1);
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             color: #FFD966;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.85rem;
         }
 
         .fav-btn.active {
@@ -174,18 +171,43 @@
             color: #0a0f1e;
         }
 
-        .channels-section {
+        /* Lista de canais - ocupando o restante da tela */
+        .channels-area {
             flex: 1;
             overflow-y: auto;
-            padding: 15px 20px;
+            padding: 12px;
+            -webkit-overflow-scrolling: touch;
         }
 
+        /* Tabs de filtro */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 30px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            background: #FFD966;
+            color: #0a0f1e;
+        }
+
+        /* Grid de canais - uma coluna no celular, duas em telas maiores */
         .channels-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 10px;
-            max-width: 1200px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .channel-card {
@@ -202,31 +224,34 @@
         }
 
         .channel-card:hover {
-            background: rgba(255,215,0,0.15);
-            transform: translateX(4px);
+            background: rgba(255,215,0,0.1);
         }
 
         .channel-card.playing {
-            background: rgba(255,215,0,0.25);
+            background: rgba(255,215,0,0.2);
             border-color: #FFD966;
         }
 
         .card-logo {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             object-fit: contain;
             background: #1e1e2e;
             border-radius: 8px;
-            padding: 5px;
+            padding: 4px;
         }
 
         .card-info {
             flex: 1;
+            min-width: 0;
         }
 
         .card-title {
             font-weight: 600;
             font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .card-group {
@@ -236,9 +261,9 @@
 
         .card-fav {
             color: rgba(255,255,255,0.3);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            width: 30px;
+            width: 32px;
             text-align: center;
         }
 
@@ -250,73 +275,77 @@
             text-align: center;
             padding: 40px;
             color: #aaa;
+            font-size: 0.85rem;
         }
 
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+        /* Scrollbar bonita */
+        .channels-area::-webkit-scrollbar {
+            width: 4px;
         }
 
-        .tab-btn {
+        .channels-area::-webkit-scrollbar-track {
             background: rgba(255,255,255,0.05);
-            border: none;
-            padding: 6px 16px;
-            border-radius: 30px;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 0.8rem;
         }
 
-        .tab-btn.active {
+        .channels-area::-webkit-scrollbar-thumb {
             background: #FFD966;
-            color: #0a0f1e;
+            border-radius: 4px;
         }
 
-        @media (max-width: 600px) {
-            .tv-header { padding: 10px 15px; }
-            .player-section { padding: 10px 15px; }
-            .channels-section { padding: 10px 15px; }
-            .channels-grid { grid-template-columns: 1fr; }
-            .channel-name { font-size: 0.9rem; }
-            .back-link { padding: 6px 12px; font-size: 0.7rem; }
-            .logo-area h1 { font-size: 1.1rem; }
+        /* Ajustes para telas maiores */
+        @media (min-width: 600px) {
+            .channels-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .tv-header { padding: 12px 20px; }
+            .player-area { padding: 16px 20px; }
+            .channels-area { padding: 16px 20px; }
+            .logo-area h1 { font-size: 1.4rem; }
+            .logo-area img { width: 42px; height: 42px; }
+        }
+
+        @media (min-width: 900px) {
+            .channels-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="tv-container">
+<div class="tv-app">
+    <!-- Header -->
     <div class="tv-header">
         <div class="logo-area">
-            <img src="logo.png" class="logo-img" alt="Logo">
+            <img src="logo.png" alt="Logo">
             <h1>EXNA TV</h1>
         </div>
-        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Rádio NaldoA Play</a>
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Rádio</a>
     </div>
 
-    <div class="player-section">
-        <div class="player-container">
-            <div class="video-wrapper">
-                <video id="videoPlayer" controls autoplay playsinline></video>
-                <button id="fullscreenBtn" class="fullscreen-btn"><i class="fas fa-expand"></i></button>
-            </div>
-            <div class="channel-info" id="channelInfo">
-                <img id="currentLogo" class="channel-logo" src="" alt="Logo">
-                <span id="currentName" class="channel-name">Selecione um canal</span>
-                <button id="currentFavBtn" class="fav-btn"><i class="far fa-star"></i></button>
-            </div>
+    <!-- Player -->
+    <div class="player-area">
+        <div class="video-container">
+            <video id="videoPlayer" controls autoplay playsinline></video>
+            <button id="fullscreenBtn" class="fullscreen-btn"><i class="fas fa-expand"></i></button>
+        </div>
+        <div class="channel-meta" id="channelMeta">
+            <img id="currentLogo" src="logo.png" alt="Logo">
+            <span id="currentName">Selecione um canal</span>
+            <button id="currentFavBtn" class="fav-btn"><i class="far fa-star"></i></button>
         </div>
     </div>
 
-    <div class="channels-section">
+    <!-- Lista de canais -->
+    <div class="channels-area">
         <div class="tabs">
             <button class="tab-btn active" data-filter="all">📺 Todos</button>
             <button class="tab-btn" data-filter="fav">⭐ Favoritos</button>
         </div>
         <div id="channelsList" class="channels-grid">
-            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando canais do Brasil...</div>
+            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando canais...</div>
         </div>
     </div>
 </div>
@@ -389,7 +418,7 @@
     function playChannel(channel) {
         currentChannel = channel;
         video.src = channel.url;
-        video.play().catch(e => console.log('Auto-play bloqueado, clique no play do player'));
+        video.play().catch(e => console.log('Clique no play do player'));
         
         currentNameSpan.textContent = channel.name;
         if (channel.logo && channel.logo.startsWith('http')) {
@@ -436,17 +465,6 @@
                             logo: logo,
                             url: ''
                         };
-                    } else {
-                        const nameMatch = line.match(/#EXTINF:-?\d+,\s*(.*)/);
-                        if (nameMatch && !current) {
-                            current = {
-                                id: nameMatch[1].replace(/\s/g, '_'),
-                                name: nameMatch[1],
-                                group: 'Geral',
-                                logo: '',
-                                url: ''
-                            };
-                        }
                     }
                 } else if (line && !line.startsWith('#') && current) {
                     current.url = line;
@@ -459,8 +477,8 @@
             
             if (channels.length === 0) {
                 channels.push({
-                    id: 'teste1',
-                    name: 'Canal Exemplo - M3U não carregou',
+                    id: 'demo1',
+                    name: 'Canal Demo - M3U não carregou',
                     group: 'Informação',
                     logo: '',
                     url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
@@ -474,8 +492,7 @@
                 playChannel(allChannels[0]);
             }
         } catch (error) {
-            console.error('Erro ao carregar canais:', error);
-            channelsDiv.innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar lista de canais. Verifique sua conexão.</div>`;
+            channelsDiv.innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar lista de canais.</div>`;
         }
     }
     
@@ -533,9 +550,9 @@
     }
     
     function toggleFullscreen() {
-        const wrapper = document.querySelector('.video-wrapper');
+        const container = document.querySelector('.video-container');
         if (!document.fullscreenElement) {
-            wrapper.requestFullscreen().catch(err => console.log(err));
+            container.requestFullscreen().catch(err => console.log(err));
         } else {
             document.exitFullscreen();
         }
