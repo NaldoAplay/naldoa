@@ -22,40 +22,37 @@
     }
 
     body {
-      background: radial-gradient(circle at top left, #140526, #3b092a, #03000a);
-      background-size: 400% 400%;
-      animation: fundoFluido 20s ease infinite;
+      background: #0a0218;
       height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       color: #fff;
-      overflow: hidden;
+      /* Permite rolar a tela livremente no iPhone e iPad */
+      overflow-y: auto; 
+      -webkit-overflow-scrolling: touch;
+      position: relative;
     }
 
-    @keyframes fundoFluido {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
+    /* --- BLUR DE FUNDO DINÂMICO (Muda via JS com a capa atual) --- */
     .bg-blur {
-      position: absolute;
+      position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: url('logo-quadrada.png') no-repeat center center;
       background-size: cover;
-      filter: blur(60px) brightness(0.25);
+      filter: blur(50px) brightness(0.25);
       z-index: -1;
       transform: scale(1.15);
+      transition: background-image 1s ease-in-out; /* Transição suave de cores */
     }
 
-    /* --- TOPO E CABEÇALHO --- */
+    /* --- CABEÇALHO --- */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 18px 25px;
-      background: rgba(20, 5, 38, 0.6); 
+      background: rgba(20, 5, 38, 0.45); 
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -68,14 +65,15 @@
       gap: 15px;
     }
 
+    /* TRUQUE DA BORDA BRANCA: O blend-mode faz o fundo branco da foto sumir no site */
     .logo-img {
       width: 48px;
       height: 48px;
       border-radius: 12px;
       object-fit: cover;
+      mix-blend-mode: multiply; 
     }
 
-    /* Nome com efeito de gradiente metálico elegante */
     .titulo-radio h1 {
       font-size: 24px;
       font-weight: 900;
@@ -86,7 +84,6 @@
       line-height: 1.1;
     }
 
-    /* Slogan posicionado logo abaixo do título da rádio */
     .titulo-radio p {
       font-size: 11px;
       color: #ff2d55;
@@ -115,13 +112,13 @@
       color: #ff2d55;
     }
 
-    /* --- CONTAINER DO PLAYER CENTRAL --- */
+    /* --- PLAYER CARD --- */
     main {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 30px 20px;
     }
 
     .player-container {
@@ -189,7 +186,7 @@
       100% { opacity: 0.3; }
     }
 
-    /* --- LETREIRO DE FRASES --- */
+    /* --- LETREIRO DE FRASES (MARQUEE) --- */
     .container-letreiro {
       width: 100%;
       overflow: hidden;
@@ -217,7 +214,7 @@
       font-weight: 600;
     }
 
-    /* --- CONTROLES COM ALINHAMENTO CENTRALIZADO --- */
+    /* --- CONTROLES CENTRALIZADOS --- */
     .controles {
       display: flex;
       justify-content: center;
@@ -239,14 +236,14 @@
       cursor: pointer;
       box-shadow: 0 12px 35px rgba(255, 255, 255, 0.25);
       transition: transform 0.2s;
-      margin: 0 auto; /* Centralização garantida no motor do iOS */
+      margin: 0 auto; 
     }
 
     .btn-play-live:active {
       transform: scale(0.92);
     }
 
-    /* --- RODAPÉ COM SÍMBOLO DE DIREITOS AUTORAIS --- */
+    /* --- RODAPÉ --- */
     footer {
       text-align: center;
       padding: 18px;
@@ -255,13 +252,12 @@
       color: rgba(255, 255, 255, 0.4);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       font-weight: 500;
-      letter-spacing: 0.5px;
     }
   </style>
 </head>
 <body>
 
-  <div class="bg-blur"></div>
+  <div class="bg-blur" id="fundoDinamico"></div>
 
   <header>
     <div class="logo-area">
@@ -319,6 +315,7 @@
     const playerCard = document.getElementById('playerCard');
     const txtFrase = document.getElementById('txtFrase');
     const capaRadio = document.getElementById('capaRadio');
+    const fundoDinamico = document.getElementById('fundoDinamico');
 
     let playlistMp3 = [];
     
@@ -362,6 +359,7 @@
       txtFrase.innerText = slogansRadio[indexFrase];
     }
 
+    // Busca imagem no iTunes e sincroniza com o fundo borrado do app
     async function buscarCapaDoiTunes() {
       try {
         const termoAleatorio = termosCapas[Math.floor(Math.random() * termosCapas.length)];
@@ -371,10 +369,14 @@
         if (resultado.results && resultado.results.length > 0) {
           const albumSorteado = resultado.results[Math.floor(Math.random() * resultado.results.length)];
           const capaHD = albumSorteado.artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+          
+          // Atualiza a capa central e o fundo do app ao mesmo tempo!
           capaRadio.src = capaHD;
+          fundoDinamico.style.backgroundImage = `url('${capaHD}')`;
         }
       } catch (e) {
         capaRadio.src = "logo-quadrada.png";
+        fundoDinamico.style.backgroundImage = "url('logo-quadrada.png')";
       }
     }
 
