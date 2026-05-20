@@ -32,7 +32,6 @@
             width: 100%;
         }
 
-        /* Container principal - flex column */
         .tv-app {
             display: flex;
             flex-direction: column;
@@ -41,7 +40,6 @@
             background: radial-gradient(ellipse at 30% 40%, #0f1422, #05080c);
         }
 
-        /* Header fixo */
         .tv-header {
             background: rgba(10, 15, 30, 0.95);
             backdrop-filter: blur(15px);
@@ -89,9 +87,8 @@
             border: 0.5px solid rgba(255,215,0,0.3);
         }
 
-        /* Player - tamanho compacto e proporcional */
         .player-area {
-            background: #00000055;
+            background: #00000066;
             backdrop-filter: blur(10px);
             padding: 12px;
             flex-shrink: 0;
@@ -114,6 +111,12 @@
             display: block;
         }
 
+        /* REMOVER controles padrão do vídeo para evitar dois fullscreen */
+        #videoPlayer::-webkit-media-controls {
+            display: flex !important;
+        }
+        
+        /* Botão fullscreen customizado APENAS */
         .fullscreen-btn {
             position: absolute;
             bottom: 10px;
@@ -121,12 +124,17 @@
             background: rgba(0,0,0,0.6);
             border: none;
             color: white;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             z-index: 20;
+            transition: 0.2s;
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
         }
 
         .channel-meta {
@@ -135,35 +143,46 @@
             gap: 10px;
             margin-top: 10px;
             padding: 0 4px;
+            flex-wrap: wrap;
         }
 
         .channel-meta img {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
             background: #1e1e2e;
-            border-radius: 8px;
-            padding: 4px;
+            border-radius: 10px;
+            padding: 5px;
         }
 
-        .channel-meta span {
+        .info-time {
             flex: 1;
-            font-weight: 600;
-            font-size: 0.85rem;
+            min-width: 0;
+        }
+
+        .info-time .channel-name {
+            font-weight: 700;
+            font-size: 0.9rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
+        .info-time .datetime {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 2px;
+        }
+
         .fav-btn {
             background: rgba(255,255,255,0.1);
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             color: #FFD966;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .fav-btn.active {
@@ -171,7 +190,6 @@
             color: #0a0f1e;
         }
 
-        /* Lista de canais - ocupando o restante da tela */
         .channels-area {
             flex: 1;
             overflow-y: auto;
@@ -179,7 +197,6 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Tabs de filtro */
         .tabs {
             display: flex;
             gap: 12px;
@@ -203,7 +220,6 @@
             color: #0a0f1e;
         }
 
-        /* Grid de canais - uma coluna no celular, duas em telas maiores */
         .channels-grid {
             display: flex;
             flex-direction: column;
@@ -233,12 +249,13 @@
         }
 
         .card-logo {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
             background: #1e1e2e;
-            border-radius: 8px;
-            padding: 4px;
+            border-radius: 10px;
+            padding: 5px;
+            flex-shrink: 0;
         }
 
         .card-info {
@@ -261,10 +278,11 @@
 
         .card-fav {
             color: rgba(255,255,255,0.3);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            width: 32px;
+            width: 36px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .card-fav.active {
@@ -278,7 +296,6 @@
             font-size: 0.85rem;
         }
 
-        /* Scrollbar bonita */
         .channels-area::-webkit-scrollbar {
             width: 4px;
         }
@@ -292,7 +309,27 @@
             border-radius: 4px;
         }
 
-        /* Ajustes para telas maiores */
+        /* Tela cheia */
+        .video-container:-webkit-full-screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        .video-container:fullscreen {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        .video-container:-webkit-full-screen video {
+            height: 100%;
+        }
+
+        .video-container:fullscreen video {
+            height: 100%;
+        }
+
         @media (min-width: 600px) {
             .channels-grid {
                 display: grid;
@@ -316,7 +353,6 @@
 <body>
 
 <div class="tv-app">
-    <!-- Header -->
     <div class="tv-header">
         <div class="logo-area">
             <img src="logo.png" alt="Logo">
@@ -325,20 +361,21 @@
         <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Rádio</a>
     </div>
 
-    <!-- Player -->
     <div class="player-area">
-        <div class="video-container">
+        <div class="video-container" id="videoContainer">
             <video id="videoPlayer" controls autoplay playsinline></video>
             <button id="fullscreenBtn" class="fullscreen-btn"><i class="fas fa-expand"></i></button>
         </div>
         <div class="channel-meta" id="channelMeta">
             <img id="currentLogo" src="logo.png" alt="Logo">
-            <span id="currentName">Selecione um canal</span>
+            <div class="info-time">
+                <div class="channel-name" id="currentName">Selecione um canal</div>
+                <div class="datetime" id="currentDateTime"></div>
+            </div>
             <button id="currentFavBtn" class="fav-btn"><i class="far fa-star"></i></button>
         </div>
     </div>
 
-    <!-- Lista de canais -->
     <div class="channels-area">
         <div class="tabs">
             <button class="tab-btn active" data-filter="all">📺 Todos</button>
@@ -359,16 +396,29 @@
     let currentFilter = 'all';
     
     const video = document.getElementById('videoPlayer');
+    const videoContainer = document.getElementById('videoContainer');
     const channelsDiv = document.getElementById('channelsList');
     const currentNameSpan = document.getElementById('currentName');
     const currentLogoImg = document.getElementById('currentLogo');
     const currentFavBtn = document.getElementById('currentFavBtn');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const currentDateTimeSpan = document.getElementById('currentDateTime');
+    
+    // Atualizar data e hora
+    function updateDateTime() {
+        const now = new Date();
+        const options = { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' };
+        currentDateTimeSpan.textContent = now.toLocaleDateString('pt-BR', options);
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
     
     function loadFavorites() {
         const saved = localStorage.getItem('exna_tv_favorites');
         if (saved) {
-            favoriteIds = new Set(JSON.parse(saved));
+            try {
+                favoriteIds = new Set(JSON.parse(saved));
+            } catch(e) { favoriteIds = new Set(); }
         }
     }
     
@@ -415,13 +465,23 @@
         updateCurrentFavoriteButton();
     }
     
+    // Extrai nome limpo do canal (remove informações extras)
+    function cleanChannelName(name) {
+        // Remove coisas como "TV: " ou "| BR" se existir
+        let clean = name.replace(/^TV:\s*/i, '');
+        clean = clean.replace(/\s*\|\s*BR$/i, '');
+        clean = clean.replace(/\s*\(.*?\)\s*/g, '');
+        return clean.trim();
+    }
+    
     function playChannel(channel) {
         currentChannel = channel;
         video.src = channel.url;
         video.play().catch(e => console.log('Clique no play do player'));
         
         currentNameSpan.textContent = channel.name;
-        if (channel.logo && channel.logo.startsWith('http')) {
+        // Só usa a logo se for uma URL válida (http ou https)
+        if (channel.logo && (channel.logo.startsWith('http://') || channel.logo.startsWith('https://'))) {
             currentLogoImg.src = channel.logo;
         } else {
             currentLogoImg.src = 'logo.png';
@@ -445,30 +505,37 @@
             const channels = [];
             let current = null;
             
-            for (let line of lines) {
-                line = line.trim();
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
                 if (line.startsWith('#EXTINF:')) {
-                    const match = line.match(/#EXTINF:-?\d+\s+(?:tvg-logo="([^"]*)"\s+)?(?:group-title="([^"]*)"\s+)?(?:tvg-id="([^"]*)"\s+)?(?:tvg-name="([^"]*)"\s+)?(.*)/i);
-                    if (match) {
-                        const logo = match[1] || '';
-                        const group = match[2] || 'Geral';
-                        const tvgId = match[3] || '';
-                        const tvgName = match[4] || '';
-                        let name = (match[5] || '').replace(/,$/, '').trim();
-                        if (!name && tvgName) name = tvgName;
-                        if (!name) name = 'Canal sem nome';
-                        
-                        current = {
-                            id: tvgId || name.replace(/\s/g, '_'),
-                            name: name,
-                            group: group,
-                            logo: logo,
-                            url: ''
-                        };
+                    // Extração mais robusta usando regex
+                    // Procura por tvg-logo, tvg-name, group-title
+                    const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
+                    const nameMatch = line.match(/tvg-name="([^"]*)"/i);
+                    const groupMatch = line.match(/group-title="([^"]*)"/i);
+                    
+                    // O nome do canal geralmente vem depois do último " ," 
+                    let name = '';
+                    const lastCommaIndex = line.lastIndexOf(',');
+                    if (lastCommaIndex !== -1) {
+                        name = line.substring(lastCommaIndex + 1).trim();
                     }
+                    
+                    if (!name && nameMatch) name = nameMatch[1];
+                    if (!name) name = 'Canal sem nome';
+                    
+                    name = cleanChannelName(name);
+                    
+                    current = {
+                        id: name.replace(/\s/g, '_').toLowerCase(),
+                        name: name,
+                        group: groupMatch ? groupMatch[1] : 'Geral',
+                        logo: logoMatch ? logoMatch[1] : '',
+                        url: ''
+                    };
                 } else if (line && !line.startsWith('#') && current) {
                     current.url = line;
-                    if (current.url && current.name) {
+                    if (current.url && current.name && current.url.startsWith('http')) {
                         channels.push(current);
                     }
                     current = null;
@@ -476,13 +543,8 @@
             }
             
             if (channels.length === 0) {
-                channels.push({
-                    id: 'demo1',
-                    name: 'Canal Demo - M3U não carregou',
-                    group: 'Informação',
-                    logo: '',
-                    url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
-                });
+                channelsDiv.innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle"></i> Nenhum canal encontrado na lista M3U.</div>`;
+                return;
             }
             
             allChannels = channels;
@@ -492,6 +554,7 @@
                 playChannel(allChannels[0]);
             }
         } catch (error) {
+            console.error(error);
             channelsDiv.innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar lista de canais.</div>`;
         }
     }
@@ -507,9 +570,12 @@
             return;
         }
         
-        channelsDiv.innerHTML = filtered.map(ch => `
-            <div class="channel-card ${currentChannel && currentChannel.id === ch.id ? 'playing' : ''}" data-id="${ch.id}" data-url="${ch.url}" data-name="${ch.name.replace(/"/g, '&quot;')}" data-logo="${ch.logo || 'logo.png'}">
-                <img class="card-logo" src="${ch.logo || 'logo.png'}" onerror="this.src='logo.png'">
+        channelsDiv.innerHTML = filtered.map(ch => {
+            // Só usa a logo se for URL válida
+            let logoUrl = (ch.logo && (ch.logo.startsWith('http://') || ch.logo.startsWith('https://'))) ? ch.logo : 'logo.png';
+            return `
+            <div class="channel-card ${currentChannel && currentChannel.id === ch.id ? 'playing' : ''}" data-id="${ch.id}" data-url="${ch.url}" data-name="${ch.name.replace(/"/g, '&quot;')}" data-logo="${logoUrl}">
+                <img class="card-logo" src="${logoUrl}" onerror="this.src='logo.png'">
                 <div class="card-info">
                     <div class="card-title">${ch.name}</div>
                     <div class="card-group">${ch.group}</div>
@@ -518,7 +584,7 @@
                     ${isFavorite(ch.id) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
         
         document.querySelectorAll('.channel-card').forEach(card => {
             card.addEventListener('click', (e) => {
@@ -549,16 +615,29 @@
         });
     }
     
+    // Tela cheia - APENAS um botão
     function toggleFullscreen() {
-        const container = document.querySelector('.video-container');
-        if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(err => console.log(err));
+        const container = videoContainer;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
         } else {
-            document.exitFullscreen();
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
         }
     }
     
     fullscreenBtn.addEventListener('click', toggleFullscreen);
+    
+    // Detecta saída da tela cheia por ESC
+    document.addEventListener('fullscreenchange', () => {});
+    document.addEventListener('webkitfullscreenchange', () => {});
     
     currentFavBtn.addEventListener('click', () => {
         if (currentChannel) {
