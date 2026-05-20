@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EXNA FM - Player Embutido</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 90px; 
+    }
+
+    .widget-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 76px;
+      background: rgba(20, 5, 38, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 0 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-bloco {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .logo-widget {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      mix-blend-mode: screen;
+    }
+
+    .textos {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .textos h1 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #ffffff, #c5c5c5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+
+    .marquee-container {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    #txtSlogan {
+      display: inline-block;
+      font-size: 11px;
+      color: #ff2d55;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-left: 100%;
+      animation: barraFina 12s linear infinite;
+    }
+
+    @keyframes barraFina {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+
+    .espectro-box {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 24px;
+      margin: 0 20px;
+    }
+
+    .barra-som {
+      width: 3px;
+      height: 3px;
+      background: linear-gradient(to top, #ff2d55, #00f2fe);
+      border-radius: 2px;
+      transition: height 0.15s ease;
+    }
+
+    .animar .barra-som:nth-child(1) { animation: puloSom 0.6s ease infinite alternate; }
+    .animar .barra-som:nth-child(2) { animation: puloSom 0.4s ease infinite alternate 0.1s; }
+    .animar .barra-som:nth-child(3) { animation: puloSom 0.7s ease infinite alternate 0.2s; }
+    .animar .barra-som:nth-child(4) { animation: puloSom 0.5s ease infinite alternate 0.15s; }
+    .animar .barra-som:nth-child(5) { animation: puloSom 0.8s ease infinite alternate 0.05s; }
+
+    @keyframes puloSom {
+      0% { height: 4px; }
+      100% { height: 24px; }
+    }
+
+    .btn-play-widget {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      color: #000;
+      border: none;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+      transition: transform 0.2s;
+    }
+
+    .btn-play-widget:active {
+      transform: scale(0.9);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="widget-container">
+    <div class="info-bloco">
+      <img src="logo-quadrada.png" alt="EXNA" class="logo-widget">
+      <div class="textos">
+        <h1>EXNA FM</h1>
+        <div class="marquee-container">
+          <span id="txtSlogan">EXNA FM - A RÁDIO QUE TOCA TODAS!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="espectro-box" id="espectro">
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
+    </div>
+
+    <button class="btn-play-widget" id="btnPlay">
+      <i class="fas fa-play" id="iconePlay"></i>
+    </button>
+  </div>
+
+  <audio id="audioRadio" crossorigin="anonymous"></audio>
+
+  <script>
+    const urlArchiveJson = "https://archive.org/metadata/exna-fm";
+    const audio = document.getElementById('audioRadio');
+    const btnPlay = document.getElementById('btnPlay');
+    const iconePlay = document.getElementById('iconePlay');
+    const espectro = document.getElementById('espectro');
+    const txtSlogan = document.getElementById('txtSlogan');
+
+    let playlistMp3 = [];
+    let indiceAtual = 0;
+    let sintonizado = false;
+    const DURACAO_ESTIMADA = 180;
+
+    // Slogans oficiais corrigidos conforme pedido!
+    const frases = [
+      "EXNA FM - A RÁDIO QUE TOCA TODAS!",
+      "SINTONIZADO NO MELHOR RITMO • 24 HORAS NO AR",
+      "A RÁDIO QUE TOCA TODAS! • QUALIDADE MÁXIMA DIGITAL"
+    ];
+    let indexFrase = 0;
+
+    async function carregarPlayer() {
+      try {
+        const resposta = await fetch(urlArchiveJson);
+        const dados = await resposta.json();
+        dados.files.forEach(arq => {
+          if (arq.name.endsWith('.mp3')) {
+            playlistMp3.push({ id: arq.name, url: `https://archive.org/download/exna-fm/${arq.name}` });
+          }
+        });
+
+        if (playlistMp3.length > 0) {
+          playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+          sincronizarSinal();
+          setInterval(() => { if(audio.paused && !sintonizado) sincronizarSinal(); }, 1000);
+          setInterval(mudarTexto, 12000);
+        }
+      } catch (e) { txtSlogan.innerText = "EXNA FM - FORA DO AR"; }
+    }
+
+    function mudarTexto() {
+      indexFrase = (indexFrase + 1) % frases.length;
+      txtSlogan.innerText = frases[indexFrase];
+    }
+
+    function sincronizarSinal() {
+      if (sintonizado) return;
+      const agora = new Date();
+      const segundosDia = (agora.getHours() * 3600) + (agora.getMinutes() * 60) + agora.getSeconds();
+      const loopTotal = playlistMp3.length * DURACAO_ESTIMADA;
+      const atualNoLoop = segundosDia % loopTotal;
+      
+      indiceAtual = Math.floor(atualNoLoop / DURACAO_ESTIMADA);
+      audio.src = playlistMp3[indiceAtual].url;
+      audio.currentTime = atualNoLoop % DURACAO_ESTIMADA;
+    }
+
+    btnPlay.addEventListener('click', () => {
+      if (audio.paused) {
+        if (!sintonizado) {
+          const agora = new Date();
+          audio.currentTime = ((agora.getHours() * 3600) + (agora.getMinutes() * 60) + agora.getSeconds()) % DURACAO_ESTIMADA;
+          sintonizado = true;
+        }
+        audio.play().then(() => {
+          iconePlay.className = "fas fa-pause";
+          espectro.classList.add('animar');
+        });
+      } else {
+        audio.pause();
+        iconePlay.className = "fas fa-play";
+        espectro.classList.remove('animar');
+      }
+    });
+
+    audio.addEventListener('ended', () => {
+      indiceAtual = (indiceAtual + 1) % playlistMp3.length;
+      audio.src = playlistMp3[indiceAtual].url;
+      audio.play().then(() => {
+        espectro.classList.add('animar');
+        iconePlay.className = "fas fa-pause";
+      });
+    });
+
+    carregarPlayer();
+  </script>
+</body>
+</html>
