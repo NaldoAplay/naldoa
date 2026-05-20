@@ -43,7 +43,6 @@
       transition: background-image 1s ease-in-out;
     }
 
-    /* --- TOPO AJUSTADO: Aumentei o recuo do topo para empurrar o nome para baixo da Dynamic Island --- */
     header {
       display: flex;
       justify-content: space-between;
@@ -101,7 +100,6 @@
       opacity: 0.8;
     }
 
-    /* --- ÁREA CENTRAL COMPACTADA --- */
     main {
       flex: 1;
       display: flex;
@@ -116,7 +114,7 @@
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.07);
       border-radius: 32px;
-      padding: 22px 25px; /* Reduzi de 25px para dar mais folga vertical */
+      padding: 22px 25px;
       width: 100%;
       max-width: 340px;
       text-align: center;
@@ -202,6 +200,13 @@
       font-weight: 600;
     }
 
+    .controles {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
     .btn-play-live {
       width: 74px;
       height: 74px;
@@ -218,7 +223,6 @@
       margin: 0 auto; 
     }
 
-    /* --- RODAPÉ ELEVADO: Empurra o texto para cima da barra cinza do navegador --- */
     footer {
       text-align: center;
       padding: 10px 14px calc(24px + env(safe-area-inset-bottom)) 14px;
@@ -293,8 +297,11 @@
     const fundoDinamico = document.getElementById('fundoDinamico');
 
     let playlistMp3 = [];
-    let musicaAtualGlobal = null;
-    const DURACAO_FAIXA_SEGUNDOS = 180; 
+    let indiceAtualGlobal = 0;
+    let jaSintonizouPrimeiraVez = false;
+    
+    // Média matemática estimada de 3 minutos APENAS para calcular a entrada sintonizada inicial
+    const DURACAO_FAIXA_ESTIMADA = 180; 
 
     const slogansRadio = [
       "EXNA FM - A RÁDIO QUE TOCA TODAS!",
@@ -322,12 +329,10 @@
 
         if (playlistMp3.length > 0) {
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-          sincronizarGradeAoVivo();
           
-          setInterval(() => {
-            if (audio.paused) sincronizarGradeAoVivo();
-          }, 1000);
-
+          // Prepara o ponto inicial sintonizado ao carregar a página
+          calcularPontoDeSintoniaInicial();
+          
           setInterval(alternarSloganTexto, 14000);
         }
       } catch (erro) {
@@ -359,43 +364,35 @@
       }
     }
 
-    function sincronizarGradeAoVivo() {
+    // --- MODO 1: CALCULA O AO VIVO SÓ NO MOMENTO DA ENTRADA ---
+    function calcularPontoDeSintoniaInicial() {
+      if (jaSintonizouPrimeiraVez) return;
+
       const tempoAgora = new Date();
       const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
       
-      const duracaoTotalGrade = playlistMp3.length * DURACAO_FAIXA_SEGUNDOS;
+      const duracaoTotalGrade = playlistMp3.length * DURACAO_FAIXA_ESTIMADA;
       const segundoAtualNoLoopDaRadio = segundosPassadosDoDia % duracaoTotalGrade;
       
-      const indiceMusicaCerta = Math.floor(segundoAtualNoLoopDaRadio / DURACAO_FAIXA_SEGUNDOS);
-      const segundoDeEntradaNaMusica = segundoAtualNoLoopDaRadio % DURACAO_FAIXA_SEGUNDOS;
+      indiceAtualGlobal = Math.floor(segundoAtualNoLoopDaRadio / DURACAO_FAIXA_ESTIMADA);
+      const segundoDeEntradaNaMusica = segundoAtualNoLoopDaRadio % DURACAO_FAIXA_ESTIMADA;
 
-      const musicaCronometrada = playlistMp3[indiceMusicaCerta];
-
-      if (!musicaAtualGlobal || musicaAtualGlobal.id !== musicaCronometrada.id) {
-        musicaAtualGlobal = musicaCronometrada;
-        audio.src = musicaAtualGlobal.url;
-        audio.currentTime = segundoDeEntradaNaMusica;
-        buscarCapaDoiTunes(indiceMusicaCerta);
-      }
+      const musicaCronometrada = playlistMp3[indiceAtualGlobal];
+      audio.src = musicaCronometrada.url;
+      audio.currentTime = segundoDeEntradaNaMusica; 
+      
+      buscarCapaDoiTunes(indiceAtualGlobal);
     }
-
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && !audio.paused) {
-        const tempoAgora = new Date();
-        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
-        const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_SEGUNDOS;
-        
-        if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 3) {
-          audio.currentTime = segundoDeEntradaNaMusica;
-        }
-      }
-    });
 
     function comandarPlayer() {
       if (audio.paused) {
-        const tempoAgora = new Date();
-        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
-        audio.currentTime = segundosPassadosDoDia % DURACAO_FAIXA_SEGUNDOS;
+        // Se for o primeiro clique do usuário ao entrar na página, força a sincronia ao vivo do relógio
+        if (!jaSintonizouPrimeiraVez) {
+          const tempoAgora = new Date();
+          const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+          audio.currentTime = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
+          jaSintonizouPrimeiraVez = true; // Trava para não cortar mais baseado no relógio!
+        }
 
         audio.play().then(() => {
           iconePlay.className = "fas fa-pause";
@@ -425,12 +422,21 @@
       }
     }
 
+    // --- MODO 2: FLUXO CONTÍNUO REAL (Sem interrupções e sem cortes de tempo) ---
+    // O evento 'ended' avisa nativamente o iOS que o arquivo acabou por completo, mantendo a rádio acordada em background.
     audio.addEventListener('ended', () => {
-      sincronizarGradeAoVivo();
+      // Avança para a próxima da lista em loop contínuo e orgânico
+      indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
+      const proximaMusica = playlistMp3[indiceAtualGlobal];
+      
+      audio.src = proximaMusica.url;
+      // Não mexemos no currentTime aqui, a música nova começará obrigatoriamente do segundo 0!
+      buscarCapaDoiTunes(indiceAtualGlobal);
+
       audio.play().then(() => {
         playerCard.classList.add('tocando');
         iconePlay.className = "fas fa-pause";
-      }).catch(e => console.log(e));
+      }).catch(e => console.log("Erro de transição em segundo plano:", e));
     });
 
     btnPlayLive.addEventListener('click', comandarPlayer);
