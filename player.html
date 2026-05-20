@@ -22,25 +22,23 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* MATADOR DA MANCHA BRANCA: Força a mesma cor escura de fundo do site e trava a altura rígida */
     html, body {
-      background: #090d16 !important; /* Cor exata do fundo do seu site para sumir com o bloco branco */
+      background: #090d16 !important;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
-      height: 76px; /* Casado perfeitamente com a altura do widget */
+      height: 76px;
     }
 
-    /* O player agora ocupa 100% da área útil do iFrame, sem sobras */
     .widget-container {
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
       height: 76px;
-      background: rgba(255, 255, 255, 0.03); /* Efeito vidro fosco sutil sobre o fundo escuro */
+      background: rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -199,6 +197,23 @@
     ];
     let indexFrase = 0;
 
+    // Função de embaralhar com semente fixa (Garante que a ordem aleatória seja IDÊNTICA em todas as telas)
+    function embaralharLista(array) {
+      let m = array.length, t, i;
+      let seed = 42; // Mesma semente do seu app principal para espelhar o AutoDJ
+      function random() {
+        let x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+      }
+      while (m) {
+        i = Math.floor(random() * m--);
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
+      }
+      return array;
+    }
+
     async function carregarPlayer() {
       try {
         const resposta = await fetch(urlArchiveJson);
@@ -210,7 +225,10 @@
         });
 
         if (playlistMp3.length > 0) {
+          // Primeiro ordena e depois embaralha com a semente estável do AutoDJ
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+          playlistMp3 = embaralharLista(playlistMp3);
+          
           sincronizarSinal();
           setInterval(() => { if(audio.paused && !sintonizado) sincronizarSinal(); }, 1000);
           setInterval(mudarTexto, 12000);
@@ -256,7 +274,6 @@
 
     function atualizarMetadadosBloqueio() {
       if ('mediaSession' in navigator) {
-        // Metadados limpos e sem controle de faixa para o iOS
         navigator.mediaSession.metadata = new MediaMetadata({
           title: "EXNA FM",
           artist: "AO VIVO", 
