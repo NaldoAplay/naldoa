@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Reset Geral estilo iOS Premium */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -23,7 +22,7 @@
     }
 
     body {
-      background: radial-gradient(circle at top left, #1a0933, #4a1236, #05010d);
+      background: radial-gradient(circle at top left, #140526, #3b092a, #03000a);
       background-size: 400% 400%;
       animation: fundoFluido 20s ease infinite;
       height: 100vh;
@@ -40,28 +39,26 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Blur de Fundo baseado na Logo */
     .bg-blur {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       background: url('logo-quadrada.png') no-repeat center center;
       background-size: cover;
-      filter: blur(50px) brightness(0.3);
+      filter: blur(60px) brightness(0.25);
       z-index: -1;
       transform: scale(1.15);
     }
 
-    /* --- TOPO: Header Glassmorphism --- */
+    /* --- TOPO CORRIGIDO (SEM BORDA BRANCA) --- */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 18px 25px;
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .logo-area {
@@ -75,24 +72,22 @@
       height: 48px;
       border-radius: 12px;
       object-fit: cover;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: transparent; /* Remove qualquer fundo residual */
     }
 
-    /* Título da rádio ultra estilizado */
     .titulo-radio h1 {
       font-size: 24px;
       font-weight: 900;
       letter-spacing: 1.5px;
-      background: linear-gradient(135deg, #ffffff, #a1a1a1);
+      background: linear-gradient(135deg, #ffffff, #b5b5b5);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
     }
 
     .titulo-radio p {
       font-size: 11px;
-      color: #ff2d55; /* Rosa Neon estilo Apple Music */
-      font-weight: 700;
+      color: #ff2d55;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -106,8 +101,8 @@
       color: #fff;
       font-size: 22px;
       text-decoration: none;
-      transition: transform 0.2s, color 0.2s;
       opacity: 0.75;
+      transition: transform 0.2s, color 0.2s;
     }
 
     .redes-sociais a:hover {
@@ -116,7 +111,7 @@
       color: #ff2d55;
     }
 
-    /* --- CENTRO: Card do Player --- */
+    /* --- PLAYER CARD PREMIUM --- */
     main {
       flex: 1;
       display: flex;
@@ -126,14 +121,14 @@
     }
 
     .player-container {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(35px);
-      -webkit-backdrop-filter: blur(35px);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 36px;
       padding: 40px 35px;
       width: 100%;
-      max-width: 400px;
+      max-width: 380px;
       text-align: center;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
     }
@@ -143,9 +138,10 @@
       aspect-ratio: 1 / 1;
       border-radius: 24px;
       overflow: hidden;
-      margin-bottom: 25px;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+      margin-bottom: 30px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #000;
     }
 
     .capa-streaming {
@@ -156,7 +152,7 @@
     }
 
     .tocando .capa-streaming {
-      transform: scale(1.05);
+      transform: scale(1.04);
     }
 
     .status-badge {
@@ -189,51 +185,54 @@
       100% { opacity: 0.3; }
     }
 
-    .info-musica h2 {
+    /* --- LETREIRO DE FRASES (MARQUEE) --- */
+    .container-letreiro {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-bottom: 8px;
+    }
+
+    #txtFrase {
+      display: inline-block;
       font-size: 22px;
       font-weight: 700;
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      padding-left: 100%;
+      animation: barraTexto 12s linear infinite;
+    }
+
+    @keyframes barraTexto {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
     }
 
     .info-musica p {
       font-size: 14px;
       color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 30px;
-      font-weight: 500;
-    }
-
-    /* Botão Play Center */
-    .controles {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      margin-bottom: 35px;
+      font-weight: 600;
     }
 
     .btn-play-live {
-      width: 80px;
-      height: 80px;
+      width: 82px;
+      height: 82px;
       border-radius: 50%;
       background: #fff;
       color: #000;
-      font-size: 30px;
+      font-size: 32px;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 12px 30px rgba(255, 255, 255, 0.2);
-      transition: transform 0.2s, background-color 0.2s;
+      box-shadow: 0 12px 35px rgba(255, 255, 255, 0.25);
+      transition: transform 0.2s;
     }
 
     .btn-play-live:active {
       transform: scale(0.92);
-      background-color: #ececec;
     }
 
-    /* --- RODAPÉ CUSTOMIZADO --- */
     footer {
       text-align: center;
       padding: 18px;
@@ -241,7 +240,6 @@
       font-size: 13px;
       color: rgba(255, 255, 255, 0.4);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
-      letter-spacing: 0.5px;
       font-weight: 500;
     }
   </style>
@@ -260,16 +258,16 @@
     </div>
     
     <div class="redes-sociais">
-      <a href="https://www.instagram.com/naldoaoficial?igsh=d3FkMDM5a2xtaWE%3D&utm_source=qr" target="_blank"><i class="fab fa-instagram"></i></a>
-      <a href="https://www.tiktok.com/@djnaldoaoficial?_r=1&_t=ZS-96WdJJwxzQj" target="_blank"><i class="fab fa-tiktok"></i></a>
-      <a href="https://youtube.com/@djnaldoaoficial?si=7b6vo375UE93VXq7" target="_blank"><i class="fab fa-youtube"></i></a>
+      <a href="https://www.instagram.com/naldoaoficial" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@djnaldoaoficial" target="_blank"><i class="fab fa-tiktok"></i></a>
+      <a href="https://youtube.com/@djnaldoaoficial" target="_blank"><i class="fab fa-youtube"></i></a>
     </div>
   </header>
 
   <main>
     <div class="player-container" id="playerCard">
       <div class="capa-wrapper">
-        <img src="logo-quadrada.png" alt="Capa EXNA" class="capa-streaming">
+        <img src="logo-quadrada.png" id="capaRadio" alt="Capa EXNA" class="capa-streaming">
       </div>
       
       <div class="status-badge">
@@ -278,8 +276,10 @@
       </div>
 
       <div class="info-musica">
-        <h2 id="txtTitulo">Sintonizando...</h2>
-        <p>EXNA FM - A Rádio que toca todas!</p>
+        <div class="container-letreiro">
+          <span id="txtFrase">EXNA FM - A RÁDIO QUE TOCA TODAS!</span>
+        </div>
+        <p>Sintonizado no Melhor Ritmo</p>
       </div>
       
       <div class="controles">
@@ -302,12 +302,23 @@
     const btnPlayLive = document.getElementById('btnPlayLive');
     const iconePlay = document.getElementById('iconePlay');
     const playerCard = document.getElementById('playerCard');
-    const txtTitulo = document.getElementById('txtTitulo');
+    const txtFrase = document.getElementById('txtFrase');
+    const capaRadio = document.getElementById('capaRadio');
 
     let playlistMp3 = [];
-    let musicaTocandoAgora = null;
+    
+    // Lista de frases institucionais que vão ficar passando na tela
+    const slogansRadio = [
+      "EXNA FM - A RÁDIO QUE TOCA TODAS!",
+      "CONEXÃO TOTAL • SÓ AS MELHORES CONSTANTEMENTE",
+      "ECOSSISTEMAS EXNA • SOM, TECNOLOGIA E RITMO",
+      "SUA TRILHA SONORA DIÁRIA 24 HORAS NO AR"
+    ];
+    let indexFrase = 0;
 
-    // 1. Coleta e mapeia os 119 arquivos direto do Internet Archive
+    // Termos de busca no iTunes para alternar capas profissionais de música eletrônica/house/pop
+    const termosCapas = ["electronic-music", "house-music", "progressive-house", "trance", "dance-hits", "techno-remix"];
+
     async function carregarAutoDJ() {
       try {
         const resposta = await fetch(urlArchiveJson);
@@ -324,43 +335,57 @@
         });
 
         if (playlistMp3.length > 0) {
-          // Seleciona uma faixa inicial aleatória para começar o fluxo 24h
           escolherProximaMusicaAleatoria();
-        } else {
-          txtTitulo.innerText = "Playlist vazia.";
+          // Altera as frases da tela a cada 12 segundos (tempo da animação)
+          setInterval(alternarSloganTexto, 12000);
         }
-
       } catch (erro) {
-        console.error("Erro no streaming do acervo:", erro);
-        txtTitulo.innerText = "Erro ao conectar sinal.";
+        console.error(erro);
+        txtFrase.innerText = "EXNA FM - CONEXÃO INTERROMPIDA";
       }
     }
 
-    // 2. Sistema de Sorteio de Faixas (AutoDJ)
-    function escolherProximaMusicaAleatoria() {
-      const indiceSorteado = Math.floor(Math.random() * playlistMp3.length);
-      musicaTocandoAgora = playlistMp3[indiceSorteado];
-      
-      audio.src = musicaTocandoAgora.url;
-      
-      // Limpa o texto limpando o prefixo do arquivo
-      const numeroSequencia = musicaTocandoAgora.id.replace('music', '').replace('.mp3', '');
-      txtTitulo.innerText = `Música Sequência #${numeroSequencia}`;
-      
-      atualizarMetadadosSistema(numeroSequencia);
+    // Altera as frases do letreiro em loop continuo
+    function alternarSloganTexto() {
+      indexFrase = (indexFrase + 1) % slogansRadio.length;
+      txtFrase.innerText = slogansRadio[indexFrase];
     }
 
-    // 3. Controle Operacional (Play/Pause)
+    // Busca uma capa aleatória de alta qualidade na API do iTunes Store
+    async function buscarCapaDoiTunes() {
+      try {
+        const termoAleatorio = termosCapas[Math.floor(Math.random() * termosCapas.length)];
+        const resposta = await fetch(`https://itunes.apple.com/search?term=${termoAleatorio}&entity=album&limit=20`);
+        const resultado = await resposta.json();
+        
+        if (resultado.results && resultado.results.length > 0) {
+          const albumSorteado = resultado.results[Math.floor(Math.random() * resultado.results.length)];
+          // Pega a arte do álbum e substitui o tamanho padrão para 600x600 pixels (alta definição)
+          const capaHD = albumSorteado.artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+          capaRadio.src = capaHD;
+        }
+      } catch (e) {
+        // Se a API falhar, mantém a logo padrão quadrada da rádio
+        capaRadio.src = "logo-quadrada.png";
+      }
+    }
+
+    function escolherProximaMusicaAleatoria() {
+      const indiceSorteado = Math.floor(Math.random() * playlistMp3.length);
+      const musicaTocandoAgora = playlistMp3[indiceSorteado];
+      
+      audio.src = musicaTocandoAgora.url;
+      buscarCapaDoiTunes();
+      atualizarMetadadosSistema();
+    }
+
     function comandarPlayer() {
       if (audio.paused) {
         audio.play().then(() => {
           iconePlay.className = "fas fa-pause";
           playerCard.classList.add('tocando');
-          if (musicaTocandoAgora) {
-            const numeroSequencia = musicaTocandoAgora.id.replace('music', '').replace('.mp3', '');
-            atualizarMetadadosSistema(numeroSequencia);
-          }
-        }).catch(err => console.log("Aguardando ativação do áudio pelo usuário:", err));
+          atualizarMetadadosSistema();
+        }).catch(err => console.log(err));
       } else {
         audio.pause();
         iconePlay.className = "fas fa-play";
@@ -368,36 +393,31 @@
       }
     }
 
-    // 4. Integração Definitiva com a Tela de Bloqueio (Garante não parar em background)
-    function atualizarMetadadosSistema(numeroFaixa) {
+    function atualizarMetadadosSistema() {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: `Música Sequência #${numeroFaixa}`,
+          title: "EXNA FM - A Rádio que toca todas!", // Fica fixo com destaque na tela de bloqueio
           artist: 'AO VIVO', 
-          album: 'EXNA FM - A Rádio que toca todas!', // Injetado com sucesso no subtítulo do iOS!
+          album: 'Ecossistemas EXNA',
           artwork: [
-            { src: 'logo-quadrada.png', sizes: '512x512', type: 'image/png' }
+            { src: capaRadio.src, sizes: '600x600', type: 'image/jpeg' } // Injeta a capa do iTunes na tela de bloqueio do iOS!
           ]
         });
 
-        // Habilita as ações do sistema operacional para responder ao toque físico fora do app
         navigator.mediaSession.setActionHandler('play', comandarPlayer);
         navigator.mediaSession.setActionHandler('pause', comandarPlayer);
       }
     }
 
-    // 5. MOTOR DO LOOP CONTINUO (AutoDJ): Quando o áudio termina, ele puxa outra na hora
     audio.addEventListener('ended', () => {
       escolherProximaMusicaAleatoria();
       audio.play().then(() => {
         playerCard.classList.add('tocando');
         iconePlay.className = "fas fa-pause";
-      }).catch(e => console.log("Erro de transição em background:", e));
+      }).catch(e => console.log(e));
     });
 
     btnPlayLive.addEventListener('click', comandarPlayer);
-
-    // Inicializa a rádio
     carregarAutoDJ();
   </script>
 </body>
