@@ -28,13 +28,11 @@
       flex-direction: column;
       justify-content: space-between;
       color: #fff;
-      /* Permite rolar a tela livremente no iPhone e iPad */
       overflow-y: auto; 
       -webkit-overflow-scrolling: touch;
       position: relative;
     }
 
-    /* --- BLUR DE FUNDO DINÂMICO (Muda via JS com a capa atual) --- */
     .bg-blur {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -43,10 +41,9 @@
       filter: blur(50px) brightness(0.25);
       z-index: -1;
       transform: scale(1.15);
-      transition: background-image 1s ease-in-out; /* Transição suave de cores */
+      transition: background-image 1s ease-in-out;
     }
 
-    /* --- CABEÇALHO --- */
     header {
       display: flex;
       justify-content: space-between;
@@ -65,7 +62,6 @@
       gap: 15px;
     }
 
-    /* TRUQUE DA BORDA BRANCA: O blend-mode faz o fundo branco da foto sumir no site */
     .logo-img {
       width: 48px;
       height: 48px;
@@ -112,7 +108,6 @@
       color: #ff2d55;
     }
 
-    /* --- PLAYER CARD --- */
     main {
       flex: 1;
       display: flex;
@@ -186,7 +181,6 @@
       100% { opacity: 0.3; }
     }
 
-    /* --- LETREIRO DE FRASES (MARQUEE) --- */
     .container-letreiro {
       width: 100%;
       overflow: hidden;
@@ -214,7 +208,6 @@
       font-weight: 600;
     }
 
-    /* --- CONTROLES CENTRALIZADOS --- */
     .controles {
       display: flex;
       justify-content: center;
@@ -243,7 +236,6 @@
       transform: scale(0.92);
     }
 
-    /* --- RODAPÉ --- */
     footer {
       text-align: center;
       padding: 18px;
@@ -318,7 +310,11 @@
     const fundoDinamico = document.getElementById('fundoDinamico');
 
     let playlistMp3 = [];
+    let musicaAtualGlobal = null;
     
+    // Média matemática estimada de 3 minutos por faixa para criar a rotação perfeita do relógio
+    const DURACAO_FAIXA_SEGUNDOS = 180; 
+
     const slogansRadio = [
       "EXNA FM - A RÁDIO QUE TOCA TODAS!",
       "CONEXÃO TOTAL • SÓ AS MELHORES CONSTANTEMENTE",
@@ -326,7 +322,6 @@
       "SUA TRILHA SONORA DIÁRIA 24 HORAS NO AR"
     ];
     let indexFrase = 0;
-
     const termosCapas = ["electronic-music", "house-music", "progressive-house", "trance", "dance-hits", "techno-remix"];
 
     async function carregarAutoDJ() {
@@ -345,34 +340,80 @@
         });
 
         if (playlistMp3.length > 0) {
-          escolherProximaMusicaAleatoria();
+          // Ordena alfabeticamente para a linha do tempo fazer sentido global
+          playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+          
+          // Sincroniza o relógio imediatamente ao abrir a rádio
+          sincronizarGradeAoVivo();
+          
+          // Se estiver pausado, continua rodando a linha do tempo em silêncio de fundo
+          setInterval(() => {
+            if (audio.paused) sincronizarGradeAoVivo();
+          }, 1000);
+
           setInterval(alternarSloganTexto, 14000);
         }
       } catch (erro) {
         console.error(erro);
-        txtFrase.innerText = "EXNA FM - CONEXÃO INTERROMPIDA";
+        txtFrase.innerText = "EXNA FM - ERRO DE SINTONIA";
       }
     }
+
+    // --- ENGENHARIA DE SIMULAÇÃO GLOBAL AO VIVO ---
+    function sincronizarGradeAoVivo() {
+      const tempoAgora = new Date();
+      // Converte a hora do sistema do ouvinte em segundos absolutos do dia corrente
+      const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+      
+      const duracaoTotalGrade = playlistMp3.length * DURACAO_FAIXA_SEGUNDOS;
+      const segundoAtualNoLoopDaRadio = segundosPassadosDoDia % duracaoTotalGrade;
+      
+      // Encontra a música correta e o segundo exato em que ela deve estar rodando
+      const indiceMusicaCerta = Math.floor(segundoAtualNoLoopDaRadio / DURACAO_FAIXA_SEGUNDOS);
+      const segundoDeEntradaNaMusica = segundoAtualNoLoopDaRadio % DURACAO_FAIXA_SEGUNDOS;
+
+      const musicaCronometrada = playlistMp3[indiceMusicaCerta];
+
+      // Sincroniza caso mude de faixa na timeline
+      if (!musicaAtualGlobal || musicaAtualGlobal.id !== musicaCronometrada.id) {
+        musicaAtualGlobal = musicaCronometrada;
+        audio.src = musicaAtualGlobal.url;
+        audio.currentTime = segundoDeEntradaNaMusica; // Joga o player no meio da música na hora certa
+        buscarCapaDoiTunes(indiceMusicaCerta);
+      }
+    }
+
+    // Garante sincronia cirúrgica se o usuário minimizar ou travar a tela e voltar depois
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && !audio.paused) {
+        const tempoAgora = new Date();
+        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+        const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_SEGUNDOS;
+        
+        // Se houver um atraso na reprodução do iOS background, reajusta os segundos na marra
+        if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 3) {
+          audio.currentTime = segundoDeEntradaNaMusica;
+        }
+      }
+    });
 
     function alternarSloganTexto() {
       indexFrase = (indexFrase + 1) % slogansRadio.length;
       txtFrase.innerText = slogansRadio[indexFrase];
     }
 
-    // Busca imagem no iTunes e sincroniza com o fundo borrado do app
-    async function buscarCapaDoiTunes() {
+    async function buscarCapaDoiTunes(sementeId) {
       try {
-        const termoAleatorio = termosCapas[Math.floor(Math.random() * termosCapas.length)];
-        const resposta = await fetch(`https://itunes.apple.com/search?term=${termoAleatorio}&entity=album&limit=20`);
+        // Usa o índice da própria música fixa como chave para manter sempre a mesma capa para aquela faixa
+        const indexTermo = sementeId % termosCapas.length;
+        const resposta = await fetch(`https://itunes.apple.com/search?term=${termosCapas[indexTermo]}&entity=album&limit=20`);
         const resultado = await resposta.json();
         
         if (resultado.results && resultado.results.length > 0) {
-          const albumSorteado = resultado.results[Math.floor(Math.random() * resultado.results.length)];
-          const capaHD = albumSorteado.artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
-          
-          // Atualiza a capa central e o fundo do app ao mesmo tempo!
+          const capaHD = resultado.results[sementeId % resultado.results.length].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
           capaRadio.src = capaHD;
           fundoDinamico.style.backgroundImage = `url('${capaHD}')`;
+          atualizarMetadadosSistema();
         }
       } catch (e) {
         capaRadio.src = "logo-quadrada.png";
@@ -380,17 +421,13 @@
       }
     }
 
-    function escolherProximaMusicaAleatoria() {
-      const indiceSorteado = Math.floor(Math.random() * playlistMp3.length);
-      const musicaTocandoAgora = playlistMp3[indiceSorteado];
-      
-      audio.src = musicaTocandoAgora.url;
-      buscarCapaDoiTunes();
-      atualizarMetadadosSistema();
-    }
-
     function comandarPlayer() {
       if (audio.paused) {
+        // Recalcula o segundo certo no momento exato do clique para não dar delay de entrada
+        const tempoAgora = new Date();
+        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+        audio.currentTime = segundosPassadosDoDia % DURACAO_FAIXA_SEGUNDOS;
+
         audio.play().then(() => {
           iconePlay.className = "fas fa-pause";
           playerCard.classList.add('tocando');
@@ -419,8 +456,9 @@
       }
     }
 
+    // Quando o tempo estimado da faixa estourar, puxa o alinhamento da próxima na timeline do dia
     audio.addEventListener('ended', () => {
-      escolherProximaMusicaAleatoria();
+      sincronizarGradeAoVivo();
       audio.play().then(() => {
         playerCard.classList.add('tocando');
         iconePlay.className = "fas fa-pause";
