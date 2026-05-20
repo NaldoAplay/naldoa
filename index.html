@@ -7,8 +7,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NaldoA Play">
+    
+    <!-- Ícones para todos os dispositivos -->
     <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="manifest" href="manifest.json">
+    
     <title>NaldoA Play - Sua Rádio Web</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -31,7 +35,6 @@
             overflow-x: hidden;
         }
 
-        /* Partículas de fundo */
         body::before {
             content: '';
             position: fixed;
@@ -54,7 +57,6 @@
             100% { transform: translate(0, 0); opacity: 0.5; }
         }
 
-        /* Vidro fosco - agora com altura adaptativa */
         .glass-radio {
             max-width: 500px;
             width: 100%;
@@ -68,10 +70,8 @@
             overflow-y: auto;
             position: relative;
             z-index: 1;
-            transition: all 0.3s ease;
         }
 
-        /* Esconde a barra de rolagem no celular mas mantém funcional */
         .glass-radio::-webkit-scrollbar {
             width: 0;
             background: transparent;
@@ -84,7 +84,6 @@
             gap: 16px;
         }
 
-        /* Header com logo */
         .station-header {
             display: flex;
             align-items: center;
@@ -149,7 +148,6 @@
             100% { transform: scale(1.5); opacity: 0.2; }
         }
 
-        /* Slideshow */
         .slideshow-section {
             position: relative;
             width: 100%;
@@ -214,7 +212,6 @@
             color: rgba(255,255,255,0.5);
         }
 
-        /* Track info */
         .track-info {
             text-align: center;
         }
@@ -232,7 +229,6 @@
             margin-top: 4px;
         }
 
-        /* Controles */
         .controls {
             display: flex;
             justify-content: center;
@@ -271,7 +267,6 @@
             color: #ff3366;
         }
 
-        /* Progresso */
         .progress-section {
             margin: 5px 0;
         }
@@ -298,7 +293,6 @@
             margin-top: 6px;
         }
 
-        /* Volume */
         .volume-row {
             display: flex;
             align-items: center;
@@ -324,7 +318,6 @@
             border-radius: 5px;
         }
 
-        /* Redes sociais */
         .social-links {
             display: flex;
             justify-content: center;
@@ -357,7 +350,6 @@
             color: rgba(255,255,255,0.2);
         }
 
-        /* Ajustes para telas muito pequenas */
         @media (max-width: 450px) {
             body { padding: 10px; }
             .inner { padding: 20px 16px 25px; gap: 12px; }
@@ -368,7 +360,6 @@
             .ctrl-btn { width: 44px; height: 44px; font-size: 1rem; }
         }
 
-        /* Ajustes para telas muito grandes (tablets) */
         @media (min-width: 768px) {
             .glass-radio { max-width: 550px; min-height: auto; }
             .slideshow-section { max-width: 280px; }
@@ -461,7 +452,6 @@
     
     let isPlaying = false;
     
-    // Elementos
     const playBtn = document.getElementById('playPauseBtn');
     const playIcon = document.getElementById('playIcon');
     const prevBtn = document.getElementById('prevBtn');
@@ -479,7 +469,6 @@
     const statusMsg = document.getElementById('statusMsg');
     const radioContainer = document.getElementById('radioContainer');
     
-    // Playlist de demonstração
     const playlistDemo = [
         { title: "BATIDÃO EXPLOSIVO", artist: "DJ NALDOA" },
         { title: "ELETRO HITS 2025", artist: "NALDOA PLAY" },
@@ -491,14 +480,12 @@
         { title: "ROCK IN RIO", artist: "NALDOA" }
     ];
     
-    // ========== IMAGENS ==========
     function updateImage(index) {
         const imgPath = imagens[index];
         slideshowImg.src = imgPath;
         blurBackdrop.style.backgroundImage = `url(${imgPath})`;
         blurBackdrop.style.backgroundSize = 'cover';
         blurBackdrop.style.backgroundPosition = 'center';
-        
         const match = imgPath.match(/IMG_(\d+)\.jpg/);
         imageCaption.textContent = match ? `Momento #${match[1]}` : `Momento NaldoA Play`;
     }
@@ -517,13 +504,11 @@
         if (slideshowInterval) clearInterval(slideshowInterval);
     }
     
-    // ========== MÚSICA ==========
     function rotateTrackInfo() {
         const track = playlistDemo[currentMusicIndex % playlistDemo.length];
         trackTitle.textContent = track.title;
         trackArtist.textContent = track.artist;
         currentMusicIndex++;
-        
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: track.title,
@@ -536,16 +521,13 @@
     
     function startMusicRotation() {
         if (musicIntervalId) clearInterval(musicIntervalId);
-        musicIntervalId = setInterval(() => {
-            if (isPlaying) rotateTrackInfo();
-        }, 30000);
+        musicIntervalId = setInterval(() => { if (isPlaying) rotateTrackInfo(); }, 30000);
     }
     
     function stopMusicRotation() {
         if (musicIntervalId) clearInterval(musicIntervalId);
     }
     
-    // ========== PROGRESSO ==========
     function startProgressAnimation() {
         if (progressInterval) clearInterval(progressInterval);
         let fakeProgress = 0;
@@ -568,7 +550,6 @@
         currentTimeSpan.textContent = "0:00";
     }
     
-    // ========== PLAYER ==========
     function togglePlay() {
         if (isPlaying) {
             audio.pause();
@@ -601,33 +582,25 @@
         if (!isPlaying) return;
         rotateTrackInfo();
         statusMsg.textContent = "🎵 Próxima faixa";
-        setTimeout(() => {
-            if (isPlaying) statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
-        }, 2000);
+        setTimeout(() => { if (isPlaying) statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧"; }, 2000);
     }
     
-    // Volume
     volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
     audio.volume = 0.8;
-    
-    // Eventos
     audio.addEventListener('playing', () => statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧");
     audio.addEventListener('error', () => {
         statusMsg.textContent = "⚠️ Reconectando...";
         setTimeout(() => { if (isPlaying) audio.play().catch(() => {}); }, 3000);
     });
     
-    // Botões
     playBtn.addEventListener('click', togglePlay);
     nextBtn.addEventListener('click', nextTrackSimulate);
     prevBtn.addEventListener('click', nextTrackSimulate);
     
-    // Inicializar
     updateImage(0);
     audio.load();
     statusMsg.textContent = "🔊 Clique no play para ouvir";
     
-    // Media Session
     if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', () => togglePlay());
         navigator.mediaSession.setActionHandler('pause', () => togglePlay());
