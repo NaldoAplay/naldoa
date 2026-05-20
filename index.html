@@ -49,16 +49,17 @@
       transform: scale(1.15);
     }
 
-    /* --- TOPO CORRIGIDO (SEM BORDA BRANCA) --- */
+    /* --- TOPO E CABEÇALHO --- */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 18px 25px;
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(20, 5, 38, 0.6); 
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     .logo-area {
@@ -72,9 +73,9 @@
       height: 48px;
       border-radius: 12px;
       object-fit: cover;
-      background: transparent; /* Remove qualquer fundo residual */
     }
 
+    /* Nome com efeito de gradiente metálico elegante */
     .titulo-radio h1 {
       font-size: 24px;
       font-weight: 900;
@@ -82,14 +83,17 @@
       background: linear-gradient(135deg, #ffffff, #b5b5b5);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      line-height: 1.1;
     }
 
+    /* Slogan posicionado logo abaixo do título da rádio */
     .titulo-radio p {
       font-size: 11px;
       color: #ff2d55;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
     }
 
     .redes-sociais {
@@ -111,7 +115,7 @@
       color: #ff2d55;
     }
 
-    /* --- PLAYER CARD PREMIUM --- */
+    /* --- CONTAINER DO PLAYER CENTRAL --- */
     main {
       flex: 1;
       display: flex;
@@ -185,7 +189,7 @@
       100% { opacity: 0.3; }
     }
 
-    /* --- LETREIRO DE FRASES (MARQUEE) --- */
+    /* --- LETREIRO DE FRASES --- */
     .container-letreiro {
       width: 100%;
       overflow: hidden;
@@ -198,7 +202,7 @@
       font-size: 22px;
       font-weight: 700;
       padding-left: 100%;
-      animation: barraTexto 12s linear infinite;
+      animation: barraTexto 14s linear infinite;
     }
 
     @keyframes barraTexto {
@@ -211,6 +215,14 @@
       color: rgba(255, 255, 255, 0.5);
       margin-bottom: 35px;
       font-weight: 600;
+    }
+
+    /* --- CONTROLES COM ALINHAMENTO CENTRALIZADO --- */
+    .controles {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
     }
 
     .btn-play-live {
@@ -227,12 +239,14 @@
       cursor: pointer;
       box-shadow: 0 12px 35px rgba(255, 255, 255, 0.25);
       transition: transform 0.2s;
+      margin: 0 auto; /* Centralização garantida no motor do iOS */
     }
 
     .btn-play-live:active {
       transform: scale(0.92);
     }
 
+    /* --- RODAPÉ COM SÍMBOLO DE DIREITOS AUTORAIS --- */
     footer {
       text-align: center;
       padding: 18px;
@@ -241,6 +255,7 @@
       color: rgba(255, 255, 255, 0.4);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       font-weight: 500;
+      letter-spacing: 0.5px;
     }
   </style>
 </head>
@@ -253,7 +268,7 @@
       <img src="logo-quadrada.png" alt="Logo EXNA FM" class="logo-img">
       <div class="titulo-radio">
         <h1>EXNA FM</h1>
-        <p>AutoDJ 24h</p>
+        <p>A Rádio que toca todas!</p>
       </div>
     </div>
     
@@ -291,7 +306,7 @@
   </main>
 
   <footer>
-    <p>EXNA FM COPY 2026</p>
+    <p>EXNA FM &copy; 2026</p>
   </footer>
 
   <audio id="audioRadio" crossorigin="anonymous"></audio>
@@ -307,7 +322,6 @@
 
     let playlistMp3 = [];
     
-    // Lista de frases institucionais que vão ficar passando na tela
     const slogansRadio = [
       "EXNA FM - A RÁDIO QUE TOCA TODAS!",
       "CONEXÃO TOTAL • SÓ AS MELHORES CONSTANTEMENTE",
@@ -316,7 +330,6 @@
     ];
     let indexFrase = 0;
 
-    // Termos de busca no iTunes para alternar capas profissionais de música eletrônica/house/pop
     const termosCapas = ["electronic-music", "house-music", "progressive-house", "trance", "dance-hits", "techno-remix"];
 
     async function carregarAutoDJ() {
@@ -336,8 +349,7 @@
 
         if (playlistMp3.length > 0) {
           escolherProximaMusicaAleatoria();
-          // Altera as frases da tela a cada 12 segundos (tempo da animação)
-          setInterval(alternarSloganTexto, 12000);
+          setInterval(alternarSloganTexto, 14000);
         }
       } catch (erro) {
         console.error(erro);
@@ -345,13 +357,11 @@
       }
     }
 
-    // Altera as frases do letreiro em loop continuo
     function alternarSloganTexto() {
       indexFrase = (indexFrase + 1) % slogansRadio.length;
       txtFrase.innerText = slogansRadio[indexFrase];
     }
 
-    // Busca uma capa aleatória de alta qualidade na API do iTunes Store
     async function buscarCapaDoiTunes() {
       try {
         const termoAleatorio = termosCapas[Math.floor(Math.random() * termosCapas.length)];
@@ -360,12 +370,10 @@
         
         if (resultado.results && resultado.results.length > 0) {
           const albumSorteado = resultado.results[Math.floor(Math.random() * resultado.results.length)];
-          // Pega a arte do álbum e substitui o tamanho padrão para 600x600 pixels (alta definição)
           const capaHD = albumSorteado.artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
           capaRadio.src = capaHD;
         }
       } catch (e) {
-        // Se a API falhar, mantém a logo padrão quadrada da rádio
         capaRadio.src = "logo-quadrada.png";
       }
     }
@@ -396,11 +404,11 @@
     function atualizarMetadadosSistema() {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: "EXNA FM - A Rádio que toca todas!", // Fica fixo com destaque na tela de bloqueio
+          title: "EXNA FM - A Rádio que toca todas!", 
           artist: 'AO VIVO', 
-          album: 'Ecossistemas EXNA',
+          album: 'EXNA FM - A Rádio que toca todas!',
           artwork: [
-            { src: capaRadio.src, sizes: '600x600', type: 'image/jpeg' } // Injeta a capa do iTunes na tela de bloqueio do iOS!
+            { src: capaRadio.src, sizes: '600x600', type: 'image/jpeg' }
           ]
         });
 
