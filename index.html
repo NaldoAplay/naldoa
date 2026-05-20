@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <meta name="theme-color" content="#FF8C00">
+    <meta name="theme-color" content="#0a0f1e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NaldoA Play">
     
-    <!-- Ícones para todos os dispositivos -->
+    <!-- Ícones -->
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="manifest" href="manifest.json">
@@ -23,18 +23,27 @@
             box-sizing: border-box;
         }
 
-        body {
+        /* Remove bordas brancas - fundo preto total */
+        html, body {
             min-height: 100vh;
+            background: #0a0f1e;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
             background: radial-gradient(ellipse at 30% 40%, #0a0f1e, #03060c);
             font-family: 'Rajdhani', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 0;
             position: relative;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
+        /* Partículas de fundo */
         body::before {
             content: '';
             position: fixed;
@@ -43,8 +52,8 @@
             width: 100%;
             height: 100%;
             background-image: 
-                radial-gradient(2px 2px at 20% 30%, rgba(255,215,0,0.15), transparent),
-                radial-gradient(3px 3px at 80% 70%, rgba(138,43,226,0.15), transparent);
+                radial-gradient(2px 2px at 20% 30%, rgba(255,215,0,0.12), transparent),
+                radial-gradient(3px 3px at 80% 70%, rgba(138,43,226,0.12), transparent);
             background-repeat: no-repeat;
             background-size: 200px 200px, 300px 300px;
             pointer-events: none;
@@ -57,19 +66,22 @@
             100% { transform: translate(0, 0); opacity: 0.5; }
         }
 
+        /* Vidro fosco - agora ocupa 100% da tela sem bordas */
         .glass-radio {
-            max-width: 500px;
             width: 100%;
-            min-height: 85vh;
-            background: rgba(10, 20, 30, 0.45);
+            min-height: 100vh;
+            background: rgba(10, 20, 30, 0.35);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-radius: 48px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 30px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
             overflow-y: auto;
             position: relative;
             z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .glass-radio::-webkit-scrollbar {
@@ -78,12 +90,16 @@
         }
 
         .inner {
+            max-width: 500px;
+            width: 100%;
             padding: 24px 20px 30px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            margin: 0 auto;
         }
 
+        /* Header */
         .station-header {
             display: flex;
             align-items: center;
@@ -148,6 +164,7 @@
             100% { transform: scale(1.5); opacity: 0.2; }
         }
 
+        /* Slideshow */
         .slideshow-section {
             position: relative;
             width: 100%;
@@ -212,6 +229,7 @@
             color: rgba(255,255,255,0.5);
         }
 
+        /* Track info */
         .track-info {
             text-align: center;
         }
@@ -229,6 +247,7 @@
             margin-top: 4px;
         }
 
+        /* Controles */
         .controls {
             display: flex;
             justify-content: center;
@@ -267,6 +286,7 @@
             color: #ff3366;
         }
 
+        /* Progresso */
         .progress-section {
             margin: 5px 0;
         }
@@ -293,6 +313,7 @@
             margin-top: 6px;
         }
 
+        /* Volume */
         .volume-row {
             display: flex;
             align-items: center;
@@ -318,6 +339,7 @@
             border-radius: 5px;
         }
 
+        /* Redes sociais */
         .social-links {
             display: flex;
             justify-content: center;
@@ -350,8 +372,18 @@
             color: rgba(255,255,255,0.2);
         }
 
+        /* Ajustes para o PWA - sem bordas */
+        @media (display-mode: standalone) {
+            body {
+                padding: 0;
+            }
+            .glass-radio {
+                min-height: 100vh;
+                border-radius: 0;
+            }
+        }
+
         @media (max-width: 450px) {
-            body { padding: 10px; }
             .inner { padding: 20px 16px 25px; gap: 12px; }
             .logo-img { width: 42px; height: 42px; }
             .station-title h1 { font-size: 1.1rem; }
@@ -361,7 +393,7 @@
         }
 
         @media (min-width: 768px) {
-            .glass-radio { max-width: 550px; min-height: auto; }
+            .inner { max-width: 550px; }
             .slideshow-section { max-width: 280px; }
             .station-title h1 { font-size: 1.6rem; }
         }
@@ -444,6 +476,7 @@
     let currentMusicIndex = 0;
     let musicIntervalId = null;
     let progressInterval = null;
+    let reconnectAttempts = 0;
     
     const audio = new Audio();
     audio.src = STREAM_URL;
@@ -572,7 +605,9 @@
                 startMusicRotation();
                 startProgressAnimation();
                 rotateTrackInfo();
-            }).catch(() => {
+                reconnectAttempts = 0;
+            }).catch((err) => {
+                console.log(err);
                 statusMsg.textContent = "🔊 Clique novamente para ouvir";
             });
         }
@@ -585,13 +620,24 @@
         setTimeout(() => { if (isPlaying) statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧"; }, 2000);
     }
     
+    function handleError() {
+        if (isPlaying) {
+            reconnectAttempts++;
+            statusMsg.textContent = `⚠️ Reconectando... (tentativa ${reconnectAttempts})`;
+            setTimeout(() => {
+                if (isPlaying) audio.play().catch(() => {});
+            }, 3000);
+        }
+    }
+    
     volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
     audio.volume = 0.8;
-    audio.addEventListener('playing', () => statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧");
-    audio.addEventListener('error', () => {
-        statusMsg.textContent = "⚠️ Reconectando...";
-        setTimeout(() => { if (isPlaying) audio.play().catch(() => {}); }, 3000);
+    audio.addEventListener('playing', () => {
+        statusMsg.textContent = "🎧 AO VIVO - NALDOA PLAY 🎧";
+        reconnectAttempts = 0;
     });
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('stalled', handleError);
     
     playBtn.addEventListener('click', togglePlay);
     nextBtn.addEventListener('click', nextTrackSimulate);
