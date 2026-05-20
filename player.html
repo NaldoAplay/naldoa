@@ -256,6 +256,7 @@
 
     function atualizarMetadadosBloqueio() {
       if ('mediaSession' in navigator) {
+        // Metadados limpos e sem controle de faixa para o iOS
         navigator.mediaSession.metadata = new MediaMetadata({
           title: "EXNA FM",
           artist: "AO VIVO", 
