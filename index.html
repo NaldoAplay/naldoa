@@ -8,13 +8,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NaldoA Play">
     
-    <!-- Ícones -->
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="manifest" href="manifest.json">
     
     <title>NaldoA Play - Sua Rádio Web</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -23,153 +22,115 @@
             box-sizing: border-box;
         }
 
-        /* Remove bordas brancas - fundo preto total */
         html, body {
-            min-height: 100vh;
+            width: 100%;
+            height: 100%;
             background: #0a0f1e;
             margin: 0;
             padding: 0;
+            overflow: hidden;
+            position: fixed;
         }
 
         body {
-            background: radial-gradient(ellipse at 30% 40%, #0a0f1e, #03060c);
-            font-family: 'Rajdhani', sans-serif;
+            background: radial-gradient(ellipse at 30% 40%, #0f1422, #05080c);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 0;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
             position: relative;
-            overflow-x: hidden;
-            min-height: 100vh;
+            overflow: hidden;
         }
 
-        /* Partículas de fundo */
+        /* Fundo com blur e gradiente igual Apple Music */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20% 30%, rgba(255,215,0,0.12), transparent),
-                radial-gradient(3px 3px at 80% 70%, rgba(138,43,226,0.12), transparent);
-            background-repeat: no-repeat;
-            background-size: 200px 200px, 300px 300px;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 30%, rgba(255,140,0,0.08), transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(138,43,226,0.06), transparent 50%);
             pointer-events: none;
-            animation: float 20s infinite linear;
         }
 
-        @keyframes float {
-            0% { transform: translate(0, 0); opacity: 0.5; }
-            50% { transform: translate(30px, 20px); opacity: 0.8; }
-            100% { transform: translate(0, 0); opacity: 0.5; }
-        }
-
-        /* Vidro fosco - agora ocupa 100% da tela sem bordas */
+        /* Container principal - altura total sem scroll */
         .glass-radio {
             width: 100%;
-            min-height: 100vh;
-            background: rgba(10, 20, 30, 0.35);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-            overflow-y: auto;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .glass-radio::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-
-        .inner {
-            max-width: 500px;
-            width: 100%;
-            padding: 24px 20px 30px;
+            height: 100%;
+            background: rgba(18, 22, 35, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            margin: 0 auto;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
         }
 
-        /* Header */
-        .station-header {
+        /* Layout interno - centralizado e sem scroll */
+        .inner {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px 20px 15px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
+            height: 100%;
+        }
+
+        /* ========== LOGO E NOME CENTRALIZADOS ========== */
+        .station-header {
+            text-align: center;
+            flex-shrink: 0;
         }
 
         .logo-area {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .logo-img {
-            width: 50px;
-            height: 50px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+            border-radius: 22px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08);
         }
 
         .station-title h1 {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #FFE68F, #FFA500);
+            font-family: 'Inter', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff, #FFD966);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            line-height: 1.2;
         }
 
         .station-title p {
-            font-size: 0.55rem;
-            color: rgba(255,255,255,0.5);
-            letter-spacing: 1px;
-        }
-
-        .live-badge {
-            background: rgba(231, 76, 60, 0.85);
-            backdrop-filter: blur(4px);
-            padding: 6px 14px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
             font-size: 0.65rem;
-            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 4px;
         }
 
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: #ff5e5e;
-            border-radius: 50%;
-            animation: livePulse 1.2s infinite;
-        }
-
-        @keyframes livePulse {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0.2; }
-        }
-
-        /* Slideshow */
+        /* ========== SLIDESHOW ========== */
         .slideshow-section {
             position: relative;
             width: 100%;
-            max-width: 260px;
+            max-width: 250px;
             margin: 0 auto;
+            flex-shrink: 0;
         }
 
         .blur-backdrop {
@@ -179,8 +140,8 @@
             width: 100%;
             height: 100%;
             filter: blur(30px);
-            opacity: 0.5;
-            border-radius: 30px;
+            opacity: 0.45;
+            border-radius: 24px;
             z-index: 0;
             background-size: cover;
             background-position: center;
@@ -191,19 +152,19 @@
             z-index: 2;
             width: 100%;
             aspect-ratio: 1 / 1;
-            border-radius: 28px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
         }
 
         .playing .image-frame {
-            animation: frameGlow 2s ease-in-out infinite;
+            animation: framePulse 2s ease-in-out infinite;
         }
 
-        @keyframes frameGlow {
-            0% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,215,0,0.2); }
-            50% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,215,0,0.6); }
-            100% { box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,215,0,0.2); }
+        @keyframes framePulse {
+            0% { box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+            50% { box-shadow: 0 15px 30px rgba(255,140,0,0.2); }
+            100% { box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
         }
 
         .slideshow-img {
@@ -212,89 +173,121 @@
             object-fit: cover;
         }
 
-        .playing .slideshow-img {
-            animation: imagePulse 3s ease-in-out infinite;
-        }
-
-        @keyframes imagePulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
         .image-caption {
             text-align: center;
             margin-top: 8px;
             font-size: 0.65rem;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.45);
+            font-weight: 500;
         }
 
-        /* Track info */
+        /* ========== INFORMAÇÕES DA MÚSICA + BADGE AO VIVO ========== */
         .track-info {
             text-align: center;
+            margin: 8px 0 4px;
+            flex-shrink: 0;
+        }
+
+        .live-badge-inline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(220, 50, 50, 0.2);
+            backdrop-filter: blur(4px);
+            padding: 3px 12px;
+            border-radius: 30px;
+            margin-bottom: 8px;
+            border: 0.5px solid rgba(255,80,80,0.3);
+        }
+
+        .live-dot-small {
+            width: 6px;
+            height: 6px;
+            background: #ff4444;
+            border-radius: 50%;
+            animation: liveBlink 1s infinite;
+        }
+
+        @keyframes liveBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .live-text {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #ff6666;
+            letter-spacing: 1px;
         }
 
         .track-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #fff;
+            color: #ffffff;
+            letter-spacing: -0.3px;
         }
 
         .track-artist {
             font-size: 0.8rem;
             color: #FFD966;
             margin-top: 4px;
+            font-weight: 500;
         }
 
-        /* Controles */
+        /* ========== CONTROLES ========== */
         .controls {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 25px;
+            margin: 8px 0 5px;
+            flex-shrink: 0;
         }
 
         .ctrl-btn {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #FFE5B4;
-            font-size: 1.2rem;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .ctrl-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
+            background: rgba(255,255,255,0.1);
         }
 
         #playPauseBtn {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(145deg, rgba(255,215,0,0.9), rgba(255,140,0,0.9));
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(145deg, #FFD966, #FFA500);
             color: #1a1f2e;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             border: none;
-            box-shadow: 0 0 15px rgba(255,215,0,0.5);
+            box-shadow: 0 6px 20px rgba(255,140,0,0.4);
         }
 
         #playPauseBtn.playing {
-            background: white;
+            background: #ffffff;
             color: #ff3366;
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
         }
 
-        /* Progresso */
+        /* ========== PROGRESSO ========== */
         .progress-section {
             margin: 5px 0;
+            flex-shrink: 0;
         }
 
         .progress-area {
-            background: rgba(45, 55, 72, 0.7);
-            border-radius: 30px;
-            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            height: 3px;
             cursor: pointer;
             overflow: hidden;
         }
@@ -302,28 +295,31 @@
         .progress-bar {
             background: linear-gradient(90deg, #FFD700, #FFA500);
             width: 0%;
-            height: 4px;
+            height: 3px;
+            border-radius: 20px;
         }
 
         .time-stamp {
             display: flex;
             justify-content: space-between;
             font-size: 0.6rem;
-            color: #aaa;
-            margin-top: 6px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 5px;
+            padding: 0 4px;
         }
 
-        /* Volume */
+        /* ========== VOLUME ========== */
         .volume-row {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             background: rgba(0,0,0,0.25);
-            padding: 5px 16px;
+            padding: 4px 15px;
             border-radius: 40px;
             width: fit-content;
             margin: 5px auto;
+            flex-shrink: 0;
         }
 
         .volume-row i {
@@ -335,24 +331,34 @@
             width: 100px;
             height: 3px;
             -webkit-appearance: none;
-            background: #FFD966;
+            background: rgba(255,215,0,0.5);
             border-radius: 5px;
         }
 
-        /* Redes sociais */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #FFD966;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* ========== REDES SOCIAIS ========== */
         .social-links {
             display: flex;
             justify-content: center;
-            gap: 24px;
-            margin-top: 10px;
-            padding-top: 12px;
-            border-top: 0.5px solid rgba(255,215,0,0.15);
+            gap: 30px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 0.5px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
         }
 
         .social-links a {
             color: rgba(255,255,255,0.5);
-            font-size: 1.2rem;
-            transition: all 0.3s;
+            font-size: 1.3rem;
+            transition: all 0.2s;
         }
 
         .social-links a:active {
@@ -360,42 +366,53 @@
             transform: scale(1.1);
         }
 
+        /* ========== STATUS E RODAPÉ ========== */
         .status-text {
             text-align: center;
             font-size: 0.65rem;
             color: rgba(255,255,255,0.4);
+            margin-top: 6px;
+            flex-shrink: 0;
         }
 
         footer {
             text-align: center;
             font-size: 0.55rem;
-            color: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.25);
+            margin-top: 4px;
+            flex-shrink: 0;
         }
 
-        /* Ajustes para o PWA - sem bordas */
+        /* Ajustes para PWA e diferentes tamanhos de tela */
         @media (display-mode: standalone) {
             body {
-                padding: 0;
-            }
-            .glass-radio {
-                min-height: 100vh;
-                border-radius: 0;
+                height: 100vh;
             }
         }
 
-        @media (max-width: 450px) {
-            .inner { padding: 20px 16px 25px; gap: 12px; }
-            .logo-img { width: 42px; height: 42px; }
-            .station-title h1 { font-size: 1.1rem; }
-            .slideshow-section { max-width: 220px; }
-            #playPauseBtn { width: 60px; height: 60px; font-size: 1.4rem; }
-            .ctrl-btn { width: 44px; height: 44px; font-size: 1rem; }
+        /* Para telas menores (iPhone SE, 5, 6, 7, 8) */
+        @media (max-width: 380px) {
+            .inner { padding: 12px 16px 10px; }
+            .logo-img { width: 60px; height: 60px; }
+            .station-title h1 { font-size: 1.4rem; }
+            .slideshow-section { max-width: 200px; }
+            .track-title { font-size: 0.95rem; }
+            .track-artist { font-size: 0.7rem; }
+            #playPauseBtn { width: 55px; height: 55px; font-size: 1.3rem; }
+            .ctrl-btn { width: 38px; height: 38px; font-size: 0.9rem; }
+            .social-links a { font-size: 1.1rem; gap: 25px; }
         }
 
-        @media (min-width: 768px) {
-            .inner { max-width: 550px; }
+        /* Para telas maiores (iPhone Plus, Pro Max) */
+        @media (min-width: 414px) and (min-height: 800px) {
+            .inner { padding: 30px 24px 20px; }
+            .logo-img { width: 80px; height: 80px; }
+            .station-title h1 { font-size: 1.9rem; }
             .slideshow-section { max-width: 280px; }
-            .station-title h1 { font-size: 1.6rem; }
+            .track-title { font-size: 1.3rem; }
+            #playPauseBtn { width: 75px; height: 75px; font-size: 1.8rem; }
+            .ctrl-btn { width: 52px; height: 52px; font-size: 1.2rem; }
+            .social-links a { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -403,20 +420,18 @@
 
 <div class="glass-radio" id="radioContainer">
     <div class="inner">
+        <!-- Logo e nome CENTRALIZADOS -->
         <div class="station-header">
             <div class="logo-area">
-                <img src="logo.png" class="logo-img" alt="NaldoA Play" onerror="this.src='https://via.placeholder.com/50?text=NP'">
+                <img src="logo.png" class="logo-img" alt="NaldoA Play" onerror="this.src='https://via.placeholder.com/70?text=NP'">
                 <div class="station-title">
                     <h1>NALDOA PLAY</h1>
                     <p>A SUA RÁDIO WEB!</p>
                 </div>
             </div>
-            <div class="live-badge">
-                <span class="live-dot"></span>
-                <span>AO VIVO</span>
-            </div>
         </div>
 
+        <!-- Slideshow -->
         <div class="slideshow-section">
             <div class="blur-backdrop" id="blurBackdrop"></div>
             <div class="image-frame" id="imageFrame">
@@ -425,39 +440,49 @@
             <div class="image-caption" id="imageCaption">Momento NaldoA Play</div>
         </div>
 
+        <!-- Informações da música + badge AO VIVO abaixo -->
         <div class="track-info">
+            <div class="live-badge-inline">
+                <span class="live-dot-small"></span>
+                <span class="live-text">AO VIVO</span>
+            </div>
             <div class="track-title" id="trackTitle">SINTONIZANDO...</div>
             <div class="track-artist" id="trackArtist">NALDOA PLAY</div>
         </div>
 
+        <!-- Controles -->
         <div class="controls">
             <button class="ctrl-btn" id="prevBtn"><i class="fas fa-backward-step"></i></button>
             <button class="ctrl-btn" id="playPauseBtn"><i class="fas fa-play" id="playIcon"></i></button>
             <button class="ctrl-btn" id="nextBtn"><i class="fas fa-forward-step"></i></button>
         </div>
 
+        <!-- Progresso -->
         <div class="progress-section">
             <div class="progress-area" id="progressArea">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             <div class="time-stamp">
                 <span id="currentTime">0:00</span>
-                <span id="durationTime">0:00</span>
+                <span id="durationTime">3:00</span>
             </div>
         </div>
 
+        <!-- Volume -->
         <div class="volume-row">
             <i class="fas fa-volume-up"></i>
             <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
         </div>
 
+        <!-- Redes sociais (sem X) -->
         <div class="social-links">
             <a href="https://instagram.com/" target="_blank"><i class="fab fa-instagram"></i></a>
             <a href="https://youtube.com/" target="_blank"><i class="fab fa-youtube"></i></a>
             <a href="https://tiktok.com/" target="_blank"><i class="fab fa-tiktok"></i></a>
         </div>
 
-        <div class="status-text" id="statusMsg">🔊 Pronto para tocar</div>
+        <!-- Status e Rodapé -->
+        <div class="status-text" id="statusMsg">🔊 Clique no play para ouvir</div>
         <footer>NaldoA Play © 2026 | 24h no ar</footer>
     </div>
 </div>
@@ -465,7 +490,6 @@
 <script>
     const STREAM_URL = "https://stream.zeno.fm/xx785t45mf9uv";
     
-    // Gera as imagens de 4484 até 4596
     const imagens = [];
     for (let i = 4484; i <= 4596; i++) {
         imagens.push(`img/IMG_${i}.jpg`);
