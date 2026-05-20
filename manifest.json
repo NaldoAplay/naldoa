@@ -2,11 +2,12 @@
   "name": "NaldoA Play",
   "short_name": "NaldoA",
   "description": "A sua rádio web! 24h no ar",
-  "start_url": ".",
+  "start_url": "/naldoa/",
+  "scope": "/naldoa/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0f1e",
-  "theme_color": "#FF8C00",
+  "theme_color": "#0a0f1e",
   "icons": [
     {
       "src": "logo.png",
