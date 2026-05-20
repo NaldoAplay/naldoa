@@ -1,666 +1,280 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <meta name="theme-color" content="#0a0f1e">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="EXNA TV">
-    
-    <link rel="apple-touch-icon" href="logo.png">
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="manifest" href="manifest.json">
-    
-    <title>EXNA TV - Canais ao Vivo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EXNA FM - Player Embutido</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-        body {
-            background: #0a0f1e;
-            font-family: 'Inter', sans-serif;
-            color: #fff;
-            height: 100vh;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-        }
+    body {
+      background: transparent;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 90px; 
+    }
 
-        .tv-app {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: 100%;
-            background: radial-gradient(ellipse at 30% 40%, #0f1422, #05080c);
-        }
+    .widget-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 76px;
+      background: rgba(20, 5, 38, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 0 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
 
-        .tv-header {
-            background: rgba(10, 15, 30, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,215,0,0.2);
-            flex-shrink: 0;
-            z-index: 10;
-        }
+    .info-bloco {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      overflow: hidden;
+    }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .logo-widget {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      mix-blend-mode: screen;
+    }
 
-        .logo-area img {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-        }
+    .textos {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      width: 100%;
+    }
 
-        .logo-area h1 {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+    .textos h1 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #ffffff, #c5c5c5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
 
-        .back-btn {
-            background: rgba(255,215,0,0.15);
-            padding: 6px 14px;
-            border-radius: 30px;
-            text-decoration: none;
-            color: #FFD966;
-            font-size: 0.7rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 0.5px solid rgba(255,215,0,0.3);
-        }
+    .marquee-container {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
 
-        .player-area {
-            background: #00000066;
-            backdrop-filter: blur(10px);
-            padding: 12px;
-            flex-shrink: 0;
-        }
+    #txtSlogan {
+      display: inline-block;
+      font-size: 11px;
+      color: #ff2d55;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-left: 100%;
+      animation: barraFina 12s linear infinite;
+    }
 
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #000;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        }
+    @keyframes barraFina {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
 
-        #videoPlayer {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            display: block;
-        }
+    .espectro-box {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 24px;
+      margin: 0 20px;
+    }
 
-        /* REMOVER controles padrão do vídeo para evitar dois fullscreen */
-        #videoPlayer::-webkit-media-controls {
-            display: flex !important;
-        }
-        
-        /* Botão fullscreen customizado APENAS */
-        .fullscreen-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.6);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.9rem;
-            z-index: 20;
-            transition: 0.2s;
-        }
+    .barra-som {
+      width: 3px;
+      height: 3px;
+      background: linear-gradient(to top, #ff2d55, #00f2fe);
+      border-radius: 2px;
+      transition: height 0.15s ease;
+    }
 
-        .fullscreen-btn:active {
-            transform: scale(0.95);
-        }
+    .animar .barra-som:nth-child(1) { animation: puloSom 0.6s ease infinite alternate; }
+    .animar .barra-som:nth-child(2) { animation: puloSom 0.4s ease infinite alternate 0.1s; }
+    .animar .barra-som:nth-child(3) { animation: puloSom 0.7s ease infinite alternate 0.2s; }
+    .animar .barra-som:nth-child(4) { animation: puloSom 0.5s ease infinite alternate 0.15s; }
+    .animar .barra-som:nth-child(5) { animation: puloSom 0.8s ease infinite alternate 0.05s; }
 
-        .channel-meta {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            padding: 0 4px;
-            flex-wrap: wrap;
-        }
+    @keyframes puloSom {
+      0% { height: 4px; }
+      100% { height: 24px; }
+    }
 
-        .channel-meta img {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            background: #1e1e2e;
-            border-radius: 10px;
-            padding: 5px;
-        }
+    .btn-play-widget {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      color: #000;
+      border: none;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+      transition: transform 0.2s;
+    }
 
-        .info-time {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .info-time .channel-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .info-time .datetime {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.5);
-            margin-top: 2px;
-        }
-
-        .fav-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            color: #FFD966;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .fav-btn.active {
-            background: #FFD966;
-            color: #0a0f1e;
-        }
-
-        .channels-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            padding: 0 4px;
-        }
-
-        .tab-btn {
-            background: rgba(255,255,255,0.08);
-            border: none;
-            padding: 6px 16px;
-            border-radius: 30px;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .tab-btn.active {
-            background: #FFD966;
-            color: #0a0f1e;
-        }
-
-        .channels-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .channel-card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .channel-card:hover {
-            background: rgba(255,215,0,0.1);
-        }
-
-        .channel-card.playing {
-            background: rgba(255,215,0,0.2);
-            border-color: #FFD966;
-        }
-
-        .card-logo {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            background: #1e1e2e;
-            border-radius: 10px;
-            padding: 5px;
-            flex-shrink: 0;
-        }
-
-        .card-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .card-title {
-            font-weight: 600;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .card-group {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .card-fav {
-            color: rgba(255,255,255,0.3);
-            font-size: 0.9rem;
-            cursor: pointer;
-            width: 36px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .card-fav.active {
-            color: #FFD966;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #aaa;
-            font-size: 0.85rem;
-        }
-
-        .channels-area::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .channels-area::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .channels-area::-webkit-scrollbar-thumb {
-            background: #FFD966;
-            border-radius: 4px;
-        }
-
-        /* Tela cheia */
-        .video-container:-webkit-full-screen {
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
-        }
-
-        .video-container:fullscreen {
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
-        }
-
-        .video-container:-webkit-full-screen video {
-            height: 100%;
-        }
-
-        .video-container:fullscreen video {
-            height: 100%;
-        }
-
-        @media (min-width: 600px) {
-            .channels-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            .tv-header { padding: 12px 20px; }
-            .player-area { padding: 16px 20px; }
-            .channels-area { padding: 16px 20px; }
-            .logo-area h1 { font-size: 1.4rem; }
-            .logo-area img { width: 42px; height: 42px; }
-        }
-
-        @media (min-width: 900px) {
-            .channels-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-    </style>
+    .btn-play-widget:active {
+      transform: scale(0.9);
+    }
+  </style>
 </head>
 <body>
 
-<div class="tv-app">
-    <div class="tv-header">
-        <div class="logo-area">
-            <img src="logo.png" alt="Logo">
-            <h1>EXNA TV</h1>
+  <div class="widget-container">
+    <div class="info-bloco">
+      <img src="logo-quadrada.png" alt="EXNA" class="logo-widget" id="imgLogo">
+      <div class="textos">
+        <h1>EXNA FM</h1>
+        <div class="marquee-container">
+          <span id="txtSlogan">EXNA FM - A RÁDIO QUE TOCA TODAS!</span>
         </div>
-        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Rádio</a>
+      </div>
     </div>
 
-    <div class="player-area">
-        <div class="video-container" id="videoContainer">
-            <video id="videoPlayer" controls autoplay playsinline></video>
-            <button id="fullscreenBtn" class="fullscreen-btn"><i class="fas fa-expand"></i></button>
-        </div>
-        <div class="channel-meta" id="channelMeta">
-            <img id="currentLogo" src="logo.png" alt="Logo">
-            <div class="info-time">
-                <div class="channel-name" id="currentName">Selecione um canal</div>
-                <div class="datetime" id="currentDateTime"></div>
-            </div>
-            <button id="currentFavBtn" class="fav-btn"><i class="far fa-star"></i></button>
-        </div>
+    <div class="espectro-box" id="espectro">
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
+      <div class="barra-som"></div>
     </div>
 
-    <div class="channels-area">
-        <div class="tabs">
-            <button class="tab-btn active" data-filter="all">📺 Todos</button>
-            <button class="tab-btn" data-filter="fav">⭐ Favoritos</button>
-        </div>
-        <div id="channelsList" class="channels-grid">
-            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando canais...</div>
-        </div>
-    </div>
-</div>
+    <button class="btn-play-widget" id="btnPlay">
+      <i class="fas fa-play" id="iconePlay"></i>
+    </button>
+  </div>
 
-<script>
-    const M3U_URL = 'https://iptv-org.github.io/iptv/countries/br.m3u';
-    
-    let allChannels = [];
-    let favoriteIds = new Set();
-    let currentChannel = null;
-    let currentFilter = 'all';
-    
-    const video = document.getElementById('videoPlayer');
-    const videoContainer = document.getElementById('videoContainer');
-    const channelsDiv = document.getElementById('channelsList');
-    const currentNameSpan = document.getElementById('currentName');
-    const currentLogoImg = document.getElementById('currentLogo');
-    const currentFavBtn = document.getElementById('currentFavBtn');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    const currentDateTimeSpan = document.getElementById('currentDateTime');
-    
-    // Atualizar data e hora
-    function updateDateTime() {
-        const now = new Date();
-        const options = { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' };
-        currentDateTimeSpan.textContent = now.toLocaleDateString('pt-BR', options);
-    }
-    updateDateTime();
-    setInterval(updateDateTime, 60000);
-    
-    function loadFavorites() {
-        const saved = localStorage.getItem('exna_tv_favorites');
-        if (saved) {
-            try {
-                favoriteIds = new Set(JSON.parse(saved));
-            } catch(e) { favoriteIds = new Set(); }
-        }
-    }
-    
-    function saveFavorites() {
-        localStorage.setItem('exna_tv_favorites', JSON.stringify([...favoriteIds]));
-        updateAllFavoriteButtons();
-    }
-    
-    function toggleFavorite(channel) {
-        if (favoriteIds.has(channel.id)) {
-            favoriteIds.delete(channel.id);
-        } else {
-            favoriteIds.add(channel.id);
-        }
-        saveFavorites();
-        if (currentChannel && currentChannel.id === channel.id) {
-            updateCurrentFavoriteButton();
-        }
-        renderChannels();
-    }
-    
-    function isFavorite(id) {
-        return favoriteIds.has(id);
-    }
-    
-    function updateCurrentFavoriteButton() {
-        if (currentChannel) {
-            const isFav = isFavorite(currentChannel.id);
-            currentFavBtn.innerHTML = isFav ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-        }
-    }
-    
-    function updateAllFavoriteButtons() {
-        document.querySelectorAll('.card-fav').forEach(btn => {
-            const id = btn.dataset.id;
-            if (id && isFavorite(id)) {
-                btn.classList.add('active');
-                btn.innerHTML = '<i class="fas fa-star"></i>';
-            } else if (id) {
-                btn.classList.remove('active');
-                btn.innerHTML = '<i class="far fa-star"></i>';
-            }
+  <audio id="audioRadio" crossorigin="anonymous"></audio>
+
+  <script>
+    const urlArchiveJson = "https://archive.org/metadata/exna-fm";
+    const audio = document.getElementById('audioRadio');
+    const btnPlay = document.getElementById('btnPlay');
+    const iconePlay = document.getElementById('iconePlay');
+    const espectro = document.getElementById('espectro');
+    const txtSlogan = document.getElementById('txtSlogan');
+
+    let playlistMp3 = [];
+    let indiceAtual = 0;
+    let sintonizado = false;
+    const DURACAO_ESTIMADA = 180;
+
+    const frases = [
+      "EXNA FM - A RÁDIO QUE TOCA TODAS!",
+      "SINTONIZADO NO MELHOR RITMO • 24 HORAS NO AR - A RÁDIO QUE TOCA TODAS!",
+      "QUALIDADE MÁXIMA DIGITAL - A RÁDIO QUE TOCA TODAS!"
+    ];
+    let indexFrase = 0;
+
+    async function carregarPlayer() {
+      try {
+        const resposta = await fetch(urlArchiveJson);
+        const dados = await resposta.json();
+        dados.files.forEach(arq => {
+          if (arq.name.endsWith('.mp3')) {
+            playlistMp3.push({ id: arq.name, url: `https://archive.org/download/exna-fm/${arq.name}` });
+          }
         });
-        updateCurrentFavoriteButton();
-    }
-    
-    // Extrai nome limpo do canal (remove informações extras)
-    function cleanChannelName(name) {
-        // Remove coisas como "TV: " ou "| BR" se existir
-        let clean = name.replace(/^TV:\s*/i, '');
-        clean = clean.replace(/\s*\|\s*BR$/i, '');
-        clean = clean.replace(/\s*\(.*?\)\s*/g, '');
-        return clean.trim();
-    }
-    
-    function playChannel(channel) {
-        currentChannel = channel;
-        video.src = channel.url;
-        video.play().catch(e => console.log('Clique no play do player'));
-        
-        currentNameSpan.textContent = channel.name;
-        // Só usa a logo se for uma URL válida (http ou https)
-        if (channel.logo && (channel.logo.startsWith('http://') || channel.logo.startsWith('https://'))) {
-            currentLogoImg.src = channel.logo;
-        } else {
-            currentLogoImg.src = 'logo.png';
+
+        if (playlistMp3.length > 0) {
+          playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+          sincronizarSinal();
+          setInterval(() => { if(audio.paused && !sintonizado) sincronizarSinal(); }, 1000);
+          setInterval(mudarTexto, 12000);
         }
-        updateCurrentFavoriteButton();
-        
-        document.querySelectorAll('.channel-card').forEach(card => {
-            card.classList.remove('playing');
-            if (card.dataset.id === channel.id) {
-                card.classList.add('playing');
-            }
+      } catch (e) { txtSlogan.innerText = "EXNA FM - FORA DO AR"; }
+    }
+
+    function mudarTexto() {
+      indexFrase = (indexFrase + 1) % frases.length;
+      txtSlogan.innerText = frases[indexFrase];
+    }
+
+    function sincronizarSinal() {
+      if (sintonizado) return;
+      const agora = new Date();
+      const segundosDia = (agora.getHours() * 3600) + (agora.getMinutes() * 60) + agora.getSeconds();
+      const loopTotal = playlistMp3.length * DURACAO_ESTIMADA;
+      const atualNoLoop = segundosDia % loopTotal;
+      
+      indiceAtual = Math.floor(atualNoLoop / DURACAO_ESTIMADA);
+      audio.src = playlistMp3[indiceAtual].url;
+      audio.currentTime = atualNoLoop % DURACAO_ESTIMADA;
+    }
+
+    function gerenciarPlayPause() {
+      if (audio.paused) {
+        if (!sintonizado) {
+          const agora = new Date();
+          audio.currentTime = ((agora.getHours() * 3600) + (agora.getMinutes() * 60) + agora.getSeconds()) % DURACAO_ESTIMADA;
+          sintonizado = true;
+        }
+        audio.play().then(() => {
+          iconePlay.className = "fas fa-pause";
+          espectro.classList.add('animar');
+          atualizarMetadadosBloqueio();
         });
+      } else {
+        audio.pause();
+        iconePlay.className = "fas fa-play";
+        espectro.classList.remove('animar');
+      }
     }
-    
-    async function fetchChannels() {
-        try {
-            const response = await fetch(M3U_URL);
-            const text = await response.text();
-            
-            const lines = text.split('\n');
-            const channels = [];
-            let current = null;
-            
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (line.startsWith('#EXTINF:')) {
-                    // Extração mais robusta usando regex
-                    // Procura por tvg-logo, tvg-name, group-title
-                    const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
-                    const nameMatch = line.match(/tvg-name="([^"]*)"/i);
-                    const groupMatch = line.match(/group-title="([^"]*)"/i);
-                    
-                    // O nome do canal geralmente vem depois do último " ," 
-                    let name = '';
-                    const lastCommaIndex = line.lastIndexOf(',');
-                    if (lastCommaIndex !== -1) {
-                        name = line.substring(lastCommaIndex + 1).trim();
-                    }
-                    
-                    if (!name && nameMatch) name = nameMatch[1];
-                    if (!name) name = 'Canal sem nome';
-                    
-                    name = cleanChannelName(name);
-                    
-                    current = {
-                        id: name.replace(/\s/g, '_').toLowerCase(),
-                        name: name,
-                        group: groupMatch ? groupMatch[1] : 'Geral',
-                        logo: logoMatch ? logoMatch[1] : '',
-                        url: ''
-                    };
-                } else if (line && !line.startsWith('#') && current) {
-                    current.url = line;
-                    if (current.url && current.name && current.url.startsWith('http')) {
-                        channels.push(current);
-                    }
-                    current = null;
-                }
-            }
-            
-            if (channels.length === 0) {
-                channelsDiv.innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle"></i> Nenhum canal encontrado na lista M3U.</div>`;
-                return;
-            }
-            
-            allChannels = channels;
-            renderChannels();
-            
-            if (allChannels.length > 0 && !currentChannel) {
-                playChannel(allChannels[0]);
-            }
-        } catch (error) {
-            console.error(error);
-            channelsDiv.innerHTML = `<div class="loading"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar lista de canais.</div>`;
-        }
-    }
-    
-    function renderChannels() {
-        let filtered = [...allChannels];
-        if (currentFilter === 'fav') {
-            filtered = filtered.filter(ch => isFavorite(ch.id));
-        }
-        
-        if (filtered.length === 0) {
-            channelsDiv.innerHTML = `<div class="loading">Nenhum canal encontrado${currentFilter === 'fav' ? ' nos favoritos' : ''}</div>`;
-            return;
-        }
-        
-        channelsDiv.innerHTML = filtered.map(ch => {
-            // Só usa a logo se for URL válida
-            let logoUrl = (ch.logo && (ch.logo.startsWith('http://') || ch.logo.startsWith('https://'))) ? ch.logo : 'logo.png';
-            return `
-            <div class="channel-card ${currentChannel && currentChannel.id === ch.id ? 'playing' : ''}" data-id="${ch.id}" data-url="${ch.url}" data-name="${ch.name.replace(/"/g, '&quot;')}" data-logo="${logoUrl}">
-                <img class="card-logo" src="${logoUrl}" onerror="this.src='logo.png'">
-                <div class="card-info">
-                    <div class="card-title">${ch.name}</div>
-                    <div class="card-group">${ch.group}</div>
-                </div>
-                <div class="card-fav ${isFavorite(ch.id) ? 'active' : ''}" data-id="${ch.id}">
-                    ${isFavorite(ch.id) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}
-                </div>
-            </div>
-        `}).join('');
-        
-        document.querySelectorAll('.channel-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (e.target.closest('.card-fav')) return;
-                
-                const channel = {
-                    id: card.dataset.id,
-                    name: card.dataset.name,
-                    url: card.dataset.url,
-                    logo: card.dataset.logo
-                };
-                playChannel(channel);
-            });
-            
-            const favBtn = card.querySelector('.card-fav');
-            if (favBtn) {
-                favBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const ch = {
-                        id: favBtn.dataset.id,
-                        name: card.dataset.name,
-                        url: card.dataset.url,
-                        logo: card.dataset.logo
-                    };
-                    toggleFavorite(ch);
-                });
-            }
+
+    function atualizarMetadadosBloqueio() {
+      if ('mediaSession' in navigator) {
+        // "AO VIVO" injetado perfeitamente na tag 'artist'
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: "EXNA FM - A Rádio que toca todas!",
+          artist: 'AO VIVO', 
+          album: 'EXNA FM - A Rádio que toca todas!',
+          artwork: [
+            { src: window.location.origin + window.location.pathname.replace('player.html', 'logo-quadrada.png'), sizes: '600x600', type: 'image/png' }
+          ]
         });
+
+        navigator.mediaSession.setActionHandler('play', gerenciarPlayPause);
+        navigator.mediaSession.setActionHandler('pause', gerenciarPlayPause);
+      }
     }
-    
-    // Tela cheia - APENAS um botão
-    function toggleFullscreen() {
-        const container = videoContainer;
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            if (container.requestFullscreen) {
-                container.requestFullscreen();
-            } else if (container.webkitRequestFullscreen) {
-                container.webkitRequestFullscreen();
-            }
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        }
-    }
-    
-    fullscreenBtn.addEventListener('click', toggleFullscreen);
-    
-    // Detecta saída da tela cheia por ESC
-    document.addEventListener('fullscreenchange', () => {});
-    document.addEventListener('webkitfullscreenchange', () => {});
-    
-    currentFavBtn.addEventListener('click', () => {
-        if (currentChannel) {
-            toggleFavorite(currentChannel);
-        }
+
+    btnPlay.addEventListener('click', gerenciarPlayPause);
+
+    audio.addEventListener('ended', () => {
+      indiceAtual = (indiceAtual + 1) % playlistMp3.length;
+      audio.src = playlistMp3[indiceAtual].url;
+      audio.play().then(() => {
+        espectro.classList.add('animar');
+        iconePlay.className = "fas fa-pause";
+        atualizarMetadadosBloqueio();
+      });
     });
-    
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.dataset.filter;
-            renderChannels();
-        });
-    });
-    
-    loadFavorites();
-    fetchChannels();
-    
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', () => video.play());
-        navigator.mediaSession.setActionHandler('pause', () => video.pause());
-    }
-</script>
+
+    carregarPlayer();
+  </script>
 </body>
 </html>
