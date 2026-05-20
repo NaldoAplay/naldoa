@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>EXNA FM - A Rádio que toca todas!</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,122 +21,121 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* Trava o corpo do site na altura real da tela visível para sumir com fundos brancos residuais */
     body {
-      background: #0a0218;
+      background: #0d041a; 
       height: 100vh;
+      height: -webkit-fill-available;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       color: #fff;
-      overflow-y: auto; 
-      -webkit-overflow-scrolling: touch;
+      overflow: hidden;
       position: relative;
     }
 
+    /* O fundo do app agora se limita rigidamente à viewport */
     .bg-blur {
-      position: fixed;
+      position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       background: url('logo-quadrada.png') no-repeat center center;
       background-size: cover;
-      filter: blur(50px) brightness(0.25);
+      filter: blur(50px) brightness(0.22);
       z-index: -1;
-      transform: scale(1.15);
+      transform: scale(1.1);
       transition: background-image 1s ease-in-out;
     }
 
+    /* --- TOPO INTELIGENTE: Respeita a Dynamic Island / Notch do iPhone --- */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 18px 25px;
-      background: rgba(20, 5, 38, 0.45); 
+      padding: calc(12px + env(safe-area-inset-top)) 20px 12px 20px;
+      background: rgba(13, 4, 26, 0.7); 
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     .logo-area {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
     }
 
+    /* Remove o fundo branco da imagem da logo unificando com o transparente do site */
     .logo-img {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
       object-fit: cover;
-      mix-blend-mode: multiply; 
+      mix-blend-mode: screen; 
     }
 
     .titulo-radio h1 {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 900;
-      letter-spacing: 1.5px;
-      background: linear-gradient(135deg, #ffffff, #b5b5b5);
+      letter-spacing: 1.2px;
+      background: linear-gradient(135deg, #ffffff, #c5c5c5);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       line-height: 1.1;
     }
 
+    /* Slogan ajustado: bem pequeno e elegante logo abaixo do nome */
     .titulo-radio p {
-      font-size: 11px;
+      font-size: 9px;
       color: #ff2d55;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-top: 2px;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
     }
 
     .redes-sociais {
       display: flex;
-      gap: 22px;
+      gap: 16px;
     }
 
     .redes-sociais a {
       color: #fff;
-      font-size: 22px;
+      font-size: 18px;
       text-decoration: none;
-      opacity: 0.75;
-      transition: transform 0.2s, color 0.2s;
+      opacity: 0.8;
     }
 
-    .redes-sociais a:hover {
-      transform: scale(1.2);
-      opacity: 1;
-      color: #ff2d55;
-    }
-
+    /* --- CENTRO DO PLAYER DINÂMICO --- */
     main {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 30px 20px;
+      padding: 10px 20px;
     }
 
     .player-container {
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 36px;
-      padding: 40px 35px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 32px;
+      padding: 25px 25px;
       width: 100%;
-      max-width: 380px;
+      max-width: 340px;
       text-align: center;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
     }
 
     .capa-wrapper {
       width: 100%;
       aspect-ratio: 1 / 1;
-      border-radius: 24px;
+      border-radius: 20px;
       overflow: hidden;
-      margin-bottom: 30px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       background: #000;
     }
 
@@ -144,32 +143,32 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition: transform 0.8s ease;
     }
 
     .tocando .capa-streaming {
-      transform: scale(1.04);
+      transform: scale(1.03);
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(255, 45, 85, 0.15);
+      gap: 5px;
+      background: rgba(255, 45, 85, 0.12);
       color: #ff2d55;
-      padding: 5px 14px;
+      padding: 4px 12px;
       border-radius: 20px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 20px;
-      border: 1px solid rgba(255, 45, 85, 0.25);
+      margin-bottom: 15px;
+      border: 1px solid rgba(255, 45, 85, 0.2);
     }
 
     .status-badge .ponto-pisca {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       background-color: #ff2d55;
       border-radius: 50%;
       animation: piscar 1.6s infinite;
@@ -185,12 +184,12 @@
       width: 100%;
       overflow: hidden;
       white-space: nowrap;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     #txtFrase {
       display: inline-block;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       padding-left: 100%;
       animation: barraTexto 14s linear infinite;
@@ -202,46 +201,35 @@
     }
 
     .info-musica p {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 35px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 25px;
       font-weight: 600;
     }
 
-    .controles {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-    }
-
     .btn-play-live {
-      width: 82px;
-      height: 82px;
+      width: 74px;
+      height: 74px;
       border-radius: 50%;
       background: #fff;
       color: #000;
-      font-size: 32px;
+      font-size: 28px;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 12px 35px rgba(255, 255, 255, 0.25);
-      transition: transform 0.2s;
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
       margin: 0 auto; 
     }
 
-    .btn-play-live:active {
-      transform: scale(0.92);
-    }
-
+    /* --- RODAPÉ PROTEGIDO CONTRA BARRAS DO SAFARI --- */
     footer {
       text-align: center;
-      padding: 18px;
-      background: rgba(0, 0, 0, 0.5);
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.4);
+      padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) 14px;
+      background: rgba(13, 4, 26, 0.8);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.35);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       font-weight: 500;
     }
@@ -311,8 +299,6 @@
 
     let playlistMp3 = [];
     let musicaAtualGlobal = null;
-    
-    // Média matemática estimada de 3 minutos por faixa para criar a rotação perfeita do relógio
     const DURACAO_FAIXA_SEGUNDOS = 180; 
 
     const slogansRadio = [
@@ -340,13 +326,9 @@
         });
 
         if (playlistMp3.length > 0) {
-          // Ordena alfabeticamente para a linha do tempo fazer sentido global
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-          
-          // Sincroniza o relógio imediatamente ao abrir a rádio
           sincronizarGradeAoVivo();
           
-          // Se estiver pausado, continua rodando a linha do tempo em silêncio de fundo
           setInterval(() => {
             if (audio.paused) sincronizarGradeAoVivo();
           }, 1000);
@@ -359,44 +341,6 @@
       }
     }
 
-    // --- ENGENHARIA DE SIMULAÇÃO GLOBAL AO VIVO ---
-    function sincronizarGradeAoVivo() {
-      const tempoAgora = new Date();
-      // Converte a hora do sistema do ouvinte em segundos absolutos do dia corrente
-      const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
-      
-      const duracaoTotalGrade = playlistMp3.length * DURACAO_FAIXA_SEGUNDOS;
-      const segundoAtualNoLoopDaRadio = segundosPassadosDoDia % duracaoTotalGrade;
-      
-      // Encontra a música correta e o segundo exato em que ela deve estar rodando
-      const indiceMusicaCerta = Math.floor(segundoAtualNoLoopDaRadio / DURACAO_FAIXA_SEGUNDOS);
-      const segundoDeEntradaNaMusica = segundoAtualNoLoopDaRadio % DURACAO_FAIXA_SEGUNDOS;
-
-      const musicaCronometrada = playlistMp3[indiceMusicaCerta];
-
-      // Sincroniza caso mude de faixa na timeline
-      if (!musicaAtualGlobal || musicaAtualGlobal.id !== musicaCronometrada.id) {
-        musicaAtualGlobal = musicaCronometrada;
-        audio.src = musicaAtualGlobal.url;
-        audio.currentTime = segundoDeEntradaNaMusica; // Joga o player no meio da música na hora certa
-        buscarCapaDoiTunes(indiceMusicaCerta);
-      }
-    }
-
-    // Garante sincronia cirúrgica se o usuário minimizar ou travar a tela e voltar depois
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && !audio.paused) {
-        const tempoAgora = new Date();
-        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
-        const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_SEGUNDOS;
-        
-        // Se houver um atraso na reprodução do iOS background, reajusta os segundos na marra
-        if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 3) {
-          audio.currentTime = segundoDeEntradaNaMusica;
-        }
-      }
-    });
-
     function alternarSloganTexto() {
       indexFrase = (indexFrase + 1) % slogansRadio.length;
       txtFrase.innerText = slogansRadio[indexFrase];
@@ -404,7 +348,6 @@
 
     async function buscarCapaDoiTunes(sementeId) {
       try {
-        // Usa o índice da própria música fixa como chave para manter sempre a mesma capa para aquela faixa
         const indexTermo = sementeId % termosCapas.length;
         const resposta = await fetch(`https://itunes.apple.com/search?term=${termosCapas[indexTermo]}&entity=album&limit=20`);
         const resultado = await resposta.json();
@@ -421,9 +364,40 @@
       }
     }
 
+    function sincronizarGradeAoVivo() {
+      const tempoAgora = new Date();
+      const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+      
+      const duracaoTotalGrade = playlistMp3.length * DURACAO_FAIXA_SEGUNDOS;
+      const segundoAtualNoLoopDaRadio = segundosPassadosDoDia % duracaoTotalGrade;
+      
+      const indiceMusicaCerta = Math.floor(segundoAtualNoLoopDaRadio / DURACAO_FAIXA_SEGUNDOS);
+      const segundoDeEntradaNaMusica = segundoAtualNoLoopDaRadio % DURACAO_FAIXA_SEGUNDOS;
+
+      const musicaCronometrada = playlistMp3[indiceMusicaCerta];
+
+      if (!musicaAtualGlobal || musicaAtualGlobal.id !== musicaCronometrada.id) {
+        musicaAtualGlobal = musicaCronometrada;
+        audio.src = musicaAtualGlobal.url;
+        audio.currentTime = segundoDeEntradaNaMusica;
+        buscarCapaDoiTunes(indiceMusicaCerta);
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && !audio.paused) {
+        const tempoAgora = new Date();
+        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+        const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_SEGUNDOS;
+        
+        if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 3) {
+          audio.currentTime = segundoDeEntradaNaMusica;
+        }
+      }
+    });
+
     function comandarPlayer() {
       if (audio.paused) {
-        // Recalcula o segundo certo no momento exato do clique para não dar delay de entrada
         const tempoAgora = new Date();
         const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
         audio.currentTime = segundosPassadosDoDia % DURACAO_FAIXA_SEGUNDOS;
@@ -456,7 +430,6 @@
       }
     }
 
-    // Quando o tempo estimado da faixa estourar, puxa o alinhamento da próxima na timeline do dia
     audio.addEventListener('ended', () => {
       sincronizarGradeAoVivo();
       audio.play().then(() => {
