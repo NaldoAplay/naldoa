@@ -1,19 +1,21 @@
 {
-  "id": "/naldoa/",
+  "name": "EXNA FM",
   "short_name": "EXNA FM",
-  "name": "RADIO EXNA FM",
-  "description": "A Rádio que toca todas!",
-  "start_url": "/naldoa/",
+  "description": "A rádio que toca todas!",
+  "start_url": ".",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#050608",
-  "theme_color": "#8a2be2",
+  "background_color": "#0a0f1e",
+  "theme_color": "#ff8c00",
   "icons": [
     {
-      "src": "logo-quadrada.png",
+      "src": "https://via.placeholder.com/192x192?text=EXNA",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512?text=EXNA",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
