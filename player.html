@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EXNA FM - Player Embutido</title>
+  <title>EXNA FM</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
@@ -183,11 +183,10 @@
     let sintonizado = false;
     const DURACAO_ESTIMADA = 180;
 
-    // Slogans oficiais corrigidos conforme pedido!
     const frases = [
       "EXNA FM - A RÁDIO QUE TOCA TODAS!",
-      "SINTONIZADO NO MELHOR RITMO • 24 HORAS NO AR",
-      "A RÁDIO QUE TOCA TODAS! • QUALIDADE MÁXIMA DIGITAL"
+      "SINTONIZADO NO MELHOR RITMO • 24 HORAS NO AR - A RÁDIO QUE TOCA TODAS!",
+      "QUALIDADE MÁXIMA DIGITAL - A RÁDIO QUE TOCA TODAS!"
     ];
     let indexFrase = 0;
 
@@ -227,7 +226,7 @@
       audio.currentTime = atualNoLoop % DURACAO_ESTIMADA;
     }
 
-    btnPlay.addEventListener('click', () => {
+    function gerenciarPlayPause() {
       if (audio.paused) {
         if (!sintonizado) {
           const agora = new Date();
@@ -237,13 +236,37 @@
         audio.play().then(() => {
           iconePlay.className = "fas fa-pause";
           espectro.classList.add('animar');
+          atualizarMetadadosBloqueio();
         });
       } else {
         audio.pause();
         iconePlay.className = "fas fa-play";
         espectro.classList.remove('animar');
       }
-    });
+    }
+
+    function atualizarMetadadosBloqueio() {
+      if ('mediaSession' in navigator) {
+        // Metadados totalmente limpos e profissionais para a tela do iOS
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: "EXNA FM",
+          artist: "AO VIVO", 
+          album: "A Rádio que toca todas!",
+          artwork: [
+            { 
+              src: 'https://naldoaplay.github.io/exna-fm/logo-quadrada.png', 
+              sizes: '600x600', 
+              type: 'image/png' 
+            }
+          ]
+        });
+
+        navigator.mediaSession.setActionHandler('play', gerenciarPlayPause);
+        navigator.mediaSession.setActionHandler('pause', gerenciarPlayPause);
+      }
+    }
+
+    btnPlay.addEventListener('click', gerenciarPlayPause);
 
     audio.addEventListener('ended', () => {
       indiceAtual = (indiceAtual + 1) % playlistMp3.length;
@@ -251,6 +274,7 @@
       audio.play().then(() => {
         espectro.classList.add('animar');
         iconePlay.className = "fas fa-pause";
+        atualizarMetadadosBloqueio();
       });
     });
 
