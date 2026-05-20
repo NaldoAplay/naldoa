@@ -86,17 +86,18 @@
             background: transparent;
         }
 
+        /* Ajuste: padding-top maior para descer o conteúdo, padding-bottom maior para o rodapé */
         .inner {
             max-width: 550px;
             width: 100%;
-            padding: 28px 24px 35px;
+            padding: 35px 24px 35px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             margin: 0 auto;
         }
 
-        /* Header - UM POUCO MAIOR */
+        /* Header */
         .station-header {
             display: flex;
             align-items: center;
@@ -161,7 +162,7 @@
             100% { transform: scale(1.5); opacity: 0.2; }
         }
 
-        /* Slideshow - UM POUCO MAIOR */
+        /* Slideshow */
         .slideshow-section {
             position: relative;
             width: 100%;
@@ -226,7 +227,7 @@
             color: rgba(255,255,255,0.5);
         }
 
-        /* Track info - UM POUCO MAIOR */
+        /* Track info */
         .track-info {
             text-align: center;
             margin: 5px 0;
@@ -245,7 +246,7 @@
             margin-top: 5px;
         }
 
-        /* Controles - UM POUCO MAIOR */
+        /* Controles */
         .controls {
             display: flex;
             justify-content: center;
@@ -346,7 +347,7 @@
             cursor: pointer;
         }
 
-        /* Redes sociais - UM POUCO MAIOR */
+        /* Redes sociais */
         .social-links {
             display: flex;
             justify-content: center;
@@ -386,9 +387,8 @@
             .glass-radio { min-height: 100vh; border-radius: 0; }
         }
 
-        /* Ajustes para telas menores */
         @media (max-width: 450px) {
-            .inner { padding: 22px 18px 28px; gap: 16px; }
+            .inner { padding: 30px 18px 30px; gap: 16px; }
             .logo-img { width: 50px; height: 50px; }
             .station-title h1 { font-size: 1.3rem; }
             .slideshow-section { max-width: 250px; }
@@ -399,9 +399,8 @@
             .social-links a { font-size: 1.2rem; gap: 25px; }
         }
 
-        /* Ajustes para telas maiores */
         @media (min-width: 768px) {
-            .inner { max-width: 600px; padding: 35px 30px 40px; gap: 25px; }
+            .inner { max-width: 600px; padding: 40px 30px 40px; gap: 25px; }
             .logo-img { width: 70px; height: 70px; }
             .station-title h1 { font-size: 1.8rem; }
             .slideshow-section { max-width: 340px; }
@@ -554,12 +553,14 @@
         trackTitle.textContent = track.title;
         trackArtist.textContent = track.artist;
         currentMusicIndex++;
+        
+        // LOGO DA RÁDIO na tela de bloqueio (não as imagens do slideshow)
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: track.title,
                 artist: track.artist,
-                album: 'NaldoA Play',
-                artwork: [{ src: slideshowImg.src, sizes: '512x512' }]
+                album: 'NaldoA Play - Ao Vivo',
+                artwork: [{ src: "logo.png", sizes: "512x512", type: "image/png" }]
             });
         }
     }
@@ -659,10 +660,17 @@
     audio.load();
     statusMsg.textContent = "🔊 Clique no play para ouvir";
     
+    // Media Session com a LOGO da rádio (fixa)
     if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', () => togglePlay());
         navigator.mediaSession.setActionHandler('pause', () => togglePlay());
         navigator.mediaSession.setActionHandler('nexttrack', () => nextTrackSimulate());
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: "NaldoA Play",
+            artist: "Ao Vivo",
+            album: "Sua Rádio Web",
+            artwork: [{ src: "logo.png", sizes: "512x512", type: "image/png" }]
+        });
     }
 </script>
 </body>
