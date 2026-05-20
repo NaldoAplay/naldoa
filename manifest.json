@@ -1,8 +1,8 @@
 {
   "name": "NaldoA Play",
-  "short_name": "NaldoA Play",
+  "short_name": "NaldoA",
   "description": "A sua rádio web! 24h no ar",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0a0f1e",
