@@ -22,29 +22,30 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    body {
-      background: transparent;
+    /* MATADOR DA MANCHA BRANCA: Força a mesma cor escura de fundo do site e trava a altura rígida */
+    html, body {
+      background: #090d16 !important; /* Cor exata do fundo do seu site para sumir com o bloco branco */
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
-      height: 90px; 
+      height: 76px; /* Casado perfeitamente com a altura do widget */
     }
 
+    /* O player agora ocupa 100% da área útil do iFrame, sem sobras */
     .widget-container {
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
       height: 76px;
-      background: rgba(20, 5, 38, 0.75);
+      background: rgba(255, 255, 255, 0.03); /* Efeito vidro fosco sutil sobre o fundo escuro */
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 0 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
 
     .info-bloco {
@@ -107,7 +108,7 @@
       align-items: flex-end;
       gap: 3px;
       height: 24px;
-      margin: 0 20px;
+      margin: 0 15px;
     }
 
     .barra-som {
