@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EXNA FM</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo-quadrada.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo-quadrada.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="logo-quadrada.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="EXNA FM">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
@@ -247,7 +255,6 @@
 
     function atualizarMetadadosBloqueio() {
       if ('mediaSession' in navigator) {
-        // Metadados totalmente limpos e profissionais para a tela do iOS
         navigator.mediaSession.metadata = new MediaMetadata({
           title: "EXNA FM",
           artist: "AO VIVO", 
