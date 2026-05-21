@@ -219,7 +219,6 @@
       margin: 0 auto; 
     }
 
-    /* --- ESPECTRO CSS LIMPO (Brilho e Opacidade Perfeitas) --- */
     .espectro-container {
       display: flex;
       align-items: flex-end;
@@ -423,19 +422,25 @@
       buscarCapaDoiTunes(indiceAtualGlobal);
     }
 
+    // LISTENER RECALIBRADO PARA SINTONIA INTELIGENTE CASO CONGELE NO DESBLOQUEIO
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && !audio.paused && jaSintonizouPrimeiraVez) {
-        const tempoAgora = new Date();
-        const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
-        const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
-        
-        if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 5 && !jaSintonizouPrimeiraVez) {
-          audio.currentTime = segundoDeEntradaNaMusica;
+      if (!document.hidden) {
+        if (!audio.paused && jaSintonizouPrimeiraVez) {
+          const tempoAgora = new Date();
+          const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+          const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
+          
+          if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 5) {
+            audio.currentTime = segundoDeEntradaNaMusica;
+          }
+        } else if (audio.paused && iconePlay.className === "fas fa-pause") {
+          jaSintonizouPrimeiraVez = false;
+          calcularPONTODeSintoniaInicial();
+          audio.play().catch(err => console.log(err));
         }
       }
     });
 
-    // CORREÇÃO DA VELOCIDADE DO PLAY: Dispara na hora sem reinstanciar a conexão
     function comandarPlayer() {
       if (audio.paused) {
         if (!jaSintonizouPrimeiraVez) {
@@ -472,19 +477,33 @@
       }
     }
 
-    audio.addEventListener('ended', () => {
+    // FUNÇÃO DE TRANSIÇÃO DO AUTODJ ADAPTADA E BLINDADA PARA O MODO WEB APP INSTALADO
+    function mudarParaProximaFaixa() {
       indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
       const proximaMusica = playlistMp3[indiceAtualGlobal];
       
+      audio.pause();
       audio.src = proximaMusica.url; 
+      audio.load(); // Alimenta o sistema iOS notificando a troca imediata
+      
       buscarCapaDoiTunes(indiceAtualGlobal);
 
-      audio.play().then(() => {
-        playerCard.classList.add('tocando');
-        iconePlay.className = "fas fa-pause";
-        espectroLuz.classList.add('animar');
-      }).catch(e => console.log("Erro de transição em segundo plano:", e));
-    });
+      setTimeout(() => {
+        audio.play().then(() => {
+          playerCard.classList.add('tocando');
+          iconePlay.className = "fas fa-pause";
+          espectroLuz.classList.add('animar');
+          atualizarMetadadosSistema();
+        }).catch(e => {
+          console.log("iOS barrou transição automática travada. Forçando ressintonia...");
+          jaSintonizouPrimeiraVez = false;
+          calcularPONTODeSintoniaInicial();
+          audio.play();
+        });
+      }, 100);
+    }
+
+    audio.addEventListener('ended', mudarParaProximaFaixa);
 
     btnPlayLive.addEventListener('click', comandarPlayer);
     carregarAutoDJ();
