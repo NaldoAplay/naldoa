@@ -27,7 +27,7 @@
       height: -webkit-fill-available;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* Mantém a distribuição perfeita do topo ao rodapé */
+      justify-content: space-between;
       color: #fff;
       overflow: hidden;
       position: relative;
@@ -44,7 +44,6 @@
       transition: background-image 1s ease-in-out;
     }
 
-    /* --- TOPO AJUSTADO PERFEITO (Desceu para sair de trás da Dynamic Island) --- */
     header {
       display: flex;
       justify-content: space-between;
@@ -102,13 +101,13 @@
       opacity: 0.8;
     }
 
-    /* --- ÁREA CENTRAL RECALIBRADA --- */
     main {
       flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 5px 20px; /* Reduzi a margem para o card respirar e não empurrar as bordas */
+      padding: 5px 20px;
     }
 
     .player-container {
@@ -117,11 +116,12 @@
       -webkit-backdrop-filter: blur(40px);
       border: 1px solid rgba(255, 255, 255, 0.07);
       border-radius: 32px;
-      padding: 20px 25px; /* Mais compacto para telas de iPhone */
+      padding: 20px 25px;
       width: 100%;
       max-width: 335px;
       text-align: center;
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      z-index: 2;
     }
 
     .capa-wrapper {
@@ -219,7 +219,39 @@
       margin: 0 auto; 
     }
 
-    /* --- RODAPÉ AJUSTADO: Desceu na medida para colar em cima da barra do navegador sem vazar --- */
+    /* --- ESPECTRO CSS LIMPO (Não quebra o segundo plano) --- */
+    .espectro-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      max-width: 290px;
+      height: 40px;
+      margin-top: 25px; 
+      margin-bottom: 10px;
+      opacity: 0.45; /* Apagadinho como você pediu */
+    }
+
+    .barra-espectro {
+      flex: 1;
+      height: 3px;
+      background: linear-gradient(to top, #00f2fe, #9b51e0, #ff2d55);
+      border-radius: 3px;
+      box-shadow: 0 0 8px rgba(155, 81, 224, 0.6), 0 0 15px rgba(255, 45, 85, 0.4);
+    }
+
+    /* Animação CSS pura acionada apenas quando a classe 'animar' estiver ativa */
+    .animar .barra-espectro:nth-child(4n+1) { animation: puloEspectro 0.6s ease infinite alternate; }
+    .animar .barra-espectro:nth-child(4n+2) { animation: puloEspectro 0.4s ease infinite alternate 0.1s; }
+    .animar .barra-espectro:nth-child(4n+3) { animation: puloEspectro 0.7s ease infinite alternate 0.2s; }
+    .animar .barra-espectro:nth-child(4n+4) { animation: puloEspectro 0.5s ease infinite alternate 0.15s; }
+
+    @keyframes puloEspectro {
+      0% { height: 4px; }
+      100% { height: 38px; }
+    }
+
     footer {
       text-align: center;
       padding: 12px 14px calc(12px + env(safe-area-inset-bottom)) 14px;
@@ -228,6 +260,8 @@
       color: rgba(255, 255, 255, 0.35);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       font-weight: 500;
+      width: 100%;
+      z-index: 3;
     }
   </style>
 </head>
@@ -275,6 +309,15 @@
         </button>
       </div>
     </div>
+
+    <div class="espectro-container" id="espectroLuz">
+      <div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div>
+      <div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div>
+      <div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div>
+      <div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div>
+      <div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div>
+      <div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div><div class="barra-espectro"></div>
+    </div>
   </main>
 
   <footer>
@@ -292,6 +335,7 @@
     const txtFrase = document.getElementById('txtFrase');
     const capaRadio = document.getElementById('capaRadio');
     const fundoDinamico = document.getElementById('fundoDinamico');
+    const espectroLuz = document.getElementById('espectroLuz');
 
     let playlistMp3 = [];
     let indiceAtualGlobal = 0;
@@ -324,10 +368,10 @@
 
         if (playlistMp3.length > 0) {
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-          calcularPontoDeSintoniaInicial();
+          calcularPONTODeSintoniaInicial();
           
           setInterval(() => {
-            if (audio.paused && !jaSintonizouPrimeiraVez) calcularPontoDeSintoniaInicial();
+            if (audio.paused && !jaSintonizouPrimeiraVez) calcularPONTODeSintoniaInicial();
           }, 1000);
 
           setInterval(alternarSloganTexto, 14000);
@@ -361,7 +405,7 @@
       }
     }
 
-    function calcularPontoDeSintoniaInicial() {
+    function calcularPONTODeSintoniaInicial() {
       if (jaSintonizouPrimeiraVez) return;
 
       const tempoAgora = new Date();
@@ -404,12 +448,14 @@
         audio.play().then(() => {
           iconePlay.className = "fas fa-pause";
           playerCard.classList.add('tocando');
+          espectroLuz.classList.add('animar'); // Liga o espectro
           atualizarMetadadosSistema();
         }).catch(err => console.log(err));
       } else {
         audio.pause();
         iconePlay.className = "fas fa-play";
         playerCard.classList.remove('tocando');
+        espectroLuz.classList.remove('animar'); // Para o espectro na hora
       }
     }
 
@@ -439,6 +485,7 @@
       audio.play().then(() => {
         playerCard.classList.add('tocando');
         iconePlay.className = "fas fa-pause";
+        espectroLuz.classList.add('animar');
       }).catch(e => console.log("Erro de transição em segundo plano:", e));
     });
 
