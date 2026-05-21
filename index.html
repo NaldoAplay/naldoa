@@ -219,7 +219,7 @@
       margin: 0 auto; 
     }
 
-    /* --- ESPECTRO CSS LIMPO (Não quebra o segundo plano) --- */
+    /* --- ESPECTRO CSS LIMPO (Brilho e Opacidade Perfeitas) --- */
     .espectro-container {
       display: flex;
       align-items: flex-end;
@@ -230,7 +230,7 @@
       height: 40px;
       margin-top: 25px; 
       margin-bottom: 10px;
-      opacity: 0.45; /* Apagadinho como você pediu */
+      opacity: 0.45; 
     }
 
     .barra-espectro {
@@ -241,7 +241,6 @@
       box-shadow: 0 0 8px rgba(155, 81, 224, 0.6), 0 0 15px rgba(255, 45, 85, 0.4);
     }
 
-    /* Animação CSS pura acionada apenas quando a classe 'animar' estiver ativa */
     .animar .barra-espectro:nth-child(4n+1) { animation: puloEspectro 0.6s ease infinite alternate; }
     .animar .barra-espectro:nth-child(4n+2) { animation: puloEspectro 0.4s ease infinite alternate 0.1s; }
     .animar .barra-espectro:nth-child(4n+3) { animation: puloEspectro 0.7s ease infinite alternate 0.2s; }
@@ -436,26 +435,24 @@
       }
     });
 
+    // CORREÇÃO DA VELOCIDADE DO PLAY: Dispara na hora sem reinstanciar a conexão
     function comandarPlayer() {
       if (audio.paused) {
         if (!jaSintonizouPrimeiraVez) {
-          const tempoAgora = new Date();
-          const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
-          audio.currentTime = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
           jaSintonizouPrimeiraVez = true; 
         }
 
         audio.play().then(() => {
           iconePlay.className = "fas fa-pause";
           playerCard.classList.add('tocando');
-          espectroLuz.classList.add('animar'); // Liga o espectro
+          espectroLuz.classList.add('animar'); 
           atualizarMetadadosSistema();
         }).catch(err => console.log(err));
       } else {
         audio.pause();
         iconePlay.className = "fas fa-play";
         playerCard.classList.remove('tocando');
-        espectroLuz.classList.remove('animar'); // Para o espectro na hora
+        espectroLuz.classList.remove('animar'); 
       }
     }
 
