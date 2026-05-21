@@ -6,9 +6,9 @@
   <title>EXNA FM</title>
   
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" sizes="180x180" href="exna-fm/logo-quadrada.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="exna-fm/logo-quadrada.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="exna-fm/logo-quadrada.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://naldoaplay.github.io/naldoa/logo-quadrada.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://naldoaplay.github.io/naldoa/logo-quadrada.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://naldoaplay.github.io/naldoa/logo-quadrada.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="EXNA FM">
 
@@ -22,7 +22,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* Trava o tamanho da página inteira exatamente no tamanho do player */
+    /* Trava o tamanho rígido para o iFrame não ter fundo branco sobressalente */
     html, body {
       background: transparent !important;
       overflow: hidden;
@@ -30,7 +30,7 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      height: 76px; /* Altura exata do player */
+      height: 76px;
     }
 
     .widget-container {
@@ -38,7 +38,7 @@
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      max-width: 450px; /* Limita a largura máxima para ficar centralizado e bonito */
+      max-width: 450px;
       height: 76px;
       background: rgba(20, 5, 38, 0.85);
       backdrop-filter: blur(20px);
@@ -150,7 +150,7 @@
 
   <div class="widget-container">
     <div class="info-bloco">
-      <img src="https://naldoaplay.github.io/exna-fm/logo-quadrada.png" alt="EXNA" class="logo-widget">
+      <img src="https://naldoaplay.github.io/naldoa/logo-quadrada.png" alt="EXNA" class="logo-widget">
       <div class="textos">
         <h1>EXNA FM</h1>
         <div class="marquee-container">
@@ -273,7 +273,8 @@
           artist: "AO VIVO", 
           album: "A Rádio que toca todas!",
           artwork: [
-            { src: 'https://naldoaplay.github.io/exna-fm/logo-quadrada.png', sizes: '600x600', type: 'image/png' }
+            // ARTE DA TELA DE BLOQUEIO CORRIGIDA
+            { src: 'https://naldoaplay.github.io/naldoa/logo-quadrada.png', sizes: '600x600', type: 'image/png' }
           ]
         });
         navigator.mediaSession.setActionHandler('play', gerenciarPlayPause);
