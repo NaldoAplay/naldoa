@@ -21,6 +21,10 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html {
+      background: #0d041a;
+    }
+
     body {
       background: #0d041a; 
       height: 100vh;
@@ -35,13 +39,18 @@
 
     .bg-blur {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: -10%; left: -10%; right: -10%; bottom: -10%;
       background: url('logo-quadrada.png') no-repeat center center;
       background-size: cover;
-      filter: blur(50px) brightness(0.22);
+      filter: blur(60px) brightness(0.25);
       z-index: -1;
-      transform: scale(1.1);
-      transition: background-image 1s ease-in-out;
+      animation: movimentoFundo 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes movimientoFundo {
+      0% { transform: scale(1) translate(0, 0); }
+      50% { transform: scale(1.12) translate(1%, 2%); }
+      100% { transform: scale(1.05) translate(-1%, -1%); }
     }
 
     header {
@@ -49,11 +58,12 @@
       justify-content: space-between;
       align-items: center;
       padding: calc(14px + env(safe-area-inset-top)) 20px 14px 20px;
-      background: rgba(13, 4, 26, 0.7); 
+      background: rgba(13, 4, 26, 0.75); 
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 10;
     }
 
     .logo-area {
@@ -107,21 +117,21 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 5px 20px;
+      padding: 10px 20px;
+      z-index: 5;
     }
 
     .player-container {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(35px) saturate(160%);
+      -webkit-backdrop-filter: blur(35px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.11);
       border-radius: 32px;
-      padding: 20px 25px;
+      padding: 22px 25px;
       width: 100%;
       max-width: 335px;
       text-align: center;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-      z-index: 2;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
     }
 
     .capa-wrapper {
@@ -150,7 +160,7 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      background: rgba(255, 45, 85, 0.12);
+      background: rgba(255, 45, 85, 0.15);
       color: #ff2d55;
       padding: 4px 12px;
       border-radius: 20px;
@@ -159,7 +169,7 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       margin-bottom: 10px;
-      border: 1px solid rgba(255, 45, 85, 0.2);
+      border: 1px solid rgba(255, 45, 85, 0.25);
     }
 
     .status-badge .ponto-pisca {
@@ -252,14 +262,16 @@
 
     footer {
       text-align: center;
-      padding: 12px 14px calc(12px + env(safe-area-inset-bottom)) 14px;
-      background: rgba(13, 4, 26, 0.8);
+      padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) 14px; 
+      background: rgba(13, 4, 26, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       font-size: 12px;
       color: rgba(255, 255, 255, 0.35);
-      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
       font-weight: 500;
       width: 100%;
-      z-index: 3;
+      z-index: 10;
     }
   </style>
 </head>
@@ -296,7 +308,7 @@
 
       <div class="info-musica">
         <div class="container-letreiro">
-          <span id="txtFrase">EXNA FM - SINTONIZANDO ÁUDIO...</span>
+          <span id="txtFrase">EXNA FM - A RÁDIO QUE TOCA TODAS!</span>
         </div>
         <p>Sintonizado no Melhor Ritmo</p>
       </div>
@@ -340,29 +352,25 @@
     let jaSintonizouPrimeiraVez = false;
     const DURACAO_FAIXA_ESTIMADA = 180; 
 
-    // NOVA FUNÇÃO SUPER INTELIGENTE: Puxa o metadado real lido pelo Archive!
+    // RESTAURADO COMPLETO: Função original de busca do iTunes reengatada com precisão
     async function carregarMetadadosEBuscarCapa(objetoMusica) {
       try {
         let termoBusca = "";
         
-        // Se o Archive identificou a tag de título e artista por dentro, nós usamos!
         if (objetoMusica.title) {
           let artista = objetoMusica.artist ? objetoMusica.artist : "Desconhecido";
           let titulo = objetoMusica.title;
           
-          // Trata strings chatas que às vezes vêm bugadas do servidor
           if(artista.toLowerCase() === "alguém") artista = "EXNA HIT";
 
           txtFrase.innerText = `${titulo.toUpperCase()} - ${artista.toUpperCase()}  •  EXNA FM`;
           termoBusca = `${titulo} ${objetoMusica.artist || ''}`;
         } else {
-          // Caso o arquivo não tenha tags internas (raro), limpa o nome do arquivo para exibir
           let nomeLimpo = objetoMusica.id.replace(/^\d+\s*/, '').replace(/\.mp3$/i, '').replace(/[-_]/g, ' ').trim();
           txtFrase.innerText = nomeLimpo.toUpperCase() + "  •  EXNA FM";
           termoBusca = nomeLimpo;
         }
 
-        // Faz a busca cirúrgica da capa oficial do álbum no iTunes
         const resposta = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(termoBusca)}&entity=song&limit=1`);
         const resultado = await resposta.json();
         
@@ -371,7 +379,6 @@
           capaRadio.src = capaHD;
           fundoDinamico.style.backgroundImage = `url('${capaHD}')`;
         } else {
-          // Fallback seguro caso não encontre no banco do iTunes
           capaRadio.src = "logo-quadrada.png";
           fundoDinamico.style.backgroundImage = "url('logo-quadrada.png')";
         }
@@ -379,6 +386,8 @@
         capaRadio.src = "logo-quadrada.png";
         fundoDinamico.style.backgroundImage = "url('logo-quadrada.png')";
       }
+      
+      // DISPARA OS METADADOS IMEDIATAMENTE APÓS A RESPOSTA DA CAPA
       atualizarMetadadosSistema();
     }
 
@@ -393,8 +402,8 @@
             playlistMp3.push({
               id: arq.name,
               url: `https://archive.org/download/exna-fm/${arq.name}`,
-              title: arq.title || null,    // Salva o título interno extraído pelo Archive
-              artist: arq.artist || null   // Salva o artista interno extraído pelo Archive
+              title: arq.title || null,    
+              artist: arq.artist || null   
             });
           }
         });
@@ -429,7 +438,6 @@
       audio.src = musicaCronometrada.url;
       audio.currentTime = segundoDeEntradaNaMusica; 
       
-      // Carrega os metadados e dispara a busca da capa original
       carregarMetadadosEBuscarCapa(musicaCronometrada);
     }
 
@@ -471,15 +479,19 @@
       }
     }
 
+    // RESTAURADO COMPLETO REVERTIDO PARA OS PADRÕES ORIGINAIS DO SEU IPHONE
     function atualizarMetadadosSistema() {
       if ('mediaSession' in navigator && playlistMp3[indiceAtualGlobal]) {
         let faixa = playlistMp3[indiceAtualGlobal];
-        let nomeExibicao = faixa.title ? `${faixa.title} (${faixa.artist || 'EXNA'})` : faixa.id.replace(/\.mp3$/i, '');
+        
+        // Puxa exatamente o nome da música estruturado ou limpo para a tela do iOS reconhecer
+        let nomeBloqueio = faixa.title ? faixa.title.toUpperCase() : faixa.id.replace(/\.mp3$/i, '').replace(/[-_]/g, ' ').toUpperCase();
+        let artistaBloqueio = faixa.artist ? faixa.artist.toUpperCase() : "AO VIVO";
 
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: nomeExibicao, 
-          artist: 'EXNA FM - AO VIVO', 
-          album: 'A Rádio que toca todas!',
+          title: nomeBloqueio, 
+          artist: artistaBloqueio, 
+          album: 'EXNA FM - A RÁDIO QUE TOCA TODAS!',
           artwork: [
             { src: capaRadio.src, sizes: '600x600', type: 'image/jpeg' }
           ]
