@@ -391,9 +391,8 @@
     async function carregarAutoDJ() {
       try {
         const resposta = await fetch(urlArchiveJson);
-        const dados = await response = await fetch(urlArchiveJson);
-        const data = await response.json();
-        const arquivosServidor = data.files;
+        const dados = await resposta.json();
+        const arquivosServidor = dados.files;
 
         arquivosServidor.forEach(arq => {
           if (arq.name.endsWith('.mp3')) {
@@ -408,12 +407,10 @@
 
         if (playlistMp3.length > 0) {
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-          
-          // LÓGICA DE SINAL REAL: O relógio roda de 1 em 1 segundo sincronizando o andamento global
           calcularPONTODeSintoniaInicial();
           
           setInterval(() => {
-            calcularPONTODeSintoniaInicial();
+            if (audio.paused && !jaSintonizouPrimeiraVez) calcularPONTODeSintoniaInicial();
           }, 1000);
         }
       } catch (erro) {
@@ -422,46 +419,39 @@
       }
     }
 
-    // BLINDAGEM DE SEGUNDO PLANO: Mantém o áudio tocando o fluxo contínuo e atualiza as faixas sem trocar o src
     function calcularPONTODeSintoniaInicial() {
+      if (jaSintonizouPrimeiraVez) return;
+
       const tempoAgora = new Date();
       const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
       
       const duracaoTotalGrade = playlistMp3.length * DURACAO_FAIXA_ESTIMADA;
       const segundoAtualNoLoopDaRadio = segundosPassadosDoDia % duracaoTotalGrade;
       
-      const novoIndice = Math.floor(segundoAtualNoLoopDaRadio / DURACAO_FAIXA_ESTIMADA);
+      indiceAtualGlobal = Math.floor(segundoAtualNoLoopDaRadio / DURACAO_FAIXA_ESTIMADA);
       const segundoDeEntradaNaMusica = segundoAtualNoLoopDaRadio % DURACAO_FAIXA_ESTIMADA;
 
-      // Se a música virou no relógio ou se é a primeira sintonia
-      if (novoIndice !== indiceAtualGlobal || !jaSintonizouPrimeiraVez) {
-        indiceAtualGlobal = novoIndice;
-        const musicaCronometrada = playlistMp3[indiceAtualGlobal];
-        
-        // SÓ TROCA O SRC SE O APP ESTIVER ABERTO OU NA PRIMEIRA SINTONIA PARA EVITAR TRAVA DO IOS
-        if (!document.hidden || !jaSintonizouPrimeiraVez) {
-          audio.src = musicaCronometrada.url;
-          audio.currentTime = segundoDeEntradaNaMusica;
-          if (jaSintonizouPrimeiraVez && !audio.paused) {
-            audio.play().catch(err => console.log(err));
-          }
-        }
-        
-        carregarMetadadosEBuscarCapa(musicaCronometrada);
-      } else {
-        // Se continua na mesma música e o app saiu de sincronia por travas de background, corrige sutilmente
-        if (!audio.paused && Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 4 && !document.hidden) {
-          audio.currentTime = segundoDeEntradaNaMusica;
-        }
-      }
+      const musicaCronometrada = playlistMp3[indiceAtualGlobal];
+      audio.src = musicaCronometrada.url;
+      audio.currentTime = segundoDeEntradaNaMusica; 
+      
+      carregarMetadadosEBuscarCapa(musicaCronometrada);
     }
 
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
-        // Ao voltar para o app, força a sincronização matemática imediata com o relógio do mundo
-        jaSintonizouPrimeiraVez = false;
-        calcularPONTODeSintoniaInicial();
-        if (iconePlay.className === "fas fa-pause" && audio.paused) {
+        if (!audio.paused && jaSintonizouPrimeiraVez) {
+          const tempoAgora = new Date();
+          const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
+          const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
+          
+          if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 5) {
+            audio.currentTime = segundoDeEntradaNaMusica;
+          }
+          atualizarProgressoTempoBloqueio();
+        } else if (audio.paused && iconePlay.className === "fas fa-pause") {
+          jaSintonizouPrimeiraVez = false;
+          calcularPONTODeSintoniaInicial();
           audio.play().catch(err => console.log(err));
         }
       }
@@ -469,7 +459,10 @@
 
     function comandarPlayer() {
       if (audio.paused) {
-        jaSintonizouPrimeiraVez = true; 
+        if (!jaSintonizouPrimeiraVez) {
+          jaSintonizouPrimeiraVez = true; 
+        }
+
         audio.play().then(() => {
           iconePlay.className = "fas fa-pause";
           playerCard.classList.add('tocando');
@@ -500,9 +493,54 @@
 
         navigator.mediaSession.setActionHandler('play', comandarPlayer);
         navigator.mediaSession.setActionHandler('pause', comandarPlayer);
+        
+        atualizarProgressoTempoBloqueio();
       }
     }
 
+    function atualizarProgressoTempoBloqueio() {
+      if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+        if (!isNaN(audio.duration) && !isNaN(audio.currentTime) && audio.duration > 0) {
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate || 1.0,
+            position: audio.currentTime
+          });
+        }
+      }
+    }
+
+    audio.addEventListener('timeupdate', () => {
+      if (audio.currentTime % 2 === 0) { 
+        atualizarProgressoTempoBloqueio();
+      }
+    });
+
+    function mudarParaProximaFaixa() {
+      indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
+      const proximaMusica = playlistMp3[indiceAtualGlobal];
+      
+      audio.pause();
+      audio.src = proximaMusica.url; 
+      audio.load(); 
+      
+      carregarMetadadosEBuscarCapa(proximaMusica);
+
+      setTimeout(() => {
+        audio.play().then(() => {
+          playerCard.classList.add('tocando');
+          iconePlay.className = "fas fa-pause";
+          espectroLuz.classList.add('animar');
+          atualizarMetadadosSistema();
+        }).catch(e => {
+          jaSintonizouPrimeiraVez = false;
+          calcularPONTODeSintoniaInicial();
+          audio.play();
+        });
+      }, 100);
+    }
+
+    audio.addEventListener('ended', mudarParaProximaFaixa);
     btnPlayLive.addEventListener('click', comandarPlayer);
     carregarAutoDJ();
   </script>
