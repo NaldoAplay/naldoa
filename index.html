@@ -43,10 +43,10 @@
       background-size: cover;
       filter: blur(55px) brightness(0.24);
       z-index: -1;
-      animation: movimentoFundo 20s ease-in-out infinite alternate;
+      animation: movimientoFundo 20s ease-in-out infinite alternate;
     }
 
-    @keyframes movimentoFundo {
+    @keyframes movimientoFundo {
       0% { transform: scale(1) translate(0, 0); }
       50% { transform: scale(1.1) translate(1%, 2%); }
       100% { transform: scale(1.04) translate(-1%, -1%); }
@@ -350,7 +350,6 @@
     let indiceAtualGlobal = 0;
     let jaSintonizouPrimeiraVez = false;
     const DURACAO_FAIXA_ESTIMADA = 180; 
-    let artistaAnterior = ""; // Guarda o último artista para bloquear repetição em sequência
 
     async function carregarMetadadosEBuscarCapa(objetoMusica) {
       try {
@@ -370,8 +369,8 @@
           termoBusca = nomeLimpo;
         }
 
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(termoBusca)}&entity=song&limit=1`);
-        const resultado = await response.json();
+        const resposta = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(termoBusca)}&entity=song&limit=1`);
+        const resultado = await resposta.json();
         
         if (resultado.results && resultado.results.length > 0) {
           const capaHD = resultado.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
@@ -389,10 +388,28 @@
       atualizarMetadadosSistema();
     }
 
+    function embaralharGradeSustentavel(lista) {
+      let dataHoje = new Date();
+      let semente = dataHoje.getDate() + dataHoje.getMonth() + dataHoje.getFullYear();
+      
+      function randomSemente() {
+        let x = Math.sin(semente++) * 10000;
+        return x - Math.floor(x);
+      }
+
+      for (let i = lista.length - 1; i > 0; i--) {
+        const j = Math.floor(randomSemente() * (i + 1));
+        if (lista[j].artist && lista[i].artist && lista[j].artist === lista[i].artist) {
+          continue; 
+        }
+        [lista[i], lista[j]] = [lista[j], lista[i]];
+      }
+    }
+
     async function carregarAutoDJ() {
       try {
-        const response = await fetch(urlArchiveJson);
-        const dados = await response.json();
+        const resposta = await fetch(urlArchiveJson);
+        const dados = await resposta.json();
         const arquivosServidor = dados.files;
 
         arquivosServidor.forEach(arq => {
@@ -407,13 +424,15 @@
         });
 
         if (playlistMp3.length > 0) {
-          // Ordenação inicial controlada
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-          
+          embaralharGradeSustentavel(playlistMp3);
           calcularPONTODeSintoniaInicial();
           
           setInterval(() => {
-            if (audio.paused && !jaSintonizouPrimeiraVez) calcularPONTODeSintoniaInicial();
+            // SÓ RECALCULA DO ZERO SE O ÁUDIO REALMENTE PARAR E NÃO ESTIVER NO MEIO DA REPRODUÇÃO
+            if (audio.paused && !jaSintonizouPrimeiraVez && iconePlay.className === "fas fa-play") {
+              calcularPONTODeSintoniaInicial();
+            }
           }, 1000);
         }
       } catch (erro) {
@@ -438,26 +457,27 @@
       audio.src = musicaCronometrada.url;
       audio.currentTime = segundoDeEntradaNaMusica; 
       
-      if(musicaCronometrada.artist) artistaAnterior = musicaCronometrada.artist;
-      
       carregarMetadadosEBuscarCapa(musicaCronometrada);
     }
 
+    /* CORRIGIDO CORAÇÃO: Não chuta mais o áudio que está rodando liso em background */
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
-        if (!audio.paused && jaSintonizouPrimeiraVez) {
-          const tempoAgora = new Date();
-          const segundosPassadosDoDia = (tempoAgora.getHours() * 3600) + (tempoAgora.getMinutes() * 60) + tempoAgora.getSeconds();
-          const segundoDeEntradaNaMusica = segundosPassadosDoDia % DURACAO_FAIXA_ESTIMADA;
-          
-          if (Math.abs(audio.currentTime - segundoDeEntradaNaMusica) > 5) {
-            audio.currentTime = segundoDeEntradaNaMusica;
-          }
-          atualizarProgressoTempoBloqueio();
-        } else if (audio.paused && iconePlay.className === "fas fa-pause") {
+        // Se a rádio foi silenciada ou travada pelo sistema, aí sim força a resgatar o sinal do horário
+        if (audio.paused && iconePlay.className === "fas fa-pause") {
           jaSintonizouPrimeiraVez = false;
           calcularPONTODeSintoniaInicial();
           audio.play().catch(err => console.log(err));
+        } else if (!audio.paused) {
+          // Se o áudio continuou rodando de boa na tela bloqueada, só ajusta os metadados da interface se precisar
+          atualizarProgressoTempoBloqueio();
+          if(playlistMp3[indiceAtualGlobal]) {
+             let faixaAtual = playlistMp3[indiceAtualGlobal];
+             let textoLimpo = faixaAtual.title ? `${faixaAtual.title.toUpperCase()} - ${(faixaAtual.artist || 'DESCONHECIDO').toUpperCase()}  •  EXNA FM` : faixaAtual.id.toUpperCase();
+             if (txtFrase.innerText !== textoLimpo) {
+                carregarMetadadosEBuscarCapa(faixaAtual);
+             }
+          }
         }
       }
     });
@@ -521,25 +541,11 @@
       }
     });
 
-    // LÓGICA DO AUTODJ INTEGRA: Sorteio randômico verdadeiro com bloqueio de artista em sequência!
     function mudarParaProximaFaixa() {
-      let tentativas = 0;
-      let proximoIndice = indiceAtualGlobal;
+      if (!jaSintonizouPrimeiraVez) jaSintonizouPrimeiraVez = true; // Mantém a trava de playlist contínua ativa
       
-      // Escolhe um índice aleatório e valida para não repetir artista em sequência
-      do {
-        proximoIndice = Math.floor(Math.random() * playlistMp3.length);
-        tentativas++;
-      } while (
-        playlistMp3[proximoIndice].artist && 
-        playlistMp3[proximoIndice].artist === artistaAnterior && 
-        tentativas < 15
-      );
-
-      indiceAtualGlobal = proximoIndice;
+      indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
       const proximaMusica = playlistMp3[indiceAtualGlobal];
-      
-      if(proximaMusica.artist) artistaAnterior = proximaMusica.artist;
       
       audio.pause();
       audio.src = proximaMusica.url; 
@@ -547,6 +553,7 @@
       
       carregarMetadadosEBuscarCapa(proximaMusica);
 
+      // REDUZIDO PARA 10ms: Colagem cirúrgica e instantânea entre as faixas!
       setTimeout(() => {
         audio.play().then(() => {
           playerCard.classList.add('tocando');
@@ -558,7 +565,7 @@
           calcularPONTODeSintoniaInicial();
           audio.play();
         });
-      }, 100);
+      }, 10);
     }
 
     audio.addEventListener('ended', mudarParaProximaFaixa);
