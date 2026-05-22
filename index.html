@@ -350,6 +350,7 @@
     let indiceAtualGlobal = 0;
     let jaSintonizouPrimeiraVez = false;
     const DURACAO_FAIXA_ESTIMADA = 180; 
+    let artistaAnterior = ""; // Guarda o último artista para bloquear repetição em sequência
 
     async function carregarMetadadosEBuscarCapa(objetoMusica) {
       try {
@@ -369,8 +370,8 @@
           termoBusca = nomeLimpo;
         }
 
-        const resposta = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(termoBusca)}&entity=song&limit=1`);
-        const resultado = await resposta.json();
+        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(termoBusca)}&entity=song&limit=1`);
+        const resultado = await response.json();
         
         if (resultado.results && resultado.results.length > 0) {
           const capaHD = resultado.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
@@ -390,8 +391,8 @@
 
     async function carregarAutoDJ() {
       try {
-        const resposta = await fetch(urlArchiveJson);
-        const dados = await resposta.json();
+        const response = await fetch(urlArchiveJson);
+        const dados = await response.json();
         const arquivosServidor = dados.files;
 
         arquivosServidor.forEach(arq => {
@@ -406,7 +407,9 @@
         });
 
         if (playlistMp3.length > 0) {
+          // Ordenação inicial controlada
           playlistMp3.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+          
           calcularPONTODeSintoniaInicial();
           
           setInterval(() => {
@@ -434,6 +437,8 @@
       const musicaCronometrada = playlistMp3[indiceAtualGlobal];
       audio.src = musicaCronometrada.url;
       audio.currentTime = segundoDeEntradaNaMusica; 
+      
+      if(musicaCronometrada.artist) artistaAnterior = musicaCronometrada.artist;
       
       carregarMetadadosEBuscarCapa(musicaCronometrada);
     }
@@ -516,9 +521,25 @@
       }
     });
 
+    // LÓGICA DO AUTODJ INTEGRA: Sorteio randômico verdadeiro com bloqueio de artista em sequência!
     function mudarParaProximaFaixa() {
-      indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
+      let tentativas = 0;
+      let proximoIndice = indiceAtualGlobal;
+      
+      // Escolhe um índice aleatório e valida para não repetir artista em sequência
+      do {
+        proximoIndice = Math.floor(Math.random() * playlistMp3.length);
+        tentativas++;
+      } while (
+        playlistMp3[proximoIndice].artist && 
+        playlistMp3[proximoIndice].artist === artistaAnterior && 
+        tentativas < 15
+      );
+
+      indiceAtualGlobal = proximoIndice;
       const proximaMusica = playlistMp3[indiceAtualGlobal];
+      
+      if(proximaMusica.artist) artistaAnterior = proximaMusica.artist;
       
       audio.pause();
       audio.src = proximaMusica.url; 
