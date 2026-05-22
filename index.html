@@ -249,10 +249,20 @@
       box-shadow: 0 0 8px rgba(155, 81, 224, 0.6), 0 0 15px rgba(255, 45, 85, 0.4);
     }
 
-    .animar .barra-espectro:nth-child(4n+1) { animation: puloEspectro 0.6s ease infinite alternate; }
-    .animar .barra-espectro:nth-child(4n+2) { animation: puloEspectro 0.4s ease infinite alternate 0.1s; }
-    .animar .barra-espectro:nth-child(4n+3) { animation: puloEspectro 0.7s ease infinite alternate 0.2s; }
-    .animar .barra-espectro:nth-child(4n+4) { animation: puloEspectro 0.5s ease infinite alternate 0.15s; }
+    .animar .barra-espectro { animation: puloEspectro 0.5s ease infinite alternate; }
+    .animar .barra-espectro:nth-child(4n+1) { animation-duration: 0.6s; }
+    .animar .barra-espectro:nth-child(4n+2) { animation-duration: 0.4s; animation-delay: 0.1s; }
+    .animar .barra-espectro:nth-child(4n+3) { animation-duration: 0.7s; animation-delay: 0.2s; }
+    .animar .barra-espectro:nth-child(4n+4) { animation-duration: 0.5s; animation-delay: 0.15s; }
+
+    /* EFEITO CARREGANDO SUTIL NO ESPECTRO */
+    .carregando-espectro .barra-espectro {
+      animation: puloCarregando 1s ease infinite alternate;
+    }
+    @keyframes puloCarregando {
+      0% { height: 3px; opacity: 0.2; }
+      100% { height: 15px; opacity: 0.6; }
+    }
 
     @keyframes puloEspectro {
       0% { height: 4px; }
@@ -429,7 +439,6 @@
           calcularPONTODeSintoniaInicial();
           
           setInterval(() => {
-            // SÓ RECALCULA DO ZERO SE O ÁUDIO REALMENTE PARAR E NÃO ESTIVER NO MEIO DA REPRODUÇÃO
             if (audio.paused && !jaSintonizouPrimeiraVez && iconePlay.className === "fas fa-play") {
               calcularPONTODeSintoniaInicial();
             }
@@ -460,16 +469,13 @@
       carregarMetadadosEBuscarCapa(musicaCronometrada);
     }
 
-    /* CORRIGIDO CORAÇÃO: Não chuta mais o áudio que está rodando liso em background */
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
-        // Se a rádio foi silenciada ou travada pelo sistema, aí sim força a resgatar o sinal do horário
         if (audio.paused && iconePlay.className === "fas fa-pause") {
           jaSintonizouPrimeiraVez = false;
           calcularPONTODeSintoniaInicial();
           audio.play().catch(err => console.log(err));
         } else if (!audio.paused) {
-          // Se o áudio continuou rodando de boa na tela bloqueada, só ajusta os metadados da interface se precisar
           atualizarProgressoTempoBloqueio();
           if(playlistMp3[indiceAtualGlobal]) {
              let faixaAtual = playlistMp3[indiceAtualGlobal];
@@ -482,23 +488,35 @@
       }
     });
 
+    // RECALIBRADO PARA ACELERAÇÃO ULTRA VELOZ E EFEITO CARREGANDO
     function comandarPlayer() {
       if (audio.paused) {
         if (!jaSintonizouPrimeiraVez) {
           jaSintonizouPrimeiraVez = true; 
         }
 
+        // ACELERAÇÃO: Ativa os efeitos visuais e o Play na hora, sem esperar resposta de APIs externas
+        iconePlay.className = "fas fa-spinner fa-spin"; // Ícone de carregando
+        espectroLuz.classList.add('carregando-espectro'); // Espectro de espera leve
+
         audio.play().then(() => {
+          // Quando o buffer do iOS engata o áudio com sucesso (Veloz)
           iconePlay.className = "fas fa-pause";
           playerCard.classList.add('tocando');
+          espectroLuz.classList.remove('carregando-espectro');
           espectroLuz.classList.add('animar'); 
           atualizarMetadadosSistema();
-        }).catch(err => console.log(err));
+        }).catch(err => {
+          console.log(err);
+          iconePlay.className = "fas fa-play";
+          espectroLuz.classList.remove('carregando-espectro');
+        });
       } else {
         audio.pause();
         iconePlay.className = "fas fa-play";
         playerCard.classList.remove('tocando');
         espectroLuz.classList.remove('animar'); 
+        espectroLuz.classList.remove('carregando-espectro');
       }
     }
 
@@ -542,8 +560,13 @@
     });
 
     function mudarParaProximaFaixa() {
-      if (!jaSintonizouPrimeiraVez) jaSintonizouPrimeiraVez = true; // Mantém a trava de playlist contínua ativa
+      if (!jaSintonizouPrimeiraVez) jaSintonizouPrimeiraVez = true; 
       
+      // Quando vira a música, o ícone roda carregando rapidinho no buffer de troca se houver delay de rede
+      iconePlay.className = "fas fa-spinner fa-spin";
+      espectroLuz.classList.remove('animar');
+      espectroLuz.classList.add('carregando-espectro');
+
       indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
       const proximaMusica = playlistMp3[indiceAtualGlobal];
       
@@ -553,11 +576,11 @@
       
       carregarMetadadosEBuscarCapa(proximaMusica);
 
-      // REDUZIDO PARA 10ms: Colagem cirúrgica e instantânea entre as faixas!
       setTimeout(() => {
         audio.play().then(() => {
           playerCard.classList.add('tocando');
           iconePlay.className = "fas fa-pause";
+          espectroLuz.classList.remove('carregando-espectro');
           espectroLuz.classList.add('animar');
           atualizarMetadadosSistema();
         }).catch(e => {
@@ -567,6 +590,16 @@
         });
       }, 10);
     }
+
+    // Eventos nativos de monitoramento do player para remover o estado carregando caso o buffer seja instantâneo
+    audio.addEventListener('playing', () => {
+      if(iconePlay.className === "fas fa-spinner fa-spin") {
+        iconePlay.className = "fas fa-pause";
+        playerCard.classList.add('tocando');
+        espectroLuz.classList.remove('carregando-espectro');
+        espectroLuz.classList.add('animar');
+      }
+    });
 
     audio.addEventListener('ended', mudarParaProximaFaixa);
     btnPlayLive.addEventListener('click', comandarPlayer);
