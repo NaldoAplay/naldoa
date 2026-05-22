@@ -296,7 +296,7 @@
 
       <div class="info-musica">
         <div class="container-letreiro">
-          <span id="txtFrase">EXNA FM - A RÁDIO QUE TOCA TODAS!</span>
+          <span id="txtFrase">EXNA FM - SINTONIZANDO ÁUDIO...</span>
         </div>
         <p>Sintonizado no Melhor Ritmo</p>
       </div>
@@ -340,14 +340,47 @@
     let jaSintonizouPrimeiraVez = false;
     const DURACAO_FAIXA_ESTIMADA = 180; 
 
-    const slogansRadio = [
-      "EXNA FM - A RÁDIO QUE TOCA TODAS!",
-      "CONEXÃO TOTAL • SÓ AS MELHORES CONSTANTEMENTE",
-      "ECOSSISTEMAS EXNA • SOM, TECNOLOGIA E RITMO",
-      "SUA TRILHA SONORA DIÁRIA 24 HORAS NO AR"
-    ];
-    let indexFrase = 0;
-    const termosCapas = ["electronic-music", "house-music", "progressive-house", "trance", "dance-hits", "techno-remix"];
+    // NOVA FUNÇÃO SUPER INTELIGENTE: Puxa o metadado real lido pelo Archive!
+    async function carregarMetadadosEBuscarCapa(objetoMusica) {
+      try {
+        let termoBusca = "";
+        
+        // Se o Archive identificou a tag de título e artista por dentro, nós usamos!
+        if (objetoMusica.title) {
+          let artista = objetoMusica.artist ? objetoMusica.artist : "Desconhecido";
+          let titulo = objetoMusica.title;
+          
+          // Trata strings chatas que às vezes vêm bugadas do servidor
+          if(artista.toLowerCase() === "alguém") artista = "EXNA HIT";
+
+          txtFrase.innerText = `${titulo.toUpperCase()} - ${artista.toUpperCase()}  •  EXNA FM`;
+          termoBusca = `${titulo} ${objetoMusica.artist || ''}`;
+        } else {
+          // Caso o arquivo não tenha tags internas (raro), limpa o nome do arquivo para exibir
+          let nomeLimpo = objetoMusica.id.replace(/^\d+\s*/, '').replace(/\.mp3$/i, '').replace(/[-_]/g, ' ').trim();
+          txtFrase.innerText = nomeLimpo.toUpperCase() + "  •  EXNA FM";
+          termoBusca = nomeLimpo;
+        }
+
+        // Faz a busca cirúrgica da capa oficial do álbum no iTunes
+        const resposta = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(termoBusca)}&entity=song&limit=1`);
+        const resultado = await resposta.json();
+        
+        if (resultado.results && resultado.results.length > 0) {
+          const capaHD = resultado.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+          capaRadio.src = capaHD;
+          fundoDinamico.style.backgroundImage = `url('${capaHD}')`;
+        } else {
+          // Fallback seguro caso não encontre no banco do iTunes
+          capaRadio.src = "logo-quadrada.png";
+          fundoDinamico.style.backgroundImage = "url('logo-quadrada.png')";
+        }
+      } catch (e) {
+        capaRadio.src = "logo-quadrada.png";
+        fundoDinamico.style.backgroundImage = "url('logo-quadrada.png')";
+      }
+      atualizarMetadadosSistema();
+    }
 
     async function carregarAutoDJ() {
       try {
@@ -359,7 +392,9 @@
           if (arq.name.endsWith('.mp3')) {
             playlistMp3.push({
               id: arq.name,
-              url: `https://archive.org/download/exna-fm/${arq.name}`
+              url: `https://archive.org/download/exna-fm/${arq.name}`,
+              title: arq.title || null,    // Salva o título interno extraído pelo Archive
+              artist: arq.artist || null   // Salva o artista interno extraído pelo Archive
             });
           }
         });
@@ -371,35 +406,10 @@
           setInterval(() => {
             if (audio.paused && !jaSintonizouPrimeiraVez) calcularPONTODeSintoniaInicial();
           }, 1000);
-
-          setInterval(alternarSloganTexto, 14000);
         }
       } catch (erro) {
         console.error(erro);
         txtFrase.innerText = "EXNA FM - ERRO DE SINTONIA";
-      }
-    }
-
-    function alternarSloganTexto() {
-      indexFrase = (indexFrase + 1) % slogansRadio.length;
-      txtFrase.innerText = slogansRadio[indexFrase];
-    }
-
-    async function buscarCapaDoiTunes(sementeId) {
-      try {
-        const indexTermo = sementeId % termosCapas.length;
-        const resposta = await fetch(`https://itunes.apple.com/search?term=${termosCapas[indexTermo]}&entity=album&limit=20`);
-        const resultado = await resposta.json();
-        
-        if (resultado.results && resultado.results.length > 0) {
-          const capaHD = resultado.results[sementeId % resultado.results.length].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
-          capaRadio.src = capaHD;
-          fundoDinamico.style.backgroundImage = `url('${capaHD}')`;
-          atualizarMetadadosSistema();
-        }
-      } catch (e) {
-        capaRadio.src = "logo-quadrada.png";
-        fundoDinamico.style.backgroundImage = "url('logo-quadrada.png')";
       }
     }
 
@@ -419,10 +429,10 @@
       audio.src = musicaCronometrada.url;
       audio.currentTime = segundoDeEntradaNaMusica; 
       
-      buscarCapaDoiTunes(indiceAtualGlobal);
+      // Carrega os metadados e dispara a busca da capa original
+      carregarMetadadosEBuscarCapa(musicaCronometrada);
     }
 
-    // LISTENER RECALIBRADO PARA SINTONIA INTELIGENTE CASO CONGELE NO DESBLOQUEIO
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
         if (!audio.paused && jaSintonizouPrimeiraVez) {
@@ -462,11 +472,14 @@
     }
 
     function atualizarMetadadosSistema() {
-      if ('mediaSession' in navigator) {
+      if ('mediaSession' in navigator && playlistMp3[indiceAtualGlobal]) {
+        let faixa = playlistMp3[indiceAtualGlobal];
+        let nomeExibicao = faixa.title ? `${faixa.title} (${faixa.artist || 'EXNA'})` : faixa.id.replace(/\.mp3$/i, '');
+
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: "EXNA FM - A Rádio que toca todas!", 
-          artist: 'AO VIVO', 
-          album: 'EXNA FM - A Rádio que toca todas!',
+          title: nomeExibicao, 
+          artist: 'EXNA FM - AO VIVO', 
+          album: 'A Rádio que toca todas!',
           artwork: [
             { src: capaRadio.src, sizes: '600x600', type: 'image/jpeg' }
           ]
@@ -477,16 +490,15 @@
       }
     }
 
-    // FUNÇÃO DE TRANSIÇÃO DO AUTODJ ADAPTADA E BLINDADA PARA O MODO WEB APP INSTALADO
     function mudarParaProximaFaixa() {
       indiceAtualGlobal = (indiceAtualGlobal + 1) % playlistMp3.length;
       const proximaMusica = playlistMp3[indiceAtualGlobal];
       
       audio.pause();
       audio.src = proximaMusica.url; 
-      audio.load(); // Alimenta o sistema iOS notificando a troca imediata
+      audio.load(); 
       
-      buscarCapaDoiTunes(indiceAtualGlobal);
+      carregarMetadadosEBuscarCapa(proximaMusica);
 
       setTimeout(() => {
         audio.play().then(() => {
@@ -495,7 +507,6 @@
           espectroLuz.classList.add('animar');
           atualizarMetadadosSistema();
         }).catch(e => {
-          console.log("iOS barrou transição automática travada. Forçando ressintonia...");
           jaSintonizouPrimeiraVez = false;
           calcularPONTODeSintoniaInicial();
           audio.play();
@@ -504,7 +515,6 @@
     }
 
     audio.addEventListener('ended', mudarParaProximaFaixa);
-
     btnPlayLive.addEventListener('click', comandarPlayer);
     carregarAutoDJ();
   </script>
