@@ -98,45 +98,36 @@
     let ultimoTimestampPlay = 0;
     const DURACAO_FAIXA_ESTIMADA = 180;
 
-    // Cache de capas (chave: "artista|título" ou "nome do arquivo")
     let capaCache = new Map();
 
-    // ========== IDENTIFICAÇÃO DE VINHETA ==========
     function isVinheta(nome) { return nome.toLowerCase().includes("vinheta"); }
 
-    // ========== FORMATAÇÃO DE NOME PARA EXIBIÇÃO ==========
     function formatarNomeMusica(item) {
       if (item.title) {
         let artista = item.artist ? item.artist : "Desconhecido";
         return `${item.title.toUpperCase()} - ${artista.toUpperCase()}  •  EXNA FM`;
       } else {
-        let nome = item.id.replace(/^\d+\s*/, '').replace(/\.mp3$/i, '').replace(/[-_]/g, ' ').trim();
+        let nome = item.id.replace(/\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i, '').replace(/^\d+\s*/, '').replace(/[-_]/g, ' ').trim();
         return nome.toUpperCase() + "  •  EXNA FM";
       }
     }
 
     function formatarNomeVinheta(nomeArquivo) {
-      let nome = nomeArquivo.replace(/\.mp3$/i, '').replace(/[-_]/g, ' ');
+      let nome = nomeArquivo.replace(/\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i, '').replace(/[-_]/g, ' ');
       nome = nome.replace(/^\d*\s*vinheta\s*/i, '').replace(/vinheta\s*/i, '');
       if (nome.trim() === "") nome = "Vinheta";
       return `🔊 VINHETA: ${nome.toUpperCase()}`;
     }
 
-    // ========== BUSCA INTELIGENTE DE CAPA (USANDO ARTISTA + TÍTULO) ==========
     async function buscarCapaInteligente(item) {
-      // Se for vinheta, retorna logo padrão
       if (isVinheta(item.id)) return "logo-quadrada.png";
 
-      // Tenta extrair artista e título dos metadados
       let artista = item.artist ? item.artist.trim() : null;
       let titulo = item.title ? item.title.trim() : null;
 
-      // Se não tem metadados, tenta extrair do nome do arquivo
       if (!titulo) {
-        let nomeSemExt = item.id.replace(/\.mp3$/i, '');
-        // Remove números iniciais
+        let nomeSemExt = item.id.replace(/\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i, '');
         nomeSemExt = nomeSemExt.replace(/^\d+\s*/, '');
-        // Divide por hífen ou traço para separar artista - título
         if (nomeSemExt.includes('-')) {
           let partes = nomeSemExt.split('-');
           if (partes.length >= 2) {
@@ -150,11 +141,9 @@
         }
       }
 
-      // Chave para o cache (usa artista+título se disponível, senão usa o nome do arquivo)
       const chaveCache = artista && titulo ? `${artista}|${titulo}` : item.id;
       if (capaCache.has(chaveCache)) return capaCache.get(chaveCache);
 
-      // Função auxiliar para tentar uma busca
       async function tentarBusca(query, tipo) {
         try {
           if (tipo === 'itunes') {
@@ -179,22 +168,19 @@
 
       let capaUrl = null;
 
-      // 1) Busca combinada com artista e título (se ambos existirem)
       if (artista && titulo) {
         const query = `${artista} ${titulo}`;
         capaUrl = await tentarBusca(query, 'itunes');
         if (!capaUrl) capaUrl = await tentarBusca(query, 'deezer');
       }
 
-      // 2) Se não achou, tenta só o título
       if (!capaUrl && titulo) {
         capaUrl = await tentarBusca(titulo, 'itunes');
         if (!capaUrl) capaUrl = await tentarBusca(titulo, 'deezer');
       }
 
-      // 3) Se ainda não achou, tenta o nome do arquivo limpo
       if (!capaUrl) {
-        let nomeLimpo = item.id.replace(/\.mp3$/i, '').replace(/^\d+\s*/, '').replace(/[-_]/g, ' ');
+        let nomeLimpo = item.id.replace(/\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i, '').replace(/^\d+\s*/, '').replace(/[-_]/g, ' ');
         capaUrl = await tentarBusca(nomeLimpo, 'itunes');
         if (!capaUrl) capaUrl = await tentarBusca(nomeLimpo, 'deezer');
       }
@@ -204,7 +190,6 @@
       return capaUrl;
     }
 
-    // ========== ATUALIZAR INTERFACE (NOME + CAPA) ==========
     async function atualizarInterface(item, isVinhetaFlag) {
       if (isVinhetaFlag) {
         txtFrase.innerText = formatarNomeVinheta(item.id);
@@ -220,7 +205,7 @@
         let titulo = isVinhetaFlag ? formatarNomeVinheta(item.id) : (item.title ? item.title : formatarNomeMusica(item));
         navigator.mediaSession.metadata = new MediaMetadata({
           title: titulo,
-          artist: isVinhetaFlag ? 'EXNA FM - Vinheta' : 'RÁDIO EXNA FM - AO VIVO',
+          artist: isVinhetaFlag ? 'EXNA FM - Vinheta' : 'EXNA FM - AO VIVO',
           album: 'A RÁDIO QUE TOCA TODAS!',
           artwork: [{ src: capaRadio.src, sizes: '600x600', type: 'image/jpeg' }]
         });
@@ -229,7 +214,6 @@
       }
     }
 
-    // ========== EMBARALHAMENTO DIÁRIO (IDÊNTICO AO ORIGINAL) ==========
     function embaralharMusicas(lista) {
       let dataHoje = new Date();
       let semente = dataHoje.getDate() + dataHoje.getMonth() + dataHoje.getFullYear();
@@ -240,7 +224,6 @@
       }
     }
 
-    // ========== CACHE DA PLAYLIST (LOCALSTORAGE) ==========
     function salvarPlaylistCache() {
       const cacheObj = { musicas, vinhetas, timestamp: Date.now(), dataReferencia: new Date().toDateString() };
       localStorage.setItem('exna_playlist_cache', JSON.stringify(cacheObj));
@@ -258,7 +241,6 @@
       return false;
     }
 
-    // ========== CARREGAR DO ARCHIVE (COM CACHE) ==========
     async function carregarAutoDJ() {
       if (carregarPlaylistCache()) {
         modoVinhetaAtivo = (vinhetas.length > 0);
@@ -277,7 +259,8 @@
         const arquivos = dados.files || [];
         const novasMusicas = [], novasVinhetas = [];
         for (const arq of arquivos) {
-          if (arq.name.endsWith('.mp3')) {
+          // AGORA RECONHECE TODOS OS FORMATOS DE ÁUDIO!
+          if (arq.name.match(/\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i)) {
             const item = { id: arq.name, url: `https://archive.org/download/exna-fm/${arq.name}`, title: arq.title || null, artist: arq.artist || null };
             if (isVinheta(arq.name)) novasVinhetas.push(item);
             else novasMusicas.push(item);
@@ -308,7 +291,7 @@
         const arquivos = dados.files || [];
         const novasMusicas = [], novasVinhetas = [];
         for (const arq of arquivos) {
-          if (arq.name.endsWith('.mp3')) {
+          if (arq.name.match(/\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i)) {
             const item = { id: arq.name, url: `https://archive.org/download/exna-fm/${arq.name}`, title: arq.title || null, artist: arq.artist || null };
             if (isVinheta(arq.name)) novasVinhetas.push(item);
             else novasMusicas.push(item);
@@ -326,7 +309,6 @@
       } catch(e) {}
     }
 
-    // ========== SINCRO COM HORÁRIO ==========
     function calcularPontoInicial() {
       if (jaSintonizouPrimeiraVez) return;
       if (musicas.length === 0) return;
@@ -361,7 +343,6 @@
         else audio.src = proxMus.url;
         atualizarInterface(proxMus, false);
         audio.play().catch(e=>console.log(e));
-        // Pré-carrega próxima vinheta
         if (modoVinhetaAtivo && vinhetas.length) {
           let v = vinhetas[Math.floor(Math.random() * vinhetas.length)];
           proximoPreload = new Audio(); proximoPreload.src = v.url; proximoPreload.load();
